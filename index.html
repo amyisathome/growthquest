@@ -332,7 +332,7 @@ body{
   <div id="onboard" class="onboard">
     <div class="onboard-icon">🏆</div>
     <div class="onboard-title">키성장 퀘스트</div>
-    <div class="onboard-sub">닉네임을 입력하고<br>성장 모험을 시작하세요!</div>
+    <div class="onboard-sub">신병 제군! 이름을 대라.<br>지금부터 성장 임무가 시작된다!</div>
     <input id="onboardName" class="onboard-field" placeholder="이름 (예: 민준)" maxlength="6">
     <div style="font-size:11px;color:var(--text3);margin-bottom:12px;">현재 키</div>
     <div style="display:flex;gap:8px;width:100%;margin-bottom:20px;">
@@ -341,7 +341,7 @@ body{
     </div>
     <div style="font-size:11px;color:var(--text3);margin-bottom:8px;">부모 PIN 설정 (4자리)</div>
     <input id="onboardPin" class="onboard-field" placeholder="예: 1234" type="number" maxlength="4" style="margin-bottom:20px;">
-    <button class="onboard-btn" onclick="finishOnboard()">시작하기 🚀</button>
+    <button class="onboard-btn" onclick="finishOnboard()">임무 개시! 🚀</button>
     <div class="onboard-hint">데이터는 이 기기에만 저장됩니다</div>
   </div>
 
@@ -364,7 +364,7 @@ body{
               <img id="avatarEl" class="avatar-img" src="avatar.png" alt="캐릭터" style="width:72px;height:72px;">
             </div>
           </div>
-          <div class="char-right" style="overflow:hidden;padding-left:14px;flex:1;min-width:0;">
+          <div class="char-right" style="overflow:hidden;padding-left:20px;flex:1;min-width:0;margin-left:4px;">
             <div class="lv-badge" id="charLvBadge">LV.1</div>
             <div class="char-rank" id="charRank">4급 — 새싹 전사</div>
             <div class="char-nick-small" id="charNick">성장을 시작한 용사</div>
@@ -408,8 +408,8 @@ body{
       <!-- weekly reward banner (hidden by default) -->
       <div class="weekly-banner hidden" id="weeklyBanner">
         <div class="wb-icon">🎉</div>
-        <div class="wb-title">주간 목표 달성!</div>
-        <div class="wb-sub">이번 주 5일 이상 퀘스트를 완료했어요<br>보상함에서 특별 보상을 받으세요!</div>
+        <div class="wb-title">주간 임무 완수!</div>
+        <div class="wb-sub">이번 주 5일 이상 임무를 완료했다!<br>전설의 보상이 기다린다. 수령하라!</div>
         <button class="weekly-banner-btn" onclick="claimWeeklyReward()">보상 받기 →</button>
       </div>
 
@@ -449,7 +449,7 @@ body{
         <div class="gacha-box" id="gachaBox" onclick="openGacha()">🎁</div>
         <div class="gacha-count-badge">대기 중인 보상 <span id="gachaCount">0</span>개</div>
         <div id="gachaResult" class="gacha-result hidden"></div>
-        <button class="gacha-cta" id="gachaBtn" onclick="openGacha()">보상 열기!</button>
+        <button class="gacha-cta" id="gachaBtn" onclick="openGacha()">보급품 수령!</button>
       </div>
 
       <div class="section-label">🛒 보상 상점</div>
@@ -599,8 +599,8 @@ body{
         📷 인증 사진 찍기 / 올리기
       </button>
       <input type="file" id="questPhoto" accept="image/*" onchange="previewPhoto(this)" style="display:none">
-      <button class="modal-btn primary" id="submitQuestBtn" onclick="submitQuest()">퀘스트 제출하기!</button>
-      <button class="modal-btn secondary" onclick="closeQuestModal()">나중에</button>
+      <button class="modal-btn primary" id="submitQuestBtn" onclick="submitQuest()">임무 완료 보고!</button>
+      <button class="modal-btn secondary" onclick="closeQuestModal()">잠시 대기</button>
     </div>
   </div>
 
@@ -625,35 +625,35 @@ body{
 // ═══════════════════════════════════════
 const QUEST_POOL = [
   // warmup
-  {id:'w1',cat:'warmup',name:'오늘 9시간 이상 잠자기',icon:'🌙',stars:1,desc:'자는 동안 성장호르몬이 폭발 분비된다. 침대는 용사의 성장 캡슐이다.',pts:[80,100,120]},
-  {id:'w2',cat:'warmup',name:'성장호르몬 주사 맞기',icon:'✨',stars:1,desc:'마법의 성장 물약 주입 완료! 오늘 밤 몸속에서 조용한 기적이 시작된다.',pts:[80,100,120]},
+  {id:'w1',cat:'warmup',name:'오늘 9시간 이상 잠자기',icon:'🌙',stars:1,desc:'취침 미션 수행이다! 자는 동안 성장호르몬이 폭발 방출된다. 침대는 전투 캡슐이다. 어서 눕거라!',pts:[80,100,120]},
+  {id:'w2',cat:'warmup',name:'성장호르몬 주사 맞기',icon:'✨',stars:1,desc:'비밀 성장 물약 투입 완료! 오늘 밤 체내에서 키 확장 작전이 자동 개시된다. 긴장 풀어라!',pts:[80,100,120]},
   // core nutrition
-  {id:'c1',cat:'core',name:'우유 한 잔 마시기',icon:'🥛',stars:2,desc:'전설의 성장 물약. 뼈를 강철처럼 만드는 칼슘 마법이 담겨 있다. 원샷!',pts:[150,200,250]},
-  {id:'c2',cat:'core',name:'계란노른자 먹기',icon:'🍳',stars:2,desc:'황금 핵의 아연이 세포 분열을 가속한다. 용사의 체내에 성장 코드를 심어라.',pts:[150,200,250]},
-  {id:'c3',cat:'core',name:'치즈 한 조각 도전',icon:'🧀',stars:2,desc:'아연의 보고, 치즈 한 조각. 한 입이면 충분하다. 작은 용기가 키를 키운다.',pts:[150,200,250]},
-  {id:'c4',cat:'core',name:'두부 먹기',icon:'🫘',stars:2,desc:'식물성 단백질의 제왕. 근육과 키를 동시에 공략하는 용사의 비밀 병기.',pts:[150,200,250]},
-  {id:'c5',cat:'core',name:'소고기 먹기',icon:'🥩',stars:3,desc:'철과 아연의 왕. 가장 강력한 성장 원소를 몸에 채워라. 오늘 밤이 다르다.',pts:[200,280,350]},
-  {id:'c6',cat:'core',name:'견과류 한 줌',icon:'🥜',stars:2,desc:'뇌와 키를 동시에 레벨업하는 마법 씨앗. 한 줌의 힘을 얕보지 마라.',pts:[150,200,250]},
-  {id:'c7',cat:'core',name:'콩나물국 먹기',icon:'🥣',stars:2,desc:'땅에서 솟아오른 식이섬유 군단! 장을 정복해야 키도 자란다.',pts:[150,200,250]},
+  {id:'c1',cat:'core',name:'우유 한 잔 마시기',icon:'🥛',stars:2,desc:'S급 성장 물약이다! 뼈를 강철로 만드는 칼슘이 들었다. 꿀꺽꿀꺽, 원샷 각이다!',pts:[150,200,250]},
+  {id:'c2',cat:'core',name:'계란노른자 먹기',icon:'🍳',stars:2,desc:'황금 핵 아이템 획득! 아연이 세포 분열을 강제 가속한다. 지금 당장 집어먹어라!',pts:[150,200,250]},
+  {id:'c3',cat:'core',name:'치즈 한 조각 도전',icon:'🧀',stars:2,desc:'아연 농축 전투식량이다. 한 조각이면 충분하다. 입대해라, 치즈야!',pts:[150,200,250]},
+  {id:'c4',cat:'core',name:'두부 먹기',icon:'🫘',stars:2,desc:'식물성 단백질 최강자 등장! 근육과 키를 동시에 공략하는 특수 전투식량이다. 먹어라!',pts:[150,200,250]},
+  {id:'c5',cat:'core',name:'소고기 먹기',icon:'🥩',stars:3,desc:'철·아연 복합 레어 식량 획득! 최강 성장 원소 총집결이다. 오늘 밤 체급이 달라진다!',pts:[200,280,350]},
+  {id:'c6',cat:'core',name:'견과류 한 줌',icon:'🥜',stars:2,desc:'뇌+키 동시 레벨업 마법 씨앗이다. 한 줌을 얕보는 자는 평생 소인이다. 집어라!',pts:[150,200,250]},
+  {id:'c7',cat:'core',name:'콩나물국 먹기',icon:'🥣',stars:2,desc:'장 정복 선발대 출격! 장내 환경을 제압해야 키가 자란다. 후루룩, 그릇을 비워라!',pts:[150,200,250]},
   // exercise (weekend)
-  {id:'e1',cat:'exercise',name:'수영 30분',icon:'🏊',stars:3,desc:'물속에서 중력을 거스르는 자만이 전신 성장의 비밀을 얻는다. 입수!',pts:[200,300,400],weekend:true},
-  {id:'e2',cat:'exercise',name:'산책 또는 달리기',icon:'🏃',stars:2,desc:'뼈에 부하를 걸어야 더 굵고 길게 자란다. 달리는 용사는 멈추지 않는다.',pts:[150,250,300],weekend:true},
-  {id:'e3',cat:'exercise',name:'배드민턴 엄마 이기기',icon:'🏸',stars:4,desc:'최종 보스전 개시! 엄마를 꺾으면 전설의 포인트가 쏟아진다. 덤벼라!',pts:[300,400,500],weekend:true},
+  {id:'e1',cat:'exercise',name:'수영 30분',icon:'🏊',stars:3,desc:'수중 특수훈련 개시! 중력 제로 환경에서 전신 성장 스킬이 발동된다. 입수 명령이다!',pts:[200,300,400],weekend:true},
+  {id:'e2',cat:'exercise',name:'산책 또는 달리기',icon:'🏃',stars:2,desc:'뼈에 압박을 가해야 더 굵고 길게 자란다. 멈추는 자는 도태된다. 뛰어라!',pts:[150,250,300],weekend:true},
+  {id:'e3',cat:'exercise',name:'배드민턴 엄마 이기기',icon:'🏸',stars:4,desc:'최종 보스 엄마와 격돌이다! 격파 시 전설급 포인트가 쏟아진다. 각오하고 덤벼라!!',pts:[300,400,500],weekend:true},
   // rare
-  {id:'r1',cat:'rare',name:'도서관에서 책 10분 읽기',icon:'📖',stars:5,desc:'🌟 초희귀 퀘스트 등장! 지식의 탑에서 10분. 뇌가 레벨업되는 소리가 들린다.',pts:[500,700,1000]},
-  {id:'r2',cat:'rare',name:'수영장 원정',icon:'🌊',stars:4,desc:'🌟 레어 원정 퀘스트! 성장의 바다로 출정하라. 전설의 포인트가 기다린다.',pts:[400,600,800]},
-  {id:'r3',cat:'rare',name:'아이스스케이팅 원정',icon:'⛸️',stars:5,desc:'🌟 최고등급 퀘스트! 얼음 위의 용사. 이것을 클리어한 자에게만 전설급 보상이.',pts:[500,700,1000]},
+  {id:'r1',cat:'rare',name:'도서관에서 책 10분 읽기',icon:'📖',stars:5,desc:'⚡ 초희귀 임무 발령! 지식의 요새에서 10분 주둔하라. 뇌가 강제 레벨업되는 소리가 들린다!',pts:[500,700,1000]},
+  {id:'r2',cat:'rare',name:'수영장 원정',icon:'🌊',stars:4,desc:'⚡ 레어 원정 임무 발령! 성장의 바다로 출정하라. 귀환 시 전설급 보상이 지급된다!',pts:[400,600,800]},
+  {id:'r3',cat:'rare',name:'아이스스케이팅 원정',icon:'⛸️',stars:5,desc:'⚡ 최고난도 임무 발령! 빙판 위의 전사여, 이 미션을 완수한 자에게만 최고급 보상을 수여한다!',pts:[500,700,1000]},
 ];
 
 // Daily storytelling messages (rotate by day + streak)
 const STORY_POOL = [
-  {icon:'⚔️', title:'위대한 여정의 시작', msg:'모든 전설은 오늘 같은 하루에서 시작됐다. 퀘스트 하나하나가 용사를 만든다. 지금 이 순간도 역사가 쓰이고 있다!'},
-  {icon:'🌟', title:'성장의 예언', msg:'그림자 마법사가 예언했다 — "매일 퀘스트를 완수하는 자만이 전설의 키에 도달하리라!" 오늘도 증명해 보여라.'},
-  {icon:'🏆', title:'영웅의 법칙', msg:'위대한 전사도 처음엔 새싹 용사였다. 달라지는 건 포기하지 않는 것 하나뿐. 오늘의 퀘스트가 내일의 전설이 된다.'},
-  {icon:'🔥', title:'성장의 불꽃', msg:'몸 속 성장 마법이 활성화되려면 연료가 필요하다. 영양, 운동, 수면 — 이 세 가지 불꽃을 꺼뜨리지 마라!'},
-  {icon:'🌙', title:'밤의 기적', msg:'자는 동안 진짜 성장이 일어난다. 오늘 퀘스트를 마치고 눈을 감으면, 몸이 스스로 레벨업을 시작한다.'},
-  {icon:'💪', title:'축적의 힘', msg:'오늘 1mm, 내일 1mm. 눈에 안 보이는 성장이 어느 날 갑자기 폭발한다. 지금 쌓고 있는 것들이 터지는 날을 기다려라!'},
-  {icon:'🗡️', title:'용사의 루틴', msg:'평범한 하루도 용사에겐 다르다. 퀘스트를 클리어한 날과 안 한 날의 차이가 1년 뒤 키의 차이가 된다. 오늘도 클리어!'},
+  {icon:'⚔️', title:'오늘의 작전 브리핑', msg:'전원 집합! 오늘도 성장 임무가 하달됐다. 퀘스트 하나하나가 너를 전설로 만든다. 지금 이 순간이 역사가 된다. 임무 개시!'},
+  {icon:'🌟', title:'사령관의 예언', msg:'전설의 사령관이 예언했다 — "매일 임무를 완수하는 자만이 키의 정점에 도달한다!" 오늘도 증명하라. 의심하는 자는 낙오된다!'},
+  {icon:'🏆', title:'전설 병사의 법칙', msg:'전설의 취사병도 처음엔 말단 이병이었다. 차이는 포기 안 하는 것 하나뿐이다. 오늘의 임무가 내일의 전설이 된다. 알겠나!'},
+  {icon:'🔥', title:'성장 엔진 점화', msg:'체내 성장 엔진을 가동하려면 연료가 필요하다. 영양, 운동, 수면 — 세 가지를 빠뜨리는 자는 영원히 소인이다. 충전 시작!'},
+  {icon:'🌙', title:'야간 성장 작전', msg:'수면 중 성장호르몬 자동 방출 시스템이 가동된다. 퀘스트 완료 후 취침하라. 자는 동안 몸이 알아서 레벨업한다. 취침 각!'},
+  {icon:'💪', title:'누적 전력 보고', msg:'오늘 1mm, 내일 1mm. 눈에 안 보이지만 전력은 쌓이고 있다. 어느 날 갑자기 폭발 성장한다. 지금 당장 임무 수행하라!'},
+  {icon:'🗡️', title:'일일 임무 점호', msg:'임무한 날과 안 한 날의 격차가 1년 후 키의 격차가 된다. 낙오는 없다. 전원 오늘 임무를 완수하라. 이상 없나!'},
 ];
 
 
@@ -665,12 +665,12 @@ const SHOP_ITEMS = [
 
 // Level thresholds (by accumulated points)
 const LEVEL_TABLE = [
-  {lv:1, minPts:0,    maxPts:499,   title:'새싹 전사',    emoji:'🌱', rank:'4급'},
-  {lv:2, minPts:500,  maxPts:1499,  title:'성장 병사',    emoji:'🌿', rank:'3급'},
-  {lv:3, minPts:1500, maxPts:3499,  title:'질풍 용사',    emoji:'⚡', rank:'2급'},
-  {lv:4, minPts:3500, maxPts:6999,  title:'야제 전사',    emoji:'🌙', rank:'1급'},
-  {lv:5, minPts:7000, maxPts:12999, title:'그림자 검객',  emoji:'🌟', rank:'특급'},
-  {lv:6, minPts:13000,maxPts:99999, title:'방랑자 수호자',emoji:'👑', rank:'전설급'},
+  {lv:1, minPts:0,    maxPts:499,   title:'이등병 취사병',  emoji:'🌱', rank:'4급'},
+  {lv:2, minPts:500,  maxPts:1499,  title:'일등병 취사병',  emoji:'🌿', rank:'3급'},
+  {lv:3, minPts:1500, maxPts:3499,  title:'상등병 취사병',  emoji:'⚡', rank:'2급'},
+  {lv:4, minPts:3500, maxPts:6999,  title:'병장 취사병',    emoji:'🌙', rank:'1급'},
+  {lv:5, minPts:7000, maxPts:12999, title:'하사관 취사병',  emoji:'🌟', rank:'특급'},
+  {lv:6, minPts:13000,maxPts:99999, title:'전설의 취사병',  emoji:'👑', rank:'전설급'},
 ];
 function getLevelByPts(pts) {
   for (let i = LEVEL_TABLE.length-1; i >= 0; i--) {
@@ -689,13 +689,13 @@ function getXpProgress(pts) {
 
 // Dynamic nickname patterns based on recent quest activity
 const NICK_PATTERNS = [
-  {questCat:'c2',text:'계란노른자를 정복한'},
-  {questCat:'c3',text:'치즈를 무섭게 먹어대는'},
-  {questCat:'c5',text:'소고기 사냥꾼'},
-  {questCat:'e1',text:'수영장을 지배하는'},
-  {questCat:'e3',text:'배드민턴 챔피언'},
-  {questCat:'r1',text:'독서를 정복한'},
-  {questCat:'c1',text:'우유 마스터'},
+  {questCat:'c2',text:'계란노른자 특기병'},
+  {questCat:'c3',text:'치즈 돌격대원'},
+  {questCat:'c5',text:'소고기 격파왕'},
+  {questCat:'e1',text:'수영장 제압 병사'},
+  {questCat:'e3',text:'배드민턴 보스 킬러'},
+  {questCat:'r1',text:'지식의 요새 점령병'},
+  {questCat:'c1',text:'우유 일등사수'},
 ];
 
 function getDefaultState() {
