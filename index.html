@@ -308,58 +308,10 @@ body{
     <div class="scrollarea" id="homeScroll">
       <!-- char card -->
       <div class="char-card" style="margin-top:12px;">
-        <div class="avatar-wrap" onclick="document.getElementById('fileInput').click()">
+        <div class="avatar-wrap">
           <div class="avatar-ring"></div>
-          <div id="avatarEl" class="pixel-char">
-            <svg viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg" width="90" height="90">
-              <!-- bg -->
-              <circle cx="45" cy="45" r="45" fill="#f5e6c8"/>
-              <!-- body / shirt (black) -->
-              <rect x="26" y="62" width="38" height="22" rx="6" fill="#111"/>
-              <!-- neck -->
-              <rect x="39" y="57" width="12" height="8" fill="#f0d5a8"/>
-              <!-- head -->
-              <ellipse cx="45" cy="42" rx="22" ry="21" fill="#f0d5a8"/>
-              <!-- hair base -->
-              <ellipse cx="45" cy="26" rx="22" ry="14" fill="#1a1a1a"/>
-              <!-- top-knot ponytail -->
-              <ellipse cx="45" cy="13" rx="7" ry="9" fill="#1a1a1a"/>
-              <rect x="42" y="10" width="6" height="5" fill="#333"/>
-              <!-- hair tie -->
-              <rect x="41" y="18" width="8" height="3" rx="1" fill="#444"/>
-              <!-- side hair -->
-              <ellipse cx="24" cy="36" rx="5" ry="8" fill="#1a1a1a"/>
-              <ellipse cx="66" cy="36" rx="5" ry="8" fill="#1a1a1a"/>
-              <!-- ears -->
-              <ellipse cx="23" cy="43" rx="3" ry="4" fill="#e8c898"/>
-              <ellipse cx="67" cy="43" rx="3" ry="4" fill="#e8c898"/>
-              <!-- glasses frame -->
-              <circle cx="37" cy="43" r="8" fill="none" stroke="#222" stroke-width="1.5"/>
-              <circle cx="53" cy="43" r="8" fill="none" stroke="#222" stroke-width="1.5"/>
-              <line x1="45" y1="43" x2="45" y2="43" stroke="#222" stroke-width="1.5"/>
-              <line x1="29" y1="42" x2="26" y2="41" stroke="#222" stroke-width="1.5"/>
-              <line x1="61" y1="42" x2="64" y2="41" stroke="#222" stroke-width="1.5"/>
-              <!-- eyes (big, inside glasses) -->
-              <circle cx="37" cy="44" r="4" fill="#1a1a1a"/>
-              <circle cx="53" cy="44" r="4" fill="#1a1a1a"/>
-              <circle cx="38.5" cy="42.5" r="1.2" fill="#fff"/>
-              <circle cx="54.5" cy="42.5" r="1.2" fill="#fff"/>
-              <!-- smile -->
-              <path d="M37 53 Q45 60 53 53" fill="none" stroke="#c07040" stroke-width="1.5" stroke-linecap="round"/>
-              <!-- teeth -->
-              <path d="M39 54 Q45 59 51 54" fill="#fff" stroke="none"/>
-              <!-- peace sign hand (right side, small) -->
-              <rect x="64" y="50" width="5" height="10" rx="2" fill="#f0d5a8"/>
-              <rect x="66" y="44" width="3" height="8" rx="1.5" fill="#f0d5a8"/>
-              <rect x="70" y="45" width="3" height="8" rx="1.5" fill="#f0d5a8"/>
-              <!-- shorts -->
-              <rect x="26" y="72" width="16" height="14" rx="3" fill="#222"/>
-              <rect x="48" y="72" width="16" height="14" rx="3" fill="#222"/>
-            </svg>
-          </div>
-          <div class="avatar-edit">✏️</div>
+          <img id="avatarEl" class="avatar-img" src="avatar.png" alt="캐릭터">
         </div>
-        <input type="file" id="fileInput" accept="image/*" onchange="changeAvatar(this)">
         <div class="char-title" id="charTitle">LV.1 — 새싹 전사</div>
         <div class="char-nick" id="charNick">성장을 시작한 용사</div>
         <div class="day-row">
