@@ -88,8 +88,19 @@ body{
 .progress-fill{height:100%;background:linear-gradient(90deg,#ffb648,#ff7a5c);border-radius:6px;transition:width .5s;}
 .progress-label{font-size:10px;color:var(--text3);text-align:right;}
 
+/* story card */
+.story-card{
+  background:linear-gradient(135deg,rgba(108,92,231,.18),rgba(255,93,160,.1));
+  border:1px solid rgba(108,92,231,.35);border-radius:16px;
+  padding:14px 14px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start;
+}
+.story-icon{font-size:26px;flex-shrink:0;filter:drop-shadow(0 0 6px rgba(255,215,106,.5));}
+.story-body{}
+.story-title{font-size:11px;font-weight:900;color:var(--gold);margin-bottom:4px;letter-spacing:.03em;}
+.story-msg{font-size:11px;color:var(--text2);line-height:1.7;}
+
 /* RPG stat card */
-.char-top{display:flex;gap:12px;align-items:center;margin-bottom:12px;}
+.char-top{display:flex;gap:0;align-items:center;margin-bottom:12px;}
 .char-left{flex-shrink:0;}
 .char-right{flex:1;min-width:0;}
 .lv-badge{
@@ -141,7 +152,13 @@ body{
 .quest-card.done{opacity:.5;pointer-events:none;}
 .quest-card.pending{border:1px solid var(--cyan);background:rgba(90,209,255,.05);}
 .quest-card.approved{border:1px solid var(--green);background:rgba(90,217,154,.05);opacity:.7;pointer-events:none;}
-.q-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;background:rgba(255,255,255,0.08);flex-shrink:0;}
+/* game-style quest icons */
+.q-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.4);}
+.q-icon.cat-warmup{background:linear-gradient(135deg,#2d1b69,#4a2c8a);border:1px solid rgba(168,85,247,.4);box-shadow:0 2px 12px rgba(168,85,247,.3);}
+.q-icon.cat-core{background:linear-gradient(135deg,#1a3a5c,#1e5a8a);border:1px solid rgba(90,209,255,.4);box-shadow:0 2px 12px rgba(90,209,255,.25);}
+.q-icon.cat-exercise{background:linear-gradient(135deg,#1a4a2a,#2a7a40);border:1px solid rgba(90,217,154,.4);box-shadow:0 2px 12px rgba(90,217,154,.25);}
+.q-icon.cat-rare{background:linear-gradient(135deg,#5a3a00,#9a6a00);border:1px solid rgba(255,215,106,.5);box-shadow:0 2px 16px rgba(255,215,106,.4);}
+.q-icon.cat-rare::after{content:'';position:absolute;inset:0;border-radius:12px;background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);}
 .q-body{flex:1;min-width:0;}
 .q-name{font-size:13px;font-weight:700;color:#fff;margin-bottom:2px;}
 .q-desc{font-size:10px;color:var(--text3);}
@@ -330,7 +347,7 @@ body{
 
   <!-- TOPBAR -->
   <div class="topbar" id="topbar">
-    <div class="topbar-title" id="topbarTitle">⛅ 키성장 퀘스트</div>
+    <div class="topbar-title" id="topbarTitle">⚔️ <span id="topbarName">용사</span>의 위대한 여정</div>
     <div class="coin-badge" onclick="showCoinInfo()">🪙 <span id="coinDisplay">0</span></div>
   </div>
 
@@ -347,7 +364,7 @@ body{
               <img id="avatarEl" class="avatar-img" src="avatar.png" alt="캐릭터" style="width:72px;height:72px;">
             </div>
           </div>
-          <div class="char-right" style="overflow:hidden;">
+          <div class="char-right" style="overflow:hidden;padding-left:14px;flex:1;min-width:0;">
             <div class="lv-badge" id="charLvBadge">LV.1</div>
             <div class="char-rank" id="charRank">4급 — 새싹 전사</div>
             <div class="char-nick-small" id="charNick">성장을 시작한 용사</div>
@@ -394,6 +411,15 @@ body{
         <div class="wb-title">주간 목표 달성!</div>
         <div class="wb-sub">이번 주 5일 이상 퀘스트를 완료했어요<br>보상함에서 특별 보상을 받으세요!</div>
         <button class="weekly-banner-btn" onclick="claimWeeklyReward()">보상 받기 →</button>
+      </div>
+
+      <!-- Story card -->
+      <div class="story-card" id="storyCard">
+        <div class="story-icon" id="storyIcon">⚔️</div>
+        <div class="story-body">
+          <div class="story-title" id="storyTitle">오늘의 미션</div>
+          <div class="story-msg" id="storyMsg">퀘스트를 완료하면 전설이 만들어진다!</div>
+        </div>
       </div>
 
       <div class="section-label">🌙 워밍업 퀘스트</div>
@@ -599,25 +625,37 @@ body{
 // ═══════════════════════════════════════
 const QUEST_POOL = [
   // warmup
-  {id:'w1',cat:'warmup',name:'오늘 9시간 이상 잠자기',icon:'😴',stars:1,desc:'수면 퀘스트 — 성장호르몬은 잠자는 동안 나와!',pts:[80,100,120]},
-  {id:'w2',cat:'warmup',name:'성장호르몬 주사 맞기',icon:'💉',stars:1,desc:'워밍업 퀘스트 — 오늘 주사 완료!',pts:[80,100,120]},
+  {id:'w1',cat:'warmup',name:'오늘 9시간 이상 잠자기',icon:'🌙',stars:1,desc:'자는 동안 성장호르몬이 폭발 분비된다. 침대는 용사의 성장 캡슐이다.',pts:[80,100,120]},
+  {id:'w2',cat:'warmup',name:'성장호르몬 주사 맞기',icon:'✨',stars:1,desc:'마법의 성장 물약 주입 완료! 오늘 밤 몸속에서 조용한 기적이 시작된다.',pts:[80,100,120]},
   // core nutrition
-  {id:'c1',cat:'core',name:'우유 한 잔 마시기',icon:'🥛',stars:2,desc:'칼슘 핵심 퀘스트 — 키 성장 최강 콤보!',pts:[150,200,250]},
-  {id:'c2',cat:'core',name:'계란노른자 먹기',icon:'🍳',stars:2,desc:'아연 퀘스트 — 계란노른자 속 아연이 키를 키워!',pts:[150,200,250]},
-  {id:'c3',cat:'core',name:'치즈 한 조각 도전',icon:'🧀',stars:2,desc:'아연 퀘스트 — 한 조각이면 충분해!',pts:[150,200,250]},
-  {id:'c4',cat:'core',name:'두부 먹기',icon:'🫘',stars:2,desc:'아연 퀘스트 — 두부 속 식물성 단백질!',pts:[150,200,250]},
-  {id:'c5',cat:'core',name:'소고기 먹기',icon:'🥩',stars:3,desc:'아연 고급 퀘스트 — 최고 효율 아연 공급원!',pts:[200,280,350]},
-  {id:'c6',cat:'core',name:'견과류 한 줌',icon:'🥜',stars:2,desc:'아연+영양 퀘스트 — 뇌도 키도 UP!',pts:[150,200,250]},
-  {id:'c7',cat:'core',name:'콩나물국 먹기',icon:'🥗',stars:2,desc:'아연+식이섬유 퀘스트',pts:[150,200,250]},
+  {id:'c1',cat:'core',name:'우유 한 잔 마시기',icon:'🥛',stars:2,desc:'전설의 성장 물약. 뼈를 강철처럼 만드는 칼슘 마법이 담겨 있다. 원샷!',pts:[150,200,250]},
+  {id:'c2',cat:'core',name:'계란노른자 먹기',icon:'🍳',stars:2,desc:'황금 핵의 아연이 세포 분열을 가속한다. 용사의 체내에 성장 코드를 심어라.',pts:[150,200,250]},
+  {id:'c3',cat:'core',name:'치즈 한 조각 도전',icon:'🧀',stars:2,desc:'아연의 보고, 치즈 한 조각. 한 입이면 충분하다. 작은 용기가 키를 키운다.',pts:[150,200,250]},
+  {id:'c4',cat:'core',name:'두부 먹기',icon:'🫘',stars:2,desc:'식물성 단백질의 제왕. 근육과 키를 동시에 공략하는 용사의 비밀 병기.',pts:[150,200,250]},
+  {id:'c5',cat:'core',name:'소고기 먹기',icon:'🥩',stars:3,desc:'철과 아연의 왕. 가장 강력한 성장 원소를 몸에 채워라. 오늘 밤이 다르다.',pts:[200,280,350]},
+  {id:'c6',cat:'core',name:'견과류 한 줌',icon:'🥜',stars:2,desc:'뇌와 키를 동시에 레벨업하는 마법 씨앗. 한 줌의 힘을 얕보지 마라.',pts:[150,200,250]},
+  {id:'c7',cat:'core',name:'콩나물국 먹기',icon:'🥣',stars:2,desc:'땅에서 솟아오른 식이섬유 군단! 장을 정복해야 키도 자란다.',pts:[150,200,250]},
   // exercise (weekend)
-  {id:'e1',cat:'exercise',name:'수영 30분',icon:'🏊',stars:3,desc:'주말 운동 퀘스트 — 전신 성장 운동!',pts:[200,300,400],weekend:true},
-  {id:'e2',cat:'exercise',name:'산책 또는 달리기',icon:'🏃',stars:2,desc:'주말 운동 퀘스트 — 가볍게 뛰어도 OK!',pts:[150,250,300],weekend:true},
-  {id:'e3',cat:'exercise',name:'배드민턴 엄마 이기기',icon:'🏸',stars:4,desc:'대결 퀘스트 — 이기면 보너스 포인트!',pts:[300,400,500],weekend:true},
+  {id:'e1',cat:'exercise',name:'수영 30분',icon:'🏊',stars:3,desc:'물속에서 중력을 거스르는 자만이 전신 성장의 비밀을 얻는다. 입수!',pts:[200,300,400],weekend:true},
+  {id:'e2',cat:'exercise',name:'산책 또는 달리기',icon:'🏃',stars:2,desc:'뼈에 부하를 걸어야 더 굵고 길게 자란다. 달리는 용사는 멈추지 않는다.',pts:[150,250,300],weekend:true},
+  {id:'e3',cat:'exercise',name:'배드민턴 엄마 이기기',icon:'🏸',stars:4,desc:'최종 보스전 개시! 엄마를 꺾으면 전설의 포인트가 쏟아진다. 덤벼라!',pts:[300,400,500],weekend:true},
   // rare
-  {id:'r1',cat:'rare',name:'도서관에서 책 10분 읽기',icon:'📚',stars:5,desc:'★ 레어 퀘스트 ★ — 10분만! 최고 보상!',pts:[500,700,1000]},
-  {id:'r2',cat:'rare',name:'수영장 가기',icon:'🏊‍♂️',stars:4,desc:'★ 레어 외출 퀘스트 ★',pts:[400,600,800]},
-  {id:'r3',cat:'rare',name:'아이스스케이팅 가기',icon:'⛸️',stars:5,desc:'★ 레어 외출 퀘스트 ★ — 최고 보상!',pts:[500,700,1000]},
+  {id:'r1',cat:'rare',name:'도서관에서 책 10분 읽기',icon:'📖',stars:5,desc:'🌟 초희귀 퀘스트 등장! 지식의 탑에서 10분. 뇌가 레벨업되는 소리가 들린다.',pts:[500,700,1000]},
+  {id:'r2',cat:'rare',name:'수영장 원정',icon:'🌊',stars:4,desc:'🌟 레어 원정 퀘스트! 성장의 바다로 출정하라. 전설의 포인트가 기다린다.',pts:[400,600,800]},
+  {id:'r3',cat:'rare',name:'아이스스케이팅 원정',icon:'⛸️',stars:5,desc:'🌟 최고등급 퀘스트! 얼음 위의 용사. 이것을 클리어한 자에게만 전설급 보상이.',pts:[500,700,1000]},
 ];
+
+// Daily storytelling messages (rotate by day + streak)
+const STORY_POOL = [
+  {icon:'⚔️', title:'위대한 여정의 시작', msg:'모든 전설은 오늘 같은 하루에서 시작됐다. 퀘스트 하나하나가 용사를 만든다. 지금 이 순간도 역사가 쓰이고 있다!'},
+  {icon:'🌟', title:'성장의 예언', msg:'그림자 마법사가 예언했다 — "매일 퀘스트를 완수하는 자만이 전설의 키에 도달하리라!" 오늘도 증명해 보여라.'},
+  {icon:'🏆', title:'영웅의 법칙', msg:'위대한 전사도 처음엔 새싹 용사였다. 달라지는 건 포기하지 않는 것 하나뿐. 오늘의 퀘스트가 내일의 전설이 된다.'},
+  {icon:'🔥', title:'성장의 불꽃', msg:'몸 속 성장 마법이 활성화되려면 연료가 필요하다. 영양, 운동, 수면 — 이 세 가지 불꽃을 꺼뜨리지 마라!'},
+  {icon:'🌙', title:'밤의 기적', msg:'자는 동안 진짜 성장이 일어난다. 오늘 퀘스트를 마치고 눈을 감으면, 몸이 스스로 레벨업을 시작한다.'},
+  {icon:'💪', title:'축적의 힘', msg:'오늘 1mm, 내일 1mm. 눈에 안 보이는 성장이 어느 날 갑자기 폭발한다. 지금 쌓고 있는 것들이 터지는 날을 기다려라!'},
+  {icon:'🗡️', title:'용사의 루틴', msg:'평범한 하루도 용사에겐 다르다. 퀘스트를 클리어한 날과 안 한 날의 차이가 1년 뒤 키의 차이가 된다. 오늘도 클리어!'},
+];
+
 
 const SHOP_ITEMS = [
   {id:'s2',icon:'🎮',name:'게임 추가 1시간',cost:300,desc:'오늘 하루 게임 1시간 추가'},
@@ -769,7 +807,7 @@ function getCurrentWeight() {
   return STATE.weightHistory[STATE.weightHistory.length-1].value;
 }
 function starsStr(n) {
-  return '★'.repeat(n) + '☆'.repeat(Math.max(0,5-n));
+  return '★'.repeat(n); // 빈 별 미표시
 }
 
 // Quests approved today
@@ -924,6 +962,19 @@ function render() {
 
 function renderTopbar() {
   document.getElementById('coinDisplay').textContent = (STATE.profile.points || 0).toLocaleString();
+  const name = STATE.profile.name || '용사';
+  const topbarName = document.getElementById('topbarName');
+  if (topbarName) topbarName.textContent = name;
+}
+
+function renderStoryCard() {
+  const dow = new Date().getDay();
+  const streak = STATE.profile.streak || 0;
+  const idx = (dow + Math.floor(streak / 3)) % STORY_POOL.length;
+  const story = STORY_POOL[idx];
+  document.getElementById('storyIcon').textContent = story.icon;
+  document.getElementById('storyTitle').textContent = story.title;
+  document.getElementById('storyMsg').textContent = story.msg;
 }
 
 function renderHomeScreen() {
@@ -961,6 +1012,8 @@ function renderHomeScreen() {
   if (STATE.profile.avatar) {
     avatarEl.outerHTML = `<img class="avatar-img" id="avatarEl" src="${STATE.profile.avatar}" style="border-radius:50%;width:90px;height:90px;object-fit:cover;position:relative;display:block;border:3px solid var(--bg3);">`;
   }
+
+  renderStoryCard();
 
   // Daily quests
   const {warmup, core, exercise, rare} = getDailyQuests();
@@ -1024,7 +1077,7 @@ function makeQuestCard(q, status) {
 
   div.className = cls;
   div.innerHTML = `
-    <div class="q-icon">${q.icon}</div>
+    <div class="q-icon cat-${q.cat}">${q.icon}</div>
     <div class="q-body">
       <div class="q-name">${q.name}</div>
       <div class="q-desc">${q.desc}</div>
