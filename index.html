@@ -39,10 +39,10 @@ body{
   background:rgba(0,0,0,0.2);border-bottom:1px solid rgba(255,255,255,0.05);
   flex-shrink:0;
 }
-.topbar-title{font-size:13px;font-weight:700;color:var(--text2);letter-spacing:.05em;}
+.topbar-title{font-size:26px;font-weight:700;color:var(--text2);letter-spacing:.05em;}
 .coin-badge{
   background:rgba(255,255,255,0.1);border-radius:20px;
-  padding:5px 12px;font-size:12px;font-weight:700;
+  padding:5px 12px;font-size:24px;font-weight:700;
   display:flex;align-items:center;gap:5px;cursor:pointer;
 }
 .coin-badge:active{opacity:.7;}
@@ -58,10 +58,10 @@ body{
   background:rgba(0,0,0,0.4);border-top:1px solid rgba(255,255,255,0.08);
   flex-shrink:0;
 }
-.nav-item{text-align:center;font-size:9px;color:var(--text4);cursor:pointer;padding:2px 10px;transition:color .2s;}
+.nav-item{text-align:center;font-size:18px;color:var(--text4);cursor:pointer;padding:2px 10px;transition:color .2s;}
 .nav-item.active{color:#fff;}
 .nav-item:active{opacity:.7;}
-.nav-icon{font-size:18px;display:block;margin-bottom:2px;}
+.nav-icon{font-size:36px;display:block;margin-bottom:2px;}
 
 /* ── SCREENS ── */
 .screen{display:none;flex-direction:column;height:100%;overflow:hidden;}
@@ -69,7 +69,7 @@ body{
 
 /* ── SECTION LABEL ── */
 .section-label{
-  font-size:12px;font-weight:700;color:var(--text2);
+  font-size:24px;font-weight:700;color:var(--text2);
   margin:16px 0 10px;display:flex;align-items:center;gap:6px;
 }
 
@@ -79,14 +79,14 @@ body{
   border-radius:20px;padding:14px;margin-bottom:14px;
 }
 .char-title{
-  font-family:'Press Start 2P',monospace;font-size:9px;
+  font-family:'Press Start 2P',monospace;font-size:18px;
   color:var(--gold);margin-bottom:3px;letter-spacing:.02em;
 }
-.char-nick{font-size:12px;font-weight:700;color:#fff;margin-bottom:8px;}
-.day-row{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:5px;}
+.char-nick{font-size:24px;font-weight:700;color:#fff;margin-bottom:8px;}
+.day-row{display:flex;justify-content:space-between;font-size:22px;color:var(--text2);margin-bottom:5px;}
 .progress-track{width:100%;height:10px;background:rgba(255,255,255,0.1);border-radius:6px;overflow:hidden;margin-bottom:4px;}
 .progress-fill{height:100%;background:linear-gradient(90deg,#ffb648,#ff7a5c);border-radius:6px;transition:width .5s;}
-.progress-label{font-size:10px;color:var(--text3);text-align:right;}
+.progress-label{font-size:20px;color:var(--text3);text-align:right;}
 
 /* story card */
 .story-card{
@@ -94,38 +94,38 @@ body{
   border:1px solid rgba(108,92,231,.35);border-radius:16px;
   padding:14px 14px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start;
 }
-.story-icon{font-size:26px;flex-shrink:0;filter:drop-shadow(0 0 6px rgba(255,215,106,.5));}
+.story-icon{font-size:52px;flex-shrink:0;filter:drop-shadow(0 0 6px rgba(255,215,106,.5));}
 .story-body{}
-.story-title{font-size:11px;font-weight:900;color:var(--gold);margin-bottom:4px;letter-spacing:.03em;}
-.story-msg{font-size:11px;color:var(--text2);line-height:1.7;}
+.story-title{font-size:22px;font-weight:900;color:var(--gold);margin-bottom:4px;letter-spacing:.03em;}
+.story-msg{font-size:22px;color:var(--text2);line-height:1.7;}
 
 /* RPG stat card */
 .char-top{display:flex;gap:0;align-items:center;margin-bottom:12px;}
 .char-left{flex-shrink:0;}
 .char-right{flex:1;min-width:0;}
 .lv-badge{
-  font-family:'Press Start 2P',monospace;font-size:8px;
+  font-family:'Press Start 2P',monospace;font-size:16px;
   background:linear-gradient(135deg,var(--purple),var(--violet));
   color:#fff;padding:3px 8px;border-radius:6px;display:inline-block;margin-bottom:5px;
 }
-.char-rank{font-size:10px;color:var(--gold);font-weight:700;margin-bottom:2px;}
-.char-nick-small{font-size:12px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.char-rank{font-size:20px;color:var(--gold);font-weight:700;margin-bottom:2px;}
+.char-nick-small{font-size:24px;font-weight:700;color:#fff;overflow:hidden;}
 .stat-row{display:flex;gap:6px;margin-bottom:10px;}
 .stat-box{
   flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
   border-radius:10px;padding:7px 6px;text-align:center;
 }
-.stat-box .sv{font-size:14px;font-weight:900;color:#fff;line-height:1;}
-.stat-box .sl{font-size:9px;color:var(--text3);margin-top:3px;}
-.stat-box .si{font-size:12px;margin-bottom:2px;}
+.stat-box .sv{font-size:28px;font-weight:900;color:#fff;line-height:1;}
+.stat-box .sl{font-size:18px;color:var(--text3);margin-top:3px;}
+.stat-box .si{font-size:24px;margin-bottom:2px;}
 .xp-section{}
 .xp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
-.xp-label{font-size:10px;font-weight:700;color:var(--cyan);}
-.xp-next{font-size:9px;color:var(--text3);}
+.xp-label{font-size:20px;font-weight:700;color:var(--cyan);}
+.xp-next{font-size:18px;color:var(--text3);}
 .xp-track{width:100%;height:12px;background:rgba(255,255,255,0.08);border-radius:8px;overflow:hidden;position:relative;}
 .xp-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--purple),var(--violet));border-radius:8px;transition:width .6s cubic-bezier(.4,0,.2,1);}
 .xp-glow{position:absolute;top:0;right:0;height:100%;width:20px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3));border-radius:0 8px 8px 0;}
-.quest-today{display:flex;align-items:center;justify-content:flex-end;gap:4px;margin-top:6px;font-size:10px;color:var(--text3);}
+.quest-today{display:flex;align-items:center;justify-content:flex-end;gap:4px;margin-top:6px;font-size:20px;color:var(--text3);}
 .quest-today b{color:var(--green);}
 .levelup-flash{animation:lvflash .8s ease-out;}
 @keyframes lvflash{0%{box-shadow:0 0 0 0 rgba(108,92,231,.8);}100%{box-shadow:0 0 30px 10px rgba(108,92,231,0);}}
@@ -135,7 +135,7 @@ body{
 .avatar-wrap{width:90px;height:90px;margin:4px auto 10px;position:relative;cursor:pointer;}
 .avatar-ring{position:absolute;inset:-4px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--violet),var(--cyan));}
 .avatar-img{width:90px;height:90px;border-radius:50%;object-fit:cover;position:relative;display:block;border:3px solid var(--bg3);}
-.avatar-edit{position:absolute;bottom:-2px;right:-2px;width:26px;height:26px;border-radius:50%;background:var(--bg3);border:2px solid var(--cyan);display:flex;align-items:center;justify-content:center;font-size:12px;}
+.avatar-edit{position:absolute;bottom:-2px;right:-2px;width:26px;height:26px;border-radius:50%;background:var(--bg3);border:2px solid var(--cyan);display:flex;align-items:center;justify-content:center;font-size:24px;}
 #fileInput{display:none;}
 
 /* pixel SVG avatar default */
@@ -153,17 +153,17 @@ body{
 .quest-card.pending{border:1px solid var(--cyan);background:rgba(90,209,255,.05);}
 .quest-card.approved{border:1px solid var(--green);background:rgba(90,217,154,.05);opacity:.7;pointer-events:none;}
 /* game-style quest icons */
-.q-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.4);}
+.q-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:40px;flex-shrink:0;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.4);}
 .q-icon.cat-warmup{background:linear-gradient(135deg,#2d1b69,#4a2c8a);border:1px solid rgba(168,85,247,.4);box-shadow:0 2px 12px rgba(168,85,247,.3);}
 .q-icon.cat-core{background:linear-gradient(135deg,#1a3a5c,#1e5a8a);border:1px solid rgba(90,209,255,.4);box-shadow:0 2px 12px rgba(90,209,255,.25);}
 .q-icon.cat-exercise{background:linear-gradient(135deg,#1a4a2a,#2a7a40);border:1px solid rgba(90,217,154,.4);box-shadow:0 2px 12px rgba(90,217,154,.25);}
 .q-icon.cat-rare{background:linear-gradient(135deg,#5a3a00,#9a6a00);border:1px solid rgba(255,215,106,.5);box-shadow:0 2px 16px rgba(255,215,106,.4);}
 .q-icon.cat-rare::after{content:'';position:absolute;inset:0;border-radius:12px;background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);}
 .q-body{flex:1;min-width:0;}
-.q-name{font-size:13px;font-weight:700;color:#fff;margin-bottom:2px;}
-.q-desc{font-size:10px;color:var(--text3);}
-.q-stars{font-size:10px;color:var(--gold);white-space:nowrap;flex-shrink:0;font-weight:700;}
-.q-badge{font-size:9px;padding:2px 7px;border-radius:8px;font-weight:700;flex-shrink:0;}
+.q-name{font-size:26px;font-weight:700;color:#fff;margin-bottom:2px;}
+.q-desc{font-size:20px;color:var(--text3);}
+.q-stars{font-size:20px;color:var(--gold);white-space:nowrap;flex-shrink:0;font-weight:700;}
+.q-badge{font-size:18px;padding:2px 7px;border-radius:8px;font-weight:700;flex-shrink:0;}
 .q-badge.pending{background:rgba(90,209,255,.2);color:var(--cyan);}
 .q-badge.approved{background:rgba(90,217,154,.2);color:var(--green);}
 
@@ -175,16 +175,16 @@ body{
 .gacha-box{
   width:130px;height:130px;background:linear-gradient(135deg,#ffb648,var(--violet));
   border-radius:24px;display:flex;align-items:center;justify-content:center;
-  font-size:52px;margin-bottom:20px;box-shadow:0 0 40px rgba(255,182,72,.5);
+  font-size:104px;margin-bottom:20px;box-shadow:0 0 40px rgba(255,182,72,.5);
   cursor:pointer;transition:transform .1s;
 }
 .gacha-box:active{transform:scale(.95);}
 .gacha-box.spin{animation:gacha-spin .6s ease-out;}
 @keyframes gacha-spin{0%{transform:scale(1) rotate(0);}30%{transform:scale(1.15) rotate(-8deg);}60%{transform:scale(1.2) rotate(8deg);}100%{transform:scale(1) rotate(0);}}
-.gacha-count-badge{background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;font-weight:700;font-size:11px;padding:4px 14px;border-radius:10px;margin-bottom:12px;}
+.gacha-count-badge{background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;font-weight:700;font-size:22px;padding:4px 14px;border-radius:10px;margin-bottom:12px;}
 .gacha-cta{
   background:linear-gradient(135deg,var(--purple),var(--violet));
-  color:#fff;font-weight:700;font-size:13px;
+  color:#fff;font-weight:700;font-size:26px;
   padding:12px 32px;border-radius:16px;border:none;cursor:pointer;transition:opacity .2s;
 }
 .gacha-cta:disabled{opacity:.4;cursor:not-allowed;}
@@ -193,71 +193,71 @@ body{
   text-align:center;animation:fadeIn .4s;margin-top:8px;
 }
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
-.gacha-result .pts{font-size:28px;font-weight:900;color:var(--gold);}
-.gacha-result .msg{font-size:12px;color:var(--text2);margin-top:4px;}
+.gacha-result .pts{font-size:56px;font-weight:900;color:var(--gold);}
+.gacha-result .msg{font-size:24px;color:var(--text2);margin-top:4px;}
 
 /* reward history */
 .reward-list{width:100%;margin-top:14px;}
-.reward-row{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.05);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:12px;}
+.reward-row{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.05);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:24px;}
 .reward-row .pt{color:var(--gold);font-weight:700;margin-left:auto;white-space:nowrap;}
 
 /* reward shop */
 .shop-card{background:var(--card);border:1px solid var(--card-border);border-radius:14px;padding:12px;margin-bottom:10px;display:flex;align-items:center;gap:10px;}
-.shop-icon{font-size:24px;flex-shrink:0;}
+.shop-icon{font-size:48px;flex-shrink:0;}
 .shop-body{flex:1;}
-.shop-name{font-size:13px;font-weight:700;margin-bottom:3px;}
-.shop-cost{font-size:11px;color:var(--gold);font-weight:700;}
-.shop-btn{background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;font-size:11px;font-weight:700;border:none;border-radius:10px;padding:7px 13px;cursor:pointer;flex-shrink:0;}
+.shop-name{font-size:26px;font-weight:700;margin-bottom:3px;}
+.shop-cost{font-size:22px;color:var(--gold);font-weight:700;}
+.shop-btn{background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;font-size:22px;font-weight:700;border:none;border-radius:10px;padding:7px 13px;cursor:pointer;flex-shrink:0;}
 .shop-btn:disabled{opacity:.35;cursor:not-allowed;}
 .shop-btn:active:not(:disabled){opacity:.7;}
 
 /* ── REPORT SCREEN ── */
 .gr-hero{background:linear-gradient(160deg,rgba(108,92,231,.18),rgba(255,93,160,.08));border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:16px;text-align:center;margin-bottom:12px;}
-.gr-hero .ge{font-size:36px;margin-bottom:3px;}
-.gr-hero .gb{font-size:22px;font-weight:900;color:var(--gold);margin-bottom:2px;}
-.gr-hero .gs{font-size:11px;color:var(--text2);}
+.gr-hero .ge{font-size:72px;margin-bottom:3px;}
+.gr-hero .gb{font-size:44px;font-weight:900;color:var(--gold);margin-bottom:2px;}
+.gr-hero .gs{font-size:22px;color:var(--text2);}
 .gr-row2{display:flex;gap:8px;margin-bottom:12px;}
 .gr-mini{flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:10px 6px;text-align:center;}
-.gr-mini .ge{font-size:18px;margin-bottom:3px;}
-.gr-mini .gv{font-size:15px;font-weight:900;}
-.gr-mini .gl{font-size:9px;color:var(--text3);}
-.gr-mini .gu{font-size:10px;color:var(--green);font-weight:700;margin-top:2px;}
+.gr-mini .ge{font-size:36px;margin-bottom:3px;}
+.gr-mini .gv{font-size:30px;font-weight:900;}
+.gr-mini .gl{font-size:18px;color:var(--text3);}
+.gr-mini .gu{font-size:20px;color:var(--green);font-weight:700;margin-top:2px;}
 .gr-chartcard{background:rgba(255,255,255,0.05);border-radius:16px;padding:12px 12px 8px;margin-bottom:12px;}
-.gr-chartcard .gt{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;}
+.gr-chartcard .gt{font-size:22px;font-weight:700;color:var(--text2);margin-bottom:8px;}
 .gr-svg{width:100%;height:120px;}
 .gr-legend{display:flex;gap:12px;margin-top:4px;flex-wrap:wrap;}
-.gr-legend .li{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--text3);}
+.gr-legend .li{display:flex;align-items:center;gap:4px;font-size:18px;color:var(--text3);}
 .gr-legend .dot{width:6px;height:6px;border-radius:50%;}
 .gr-legend .dash{width:10px;height:2px;}
 .gr-inputcard{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:14px;margin-bottom:14px;}
-.gr-inputcard .it{font-size:12px;font-weight:700;color:#fff;margin-bottom:10px;}
+.gr-inputcard .it{font-size:24px;font-weight:700;color:#fff;margin-bottom:10px;}
 .gr-fieldrow{display:flex;gap:6px;margin-bottom:8px;}
 .gr-field{flex:1;}
-.gr-field label{display:block;font-size:9px;color:var(--text3);margin-bottom:4px;}
-.gr-field input,.gr-field select{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:9px;padding:8px;color:#fff;font-size:12px;font-family:inherit;}
+.gr-field label{display:block;font-size:18px;color:var(--text3);margin-bottom:4px;}
+.gr-field input,.gr-field select{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:9px;padding:8px;color:#fff;font-size:24px;font-family:inherit;}
 .gr-field input::-webkit-calendar-picker-indicator{filter:invert(1);}
-.gr-savebtn{width:100%;background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;font-weight:700;font-size:12px;border:none;border-radius:11px;padding:10px;cursor:pointer;}
+.gr-savebtn{width:100%;background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;font-weight:700;font-size:24px;border:none;border-radius:11px;padding:10px;cursor:pointer;}
 .gr-savebtn:active{opacity:.7;}
-.gr-toast{text-align:center;font-size:11px;color:var(--green);font-weight:700;margin-top:6px;min-height:14px;}
+.gr-toast{text-align:center;font-size:22px;color:var(--green);font-weight:700;margin-top:6px;min-height:14px;}
 
 /* weekly quest bar chart */
 .week-bars{display:flex;align-items:flex-end;gap:5px;height:60px;}
 .week-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
 .week-bar{width:100%;background:linear-gradient(180deg,var(--violet),var(--purple));border-radius:4px 4px 0 0;min-height:4px;transition:height .3s;}
 .week-bar.today{background:linear-gradient(180deg,var(--gold),#ff9d5c);}
-.week-bar-label{font-size:8px;color:var(--text3);}
+.week-bar-label{font-size:16px;color:var(--text3);}
 
 /* insight card */
-.insight-card{background:linear-gradient(135deg,rgba(255,215,106,.18),rgba(255,93,160,.1));border:1px solid var(--gold);border-radius:14px;padding:13px;font-size:11px;line-height:1.7;color:#fff0d0;margin-bottom:12px;}
+.insight-card{background:linear-gradient(135deg,rgba(255,215,106,.18),rgba(255,93,160,.1));border:1px solid var(--gold);border-radius:14px;padding:13px;font-size:22px;line-height:1.7;color:#fff0d0;margin-bottom:12px;}
 .insight-card b{color:var(--gold);}
 
 /* ── PARENT SCREEN ── */
 .approve-row{background:rgba(255,255,255,0.06);border-radius:14px;padding:10px;display:flex;gap:10px;align-items:center;margin-bottom:9px;}
-.thumb{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;overflow:hidden;background:linear-gradient(135deg,#3b82f6,#06b6d4);}
+.thumb{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:44px;flex-shrink:0;overflow:hidden;background:linear-gradient(135deg,#3b82f6,#06b6d4);}
 .thumb img{width:100%;height:100%;object-fit:cover;}
-.approve-btn{background:#00b37e;color:#fff;font-size:11px;font-weight:700;border:none;border-radius:10px;padding:7px 13px;cursor:pointer;flex-shrink:0;}
+.approve-btn{background:#00b37e;color:#fff;font-size:22px;font-weight:700;border:none;border-radius:10px;padding:7px 13px;cursor:pointer;flex-shrink:0;}
 .approve-btn:active{opacity:.7;}
-.reject-btn{background:rgba(255,107,107,.2);color:var(--red);font-size:11px;font-weight:700;border:1px solid rgba(255,107,107,.3);border-radius:10px;padding:7px 10px;cursor:pointer;flex-shrink:0;}
+.reject-btn{background:rgba(255,107,107,.2);color:var(--red);font-size:22px;font-weight:700;border:1px solid rgba(255,107,107,.3);border-radius:10px;padding:7px 10px;cursor:pointer;flex-shrink:0;}
 .reject-btn:active{opacity:.7;}
 
 /* ── PIN OVERLAY ── */
@@ -267,16 +267,16 @@ body{
   z-index:100;
 }
 .pin-box{background:var(--bg2);border-radius:24px;padding:30px 24px;text-align:center;width:280px;}
-.pin-title{font-size:14px;font-weight:700;margin-bottom:6px;}
-.pin-sub{font-size:11px;color:var(--text3);margin-bottom:20px;}
+.pin-title{font-size:28px;font-weight:700;margin-bottom:6px;}
+.pin-sub{font-size:22px;color:var(--text3);margin-bottom:20px;}
 .pin-dots{display:flex;justify-content:center;gap:12px;margin-bottom:20px;}
 .pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--text3);transition:all .15s;}
 .pin-dot.filled{background:var(--purple);border-color:var(--purple);}
 .pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;}
-.pin-key{background:rgba(255,255,255,.08);border:none;color:#fff;font-size:16px;font-weight:700;border-radius:14px;padding:14px;cursor:pointer;transition:background .15s;}
+.pin-key{background:rgba(255,255,255,.08);border:none;color:#fff;font-size:32px;font-weight:700;border-radius:14px;padding:14px;cursor:pointer;transition:background .15s;}
 .pin-key:active{background:var(--purple);}
-.pin-err{font-size:11px;color:var(--red);margin-top:4px;min-height:14px;}
-.pin-cancel{font-size:12px;color:var(--text3);margin-top:12px;cursor:pointer;display:inline-block;padding:4px;}
+.pin-err{font-size:22px;color:var(--red);margin-top:4px;min-height:14px;}
+.pin-cancel{font-size:24px;color:var(--text3);margin-top:12px;cursor:pointer;display:inline-block;padding:4px;}
 .pin-cancel:active{opacity:.6;}
 
 /* ── MODAL ── */
@@ -284,29 +284,29 @@ body{
 .modal-overlay.center{align-items:center;}
 .modal-box{background:var(--bg2);border-radius:24px 24px 0 0;padding:24px 20px max(env(safe-area-inset-bottom),20px);width:100%;max-width:420px;}
 .modal-box.center-box{border-radius:24px;padding:24px 20px;max-width:340px;margin:16px;}
-.modal-title{font-size:15px;font-weight:900;margin-bottom:8px;}
-.modal-sub{font-size:12px;color:var(--text3);margin-bottom:16px;line-height:1.6;}
-.modal-btn{width:100%;border:none;border-radius:14px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px;}
+.modal-title{font-size:30px;font-weight:900;margin-bottom:8px;}
+.modal-sub{font-size:24px;color:var(--text3);margin-bottom:16px;line-height:1.6;}
+.modal-btn{width:100%;border:none;border-radius:14px;padding:13px;font-size:28px;font-weight:700;cursor:pointer;margin-bottom:8px;}
 .modal-btn.primary{background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;}
 .modal-btn.primary:active{opacity:.7;}
 .modal-btn.secondary{background:rgba(255,255,255,.08);color:var(--text2);}
 .modal-btn.secondary:active{opacity:.7;}
 .photo-preview{width:100%;height:160px;object-fit:cover;border-radius:14px;margin-bottom:12px;display:none;}
-.photo-upload-btn{width:100%;border:2px dashed rgba(255,255,255,.2);background:rgba(255,255,255,.04);color:var(--text3);font-size:13px;font-weight:700;border-radius:14px;padding:20px;cursor:pointer;margin-bottom:12px;text-align:center;}
+.photo-upload-btn{width:100%;border:2px dashed rgba(255,255,255,.2);background:rgba(255,255,255,.04);color:var(--text3);font-size:26px;font-weight:700;border-radius:14px;padding:20px;cursor:pointer;margin-bottom:12px;text-align:center;}
 .photo-upload-btn:active{opacity:.6;}
 
 /* weekly reward banner */
 .weekly-banner{background:linear-gradient(135deg,rgba(255,215,106,.25),rgba(168,85,247,.2));border:1px solid var(--gold);border-radius:16px;padding:14px;text-align:center;margin-bottom:14px;}
-.weekly-banner .wb-icon{font-size:28px;margin-bottom:4px;}
-.weekly-banner .wb-title{font-size:13px;font-weight:900;color:var(--gold);margin-bottom:3px;}
-.weekly-banner .wb-sub{font-size:11px;color:var(--text2);}
-.weekly-banner-btn{margin-top:10px;background:var(--gold);color:#1a1228;font-size:12px;font-weight:900;border:none;border-radius:12px;padding:8px 20px;cursor:pointer;}
+.weekly-banner .wb-icon{font-size:56px;margin-bottom:4px;}
+.weekly-banner .wb-title{font-size:26px;font-weight:900;color:var(--gold);margin-bottom:3px;}
+.weekly-banner .wb-sub{font-size:22px;color:var(--text2);}
+.weekly-banner-btn{margin-top:10px;background:var(--gold);color:#1a1228;font-size:24px;font-weight:900;border:none;border-radius:12px;padding:8px 20px;cursor:pointer;}
 .weekly-banner-btn:active{opacity:.7;}
 
 /* toast popup */
 .toast{
   position:absolute;bottom:90px;left:50%;transform:translateX(-50%);
-  background:rgba(0,0,0,.85);color:#fff;font-size:12px;font-weight:700;
+  background:rgba(0,0,0,.85);color:#fff;font-size:24px;font-weight:700;
   padding:10px 18px;border-radius:20px;white-space:nowrap;
   opacity:0;transition:opacity .3s;pointer-events:none;z-index:200;
 }
@@ -314,13 +314,13 @@ body{
 
 /* onboarding */
 .onboard{position:absolute;inset:0;background:var(--bg);z-index:150;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 24px;}
-.onboard-icon{font-size:64px;margin-bottom:16px;}
-.onboard-title{font-family:'Press Start 2P',monospace;font-size:11px;color:var(--gold);text-align:center;margin-bottom:8px;line-height:1.8;}
-.onboard-sub{font-size:13px;color:var(--text2);text-align:center;margin-bottom:28px;line-height:1.7;}
-.onboard-field{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:12px 16px;color:#fff;font-size:16px;font-family:inherit;margin-bottom:12px;text-align:center;}
-.onboard-btn{width:100%;background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;font-weight:700;font-size:15px;border:none;border-radius:14px;padding:14px;cursor:pointer;}
+.onboard-icon{font-size:128px;margin-bottom:16px;}
+.onboard-title{font-family:'Press Start 2P',monospace;font-size:22px;color:var(--gold);text-align:center;margin-bottom:8px;line-height:1.8;}
+.onboard-sub{font-size:26px;color:var(--text2);text-align:center;margin-bottom:28px;line-height:1.7;}
+.onboard-field{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:12px 16px;color:#fff;font-size:32px;font-family:inherit;margin-bottom:12px;text-align:center;}
+.onboard-btn{width:100%;background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;font-weight:700;font-size:30px;border:none;border-radius:14px;padding:14px;cursor:pointer;}
 .onboard-btn:active{opacity:.7;}
-.onboard-hint{font-size:10px;color:var(--text4);margin-top:10px;text-align:center;}
+.onboard-hint{font-size:20px;color:var(--text4);margin-top:10px;text-align:center;}
 
 /* hidden util */
 .hidden{display:none!important;}
@@ -334,12 +334,12 @@ body{
     <div class="onboard-title">키성장 퀘스트</div>
     <div class="onboard-sub">신병 제군! 이름을 대라.<br>지금부터 성장 임무가 시작된다!</div>
     <input id="onboardName" class="onboard-field" placeholder="이름 (예: 민준)" maxlength="6">
-    <div style="font-size:11px;color:var(--text3);margin-bottom:12px;">현재 키</div>
+    <div style="font-size:22px;color:var(--text3);margin-bottom:12px;">현재 키</div>
     <div style="display:flex;gap:8px;width:100%;margin-bottom:20px;">
       <input id="onboardHeight" class="onboard-field" style="margin:0;" placeholder="키 (cm)" type="number" step="0.1">
       <input id="onboardWeight" class="onboard-field" style="margin:0;" placeholder="몸무게 (kg)" type="number" step="0.1">
     </div>
-    <div style="font-size:11px;color:var(--text3);margin-bottom:8px;">부모 PIN 설정 (4자리)</div>
+    <div style="font-size:22px;color:var(--text3);margin-bottom:8px;">부모 PIN 설정 (4자리)</div>
     <input id="onboardPin" class="onboard-field" placeholder="예: 1234" type="number" maxlength="4" style="margin-bottom:20px;">
     <button class="onboard-btn" onclick="finishOnboard()">임무 개시! 🚀</button>
     <div class="onboard-hint">데이터는 이 기기에만 저장됩니다</div>
@@ -359,12 +359,12 @@ body{
       <div class="char-card" style="margin-top:12px;" id="charCard">
         <div class="char-top">
           <div class="char-left">
-            <div class="avatar-wrap" style="width:72px;height:72px;flex-shrink:0;">
+            <div class="avatar-wrap" style="width:144px;height:144px;flex-shrink:0;">
               <div class="avatar-ring"></div>
-              <img id="avatarEl" class="avatar-img" src="avatar.png" alt="캐릭터" style="width:72px;height:72px;">
+              <img id="avatarEl" class="avatar-img" src="avatar.png" alt="캐릭터" style="width:144px;height:144px;">
             </div>
           </div>
-          <div class="char-right" style="overflow:hidden;padding-left:20px;flex:1;min-width:0;margin-left:4px;">
+          <div class="char-right" style="overflow:hidden;padding-left:16px;flex:1;min-width:0;">
             <div class="lv-badge" id="charLvBadge">LV.1</div>
             <div class="char-rank" id="charRank">4급 — 새싹 전사</div>
             <div class="char-nick-small" id="charNick">성장을 시작한 용사</div>
@@ -580,9 +580,9 @@ body{
         <button class="pin-key" onclick="pinInput('7')">7</button>
         <button class="pin-key" onclick="pinInput('8')">8</button>
         <button class="pin-key" onclick="pinInput('9')">9</button>
-        <button class="pin-key" onclick="pinInput('del')" style="font-size:12px;">⌫</button>
+        <button class="pin-key" onclick="pinInput('del')" style="font-size:24px;">⌫</button>
         <button class="pin-key" onclick="pinInput('0')">0</button>
-        <button class="pin-key" onclick="pinInput('ok')" style="font-size:12px;background:var(--purple);">확인</button>
+        <button class="pin-key" onclick="pinInput('ok')" style="font-size:24px;background:var(--purple);">확인</button>
       </div>
       <div class="pin-err" id="pinErr"></div>
       <span class="pin-cancel" onclick="cancelPin()">취소</span>
@@ -607,10 +607,10 @@ body{
   <!-- GACHA REVEAL MODAL -->
   <div class="modal-overlay center hidden" id="gachaModal">
     <div class="modal-box center-box" style="text-align:center;">
-      <div style="font-size:52px;margin-bottom:8px;" id="gachaRevealIcon">🎁</div>
-      <div style="font-size:32px;font-weight:900;color:var(--gold);margin-bottom:4px;" id="gachaRevealPts"></div>
-      <div style="font-size:13px;color:var(--text2);margin-bottom:4px;" id="gachaRevealMsg"></div>
-      <div style="font-size:11px;color:var(--text3);margin-bottom:20px;" id="gachaRevealQuest"></div>
+      <div style="font-size:104px;margin-bottom:8px;" id="gachaRevealIcon">🎁</div>
+      <div style="font-size:64px;font-weight:900;color:var(--gold);margin-bottom:4px;" id="gachaRevealPts"></div>
+      <div style="font-size:26px;color:var(--text2);margin-bottom:4px;" id="gachaRevealMsg"></div>
+      <div style="font-size:22px;color:var(--text3);margin-bottom:20px;" id="gachaRevealQuest"></div>
       <button class="modal-btn primary" onclick="closeGachaModal()">받기! 🎉</button>
     </div>
   </div>
@@ -1110,7 +1110,7 @@ function renderGachaScreen() {
       <div class="shop-icon">${item.icon}</div>
       <div class="shop-body">
         <div class="shop-name">${item.name}</div>
-        <div style="font-size:10px;color:var(--text3);margin-bottom:3px;">${item.desc}</div>
+        <div style="font-size:20px;color:var(--text3);margin-bottom:3px;">${item.desc}</div>
         <div class="shop-cost">🪙 ${item.cost.toLocaleString()}P</div>
       </div>
       <button class="shop-btn" ${can?'':'disabled'} onclick="purchaseItem('${item.id}')">교환</button>
@@ -1123,12 +1123,12 @@ function renderGachaScreen() {
   histEl.innerHTML = '';
   const hist = [...(STATE.rewardHistory||[])].reverse().slice(0,10);
   if (hist.length === 0) {
-    histEl.innerHTML = '<div style="text-align:center;color:var(--text4);font-size:12px;padding:12px;">아직 보상 기록이 없어요</div>';
+    histEl.innerHTML = '<div style="text-align:center;color:var(--text4);font-size:24px;padding:12px;">아직 보상 기록이 없어요</div>';
   }
   hist.forEach(r => {
     const div = document.createElement('div');
     div.className = 'reward-row';
-    div.innerHTML = `<span style="font-size:16px;">${r.icon}</span><span style="flex:1;">${r.name}</span><span style="font-size:10px;color:var(--text3);">${r.date}</span><span class="pt">+${r.pts}P</span>`;
+    div.innerHTML = `<span style="font-size:32px;">${r.icon}</span><span style="flex:1;">${r.name}</span><span style="font-size:20px;color:var(--text3);">${r.date}</span><span class="pt">+${r.pts}P</span>`;
     histEl.appendChild(div);
   });
 }
@@ -1289,7 +1289,7 @@ function renderParentScreen() {
   // Pending approvals
   html += `<div class="section-label" style="margin-top:12px;">✅ 승인 대기 (${pending.length}건)</div>`;
   if (pending.length === 0) {
-    html += `<div style="text-align:center;color:var(--text4);font-size:12px;padding:16px;">승인 대기 중인 퀘스트가 없어요 🎉</div>`;
+    html += `<div style="text-align:center;color:var(--text4);font-size:24px;padding:16px;">승인 대기 중인 퀘스트가 없어요 🎉</div>`;
   } else {
     pending.forEach(p => {
       const q = QUEST_POOL.find(q=>q.id===p.questId);
@@ -1298,8 +1298,8 @@ function renderParentScreen() {
         <div class="approve-row">
           <div class="thumb">${p.photo ? `<img src="${p.photo}">` : q.icon}</div>
           <div style="flex:1;">
-            <div style="font-size:12px;font-weight:700;">${q.name}</div>
-            <div style="font-size:10px;color:var(--text3);">${p.date} ${p.submittedAt}</div>
+            <div style="font-size:24px;font-weight:700;">${q.name}</div>
+            <div style="font-size:20px;color:var(--text3);">${p.date} ${p.submittedAt}</div>
           </div>
           <button class="reject-btn" onclick="rejectQuest('${p.id}')">✕</button>
           <button class="approve-btn" onclick="approveQuest('${p.id}')">승인 ✓</button>
@@ -1326,18 +1326,18 @@ function renderParentScreen() {
     recentLog.forEach(l => {
       const q = QUEST_POOL.find(q=>q.id===l.questId);
       if (!q) return;
-      html += `<div class="reward-row"><span style="font-size:16px;">${q.icon}</span><span style="flex:1;">${q.name}</span><span style="font-size:10px;color:var(--text3);">${l.date}</span><span class="pt">+${l.pointsAwarded}P</span></div>`;
+      html += `<div class="reward-row"><span style="font-size:32px;">${q.icon}</span><span style="flex:1;">${q.name}</span><span style="font-size:20px;color:var(--text3);">${l.date}</span><span class="pt">+${l.pointsAwarded}P</span></div>`;
     });
   }
 
   // PIN settings
   html += `
     <div style="margin-top:20px;padding:14px;background:rgba(255,255,255,.05);border-radius:14px;">
-      <div style="font-size:12px;font-weight:700;margin-bottom:8px;">⚙️ 부모 설정</div>
-      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;">현재 PIN: ${'*'.repeat((STATE.profile.pin||'').length)}</div>
+      <div style="font-size:24px;font-weight:700;margin-bottom:8px;">⚙️ 부모 설정</div>
+      <div style="font-size:22px;color:var(--text3);margin-bottom:8px;">현재 PIN: ${'*'.repeat((STATE.profile.pin||'').length)}</div>
       <div style="display:flex;gap:8px;">
-        <input id="newPin" type="number" placeholder="새 PIN 4자리" style="flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:9px;padding:8px;color:#fff;font-size:12px;font-family:inherit;">
-        <button onclick="changePin()" style="background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;font-size:11px;font-weight:700;border:none;border-radius:10px;padding:8px 13px;cursor:pointer;">변경</button>
+        <input id="newPin" type="number" placeholder="새 PIN 4자리" style="flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:9px;padding:8px;color:#fff;font-size:24px;font-family:inherit;">
+        <button onclick="changePin()" style="background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;font-size:22px;font-weight:700;border:none;border-radius:10px;padding:8px 13px;cursor:pointer;">변경</button>
       </div>
     </div>
   `;
