@@ -4,630 +4,161 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0d0d14">
+<meta name="theme-color" content="#1a0e05">
 <title>키성장 퀘스트</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-:root{
-  --bg:#0d0d14;--bg2:#1a1a28;--bg3:#15152a;
-  --purple:#6c5ce7;--violet:#a855f7;--gold:#ffd76a;
-  --pink:#ff5da0;--cyan:#5ad1ff;--green:#5ad99a;--red:#ff6b6b;
-  --text:#fff;--text2:#cfcaf0;--text3:#9694b8;--text4:#6b6a88;
-  --card:rgba(255,255,255,0.06);--card-border:rgba(255,255,255,0.1);
-}
-html,body{height:100%;overflow:hidden;}
-body{
-  font-family:'Noto Sans KR',sans-serif;
-  background:var(--bg);color:var(--text);
-  display:flex;flex-direction:column;align-items:center;
-  justify-content:center;
-}
-#app{
-  width:100%;max-width:420px;height:100%;max-height:900px;
-  background:linear-gradient(180deg,#1b1330 0%,#100c20 60%,#0a0816 100%);
-  display:flex;flex-direction:column;position:relative;overflow:hidden;
-}
+html,body{height:100%;background:#0d0805;display:flex;align-items:center;justify-content:center;}
+#root{width:100%;max-width:420px;height:100%;max-height:900px;position:relative;}
 
-/* ── TOPBAR ── */
-.topbar{
-  padding:env(safe-area-inset-top,12px) 16px 10px;
-  padding-top:max(env(safe-area-inset-top),12px);
-  display:flex;justify-content:space-between;align-items:center;
-  background:rgba(0,0,0,0.2);border-bottom:1px solid rgba(255,255,255,0.05);
-  flex-shrink:0;
-}
-.topbar-title{font-size:13px;font-weight:700;color:var(--text2);letter-spacing:.05em;}
-.coin-badge{
-  background:rgba(255,255,255,0.1);border-radius:20px;
-  padding:5px 12px;font-size:12px;font-weight:700;
-  display:flex;align-items:center;gap:5px;cursor:pointer;
-}
-.coin-badge:active{opacity:.7;}
+/* Wood texture */
+.wood-bg{background:linear-gradient(180deg,#2a1505 0%,#1a0e05 40%,#0e0803 100%);}
 
-/* ── SCROLL AREA ── */
-.scrollarea{flex:1;overflow-y:auto;padding:0 14px 80px;-webkit-overflow-scrolling:touch;}
-.scrollarea::-webkit-scrollbar{display:none;}
+/* Scrollbar */
+.scroll-area::-webkit-scrollbar{display:none;}
+.scroll-area{-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 
-/* ── BOTTOM NAV ── */
-.bottom-nav{
-  display:flex;justify-content:space-around;
-  padding:10px 0 max(env(safe-area-inset-bottom),14px);
-  background:rgba(0,0,0,0.4);border-top:1px solid rgba(255,255,255,0.08);
-  flex-shrink:0;
-}
-.nav-item{text-align:center;font-size:9px;color:var(--text4);cursor:pointer;padding:2px 10px;transition:color .2s;}
-.nav-item.active{color:#fff;}
-.nav-item:active{opacity:.7;}
-.nav-icon{font-size:18px;display:block;margin-bottom:2px;}
+/* Parchment */
+.parchment{background:radial-gradient(ellipse at 30% 20%,#e8d5a3,#cdba8a 40%,#b89e6a 100%);}
 
-/* ── SCREENS ── */
-.screen{display:none;flex-direction:column;height:100%;overflow:hidden;}
-.screen.active{display:flex;}
+/* Rune border text */
+.rune-border{font-family:'Cinzel',serif;font-size:7px;letter-spacing:3px;color:#6b4c1a;opacity:0.6;text-align:center;overflow:hidden;white-space:nowrap;}
 
-/* ── SECTION LABEL ── */
-.section-label{
-  font-size:12px;font-weight:700;color:var(--text2);
-  margin:16px 0 10px;display:flex;align-items:center;gap:6px;
+/* Stone inset */
+.stone-slot{
+  background:linear-gradient(145deg,#0d0a06,#1a1208);
+  box-shadow:inset 2px 2px 6px rgba(0,0,0,.8),inset -1px -1px 3px rgba(255,210,100,.08);
+  border:1px solid #2a1e0a;
 }
 
-/* ── CHAR CARD ── */
-.char-card{
-  background:var(--card);border:1px solid var(--card-border);
-  border-radius:20px;padding:14px;margin-bottom:14px;
+/* Gold frame */
+.gold-frame{border:2px solid;border-image:linear-gradient(135deg,#c8a84b,#f5e28a,#c8a84b,#8a6620) 1;}
+
+/* XP brass bar */
+.xp-track{
+  background:linear-gradient(90deg,#1a0e05,#2a1a08,#1a0e05);
+  border:2px solid #6b4a1a;
+  border-radius:6px;
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.6),0 1px 0 rgba(255,200,80,.2);
+  position:relative;overflow:hidden;
 }
-.char-title{
-  font-family:'Press Start 2P',monospace;font-size:9px;
-  color:var(--gold);margin-bottom:3px;letter-spacing:.02em;
+.xp-fill{
+  background:linear-gradient(90deg,#c87820,#f5c842,#e8a020);
+  border-radius:4px;
+  transition:width .6s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 0 8px rgba(245,200,66,.5);
 }
-.char-nick{font-size:12px;font-weight:700;color:#fff;margin-bottom:8px;}
-.day-row{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:5px;}
-.progress-track{width:100%;height:10px;background:rgba(255,255,255,0.1);border-radius:6px;overflow:hidden;margin-bottom:4px;}
-.progress-fill{height:100%;background:linear-gradient(90deg,#ffb648,#ff7a5c);border-radius:6px;transition:width .5s;}
-.progress-label{font-size:10px;color:var(--text3);text-align:right;}
 
-/* story card */
-.story-card{
-  background:linear-gradient(135deg,rgba(108,92,231,.18),rgba(255,93,160,.1));
-  border:1px solid rgba(108,92,231,.35);border-radius:16px;
-  padding:14px 14px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start;
+/* Quest card corner brackets */
+.quest-card-rpg{position:relative;}
+.quest-card-rpg::before,.quest-card-rpg::after{
+  content:'';position:absolute;width:10px;height:10px;
+  border-color:#c8a84b;border-style:solid;
 }
-.story-icon{font-size:26px;flex-shrink:0;filter:drop-shadow(0 0 6px rgba(255,215,106,.5));}
-.story-body{}
-.story-title{font-size:11px;font-weight:900;color:var(--gold);margin-bottom:4px;letter-spacing:.03em;}
-.story-msg{font-size:11px;color:var(--text2);line-height:1.7;}
-
-/* RPG stat card */
-.char-top{display:flex;gap:0;align-items:center;margin-bottom:12px;}
-.char-left{flex-shrink:0;}
-.char-right{flex:1;min-width:0;}
-.lv-badge{
-  font-family:'Press Start 2P',monospace;font-size:8px;
-  background:linear-gradient(135deg,var(--purple),var(--violet));
-  color:#fff;padding:3px 8px;border-radius:6px;display:inline-block;margin-bottom:5px;
+.quest-card-rpg::before{top:4px;left:4px;border-width:2px 0 0 2px;}
+.quest-card-rpg::after{top:4px;right:4px;border-width:2px 2px 0 0;}
+.quest-card-rpg .corner-bl,.quest-card-rpg .corner-br{
+  position:absolute;width:10px;height:10px;
+  border-color:#c8a84b;border-style:solid;
 }
-.char-rank{font-size:10px;color:var(--gold);font-weight:700;margin-bottom:2px;}
-.char-nick-small{font-size:12px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.stat-row{display:flex;gap:6px;margin-bottom:10px;}
-.stat-box{
-  flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
-  border-radius:10px;padding:7px 6px;text-align:center;
+.quest-card-rpg .corner-bl{bottom:4px;left:4px;border-width:0 0 2px 2px;}
+.quest-card-rpg .corner-br{bottom:4px;right:4px;border-width:0 2px 2px 0;}
+
+/* Arrow header */
+.arrow-header{
+  display:inline-flex;align-items:center;
+  background:linear-gradient(90deg,#4a2800,#6b3d10,#4a2800);
+  border:1px solid #c8a84b;
+  clip-path:polygon(0 0,calc(100% - 12px) 0,100% 50%,calc(100% - 12px) 100%,0 100%,12px 50%);
+  padding:5px 24px 5px 20px;
+  font-family:'Cinzel',serif;font-size:11px;font-weight:700;
+  color:#f5e28a;letter-spacing:1px;
 }
-.stat-box .sv{font-size:14px;font-weight:900;color:#fff;line-height:1;}
-.stat-box .sl{font-size:9px;color:var(--text3);margin-top:3px;}
-.stat-box .si{font-size:12px;margin-bottom:2px;}
-.xp-section{}
-.xp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
-.xp-label{font-size:10px;font-weight:700;color:var(--cyan);}
-.xp-next{font-size:9px;color:var(--text3);}
-.xp-track{width:100%;height:12px;background:rgba(255,255,255,0.08);border-radius:8px;overflow:hidden;position:relative;}
-.xp-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--purple),var(--violet));border-radius:8px;transition:width .6s cubic-bezier(.4,0,.2,1);}
-.xp-glow{position:absolute;top:0;right:0;height:100%;width:20px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3));border-radius:0 8px 8px 0;}
-.quest-today{display:flex;align-items:center;justify-content:flex-end;gap:4px;margin-top:6px;font-size:10px;color:var(--text3);}
-.quest-today b{color:var(--green);}
-.levelup-flash{animation:lvflash .8s ease-out;}
-@keyframes lvflash{0%{box-shadow:0 0 0 0 rgba(108,92,231,.8);}100%{box-shadow:0 0 30px 10px rgba(108,92,231,0);}}
 
-
-/* ── PIXEL AVATAR ── */
-.avatar-wrap{width:90px;height:90px;margin:4px auto 10px;position:relative;cursor:pointer;}
-.avatar-ring{position:absolute;inset:-4px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--violet),var(--cyan));}
-.avatar-img{width:90px;height:90px;border-radius:50%;object-fit:cover;position:relative;display:block;border:3px solid var(--bg3);}
-.avatar-edit{position:absolute;bottom:-2px;right:-2px;width:26px;height:26px;border-radius:50%;background:var(--bg3);border:2px solid var(--cyan);display:flex;align-items:center;justify-content:center;font-size:12px;}
-#fileInput{display:none;}
-
-/* pixel SVG avatar default */
-.pixel-char{width:90px;height:90px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1e1340,#2a1a50);position:relative;overflow:hidden;}
-
-/* ── QUEST CARDS ── */
-.quest-card{
-  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);
-  border-radius:14px;padding:11px 13px;display:flex;align-items:center;gap:11px;margin-bottom:9px;
-  cursor:pointer;transition:all .15s;position:relative;overflow:hidden;
+/* Nav gem */
+.gem-active{
+  box-shadow:0 0 12px rgba(16,185,129,.8),0 0 24px rgba(16,185,129,.4);
+  color:#10b981!important;
 }
-.quest-card:active{transform:scale(0.98);}
-.quest-card.rare{border:1px solid var(--gold);background:linear-gradient(135deg,rgba(255,215,106,.12),rgba(255,93,160,.08));}
-.quest-card.done{opacity:.5;pointer-events:none;}
-.quest-card.pending{border:1px solid var(--cyan);background:rgba(90,209,255,.05);}
-.quest-card.approved{border:1px solid var(--green);background:rgba(90,217,154,.05);opacity:.7;pointer-events:none;}
-/* game-style quest icons */
-.q-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.4);}
-.q-icon.cat-warmup{background:linear-gradient(135deg,#2d1b69,#4a2c8a);border:1px solid rgba(168,85,247,.4);box-shadow:0 2px 12px rgba(168,85,247,.3);}
-.q-icon.cat-core{background:linear-gradient(135deg,#1a3a5c,#1e5a8a);border:1px solid rgba(90,209,255,.4);box-shadow:0 2px 12px rgba(90,209,255,.25);}
-.q-icon.cat-exercise{background:linear-gradient(135deg,#1a4a2a,#2a7a40);border:1px solid rgba(90,217,154,.4);box-shadow:0 2px 12px rgba(90,217,154,.25);}
-.q-icon.cat-rare{background:linear-gradient(135deg,#5a3a00,#9a6a00);border:1px solid rgba(255,215,106,.5);box-shadow:0 2px 16px rgba(255,215,106,.4);}
-.q-icon.cat-rare::after{content:'';position:absolute;inset:0;border-radius:12px;background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);}
-.q-body{flex:1;min-width:0;}
-.q-name{font-size:13px;font-weight:700;color:#fff;margin-bottom:2px;}
-.q-desc{font-size:10px;color:var(--text3);}
-.q-stars{font-size:10px;color:var(--gold);white-space:nowrap;flex-shrink:0;font-weight:700;}
-.q-badge{font-size:9px;padding:2px 7px;border-radius:8px;font-weight:700;flex-shrink:0;}
-.q-badge.pending{background:rgba(90,209,255,.2);color:var(--cyan);}
-.q-badge.approved{background:rgba(90,217,154,.2);color:var(--green);}
 
-/* ── GACHA SCREEN ── */
-.gacha-stage{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:24px 20px;flex:1;
+/* Pin key */
+.pin-key-rpg{
+  background:linear-gradient(145deg,#2a1a08,#1a0e05);
+  border:1px solid #6b4a1a;
+  border-radius:8px;padding:12px;
+  color:#f5e28a;font-size:16px;font-weight:700;
+  font-family:'Cinzel',serif;cursor:pointer;
+  box-shadow:2px 2px 4px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,200,80,.1);
 }
-.gacha-box{
-  width:130px;height:130px;background:linear-gradient(135deg,#ffb648,var(--violet));
-  border-radius:24px;display:flex;align-items:center;justify-content:center;
-  font-size:52px;margin-bottom:20px;box-shadow:0 0 40px rgba(255,182,72,.5);
-  cursor:pointer;transition:transform .1s;
+.pin-key-rpg:active{transform:scale(0.95);box-shadow:inset 2px 2px 4px rgba(0,0,0,.5);}
+
+/* Onboard */
+.onboard-field{
+  width:100%;background:rgba(0,0,0,.4);
+  border:1px solid #6b4a1a;border-radius:8px;
+  padding:10px 14px;color:#f5e28a;font-size:16px;
+  font-family:'Noto Sans KR',sans-serif;text-align:center;
 }
-.gacha-box:active{transform:scale(.95);}
-.gacha-box.spin{animation:gacha-spin .6s ease-out;}
-@keyframes gacha-spin{0%{transform:scale(1) rotate(0);}30%{transform:scale(1.15) rotate(-8deg);}60%{transform:scale(1.2) rotate(8deg);}100%{transform:scale(1) rotate(0);}}
-.gacha-count-badge{background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;font-weight:700;font-size:11px;padding:4px 14px;border-radius:10px;margin-bottom:12px;}
-.gacha-cta{
-  background:linear-gradient(135deg,var(--purple),var(--violet));
-  color:#fff;font-weight:700;font-size:13px;
-  padding:12px 32px;border-radius:16px;border:none;cursor:pointer;transition:opacity .2s;
+.onboard-field::placeholder{color:#6b4a1a;}
+
+/* Photo upload */
+.photo-upload-area{
+  width:100%;border:2px dashed #6b4a1a;
+  background:rgba(0,0,0,.2);border-radius:10px;
+  padding:20px;text-align:center;cursor:pointer;
+  color:#a07040;font-size:13px;
 }
-.gacha-cta:disabled{opacity:.4;cursor:not-allowed;}
-.gacha-cta:active:not(:disabled){opacity:.7;}
-.gacha-result{
-  text-align:center;animation:fadeIn .4s;margin-top:8px;
-}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
-.gacha-result .pts{font-size:28px;font-weight:900;color:var(--gold);}
-.gacha-result .msg{font-size:12px;color:var(--text2);margin-top:4px;}
 
-/* reward history */
-.reward-list{width:100%;margin-top:14px;}
-.reward-row{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.05);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:12px;}
-.reward-row .pt{color:var(--gold);font-weight:700;margin-left:auto;white-space:nowrap;}
+/* Modal */
+.modal-overlay-bg{position:absolute;inset:0;background:rgba(0,0,0,.8);z-index:90;display:flex;align-items:flex-end;justify-content:center;}
+.modal-overlay-bg.center{align-items:center;}
 
-/* reward shop */
-.shop-card{background:var(--card);border:1px solid var(--card-border);border-radius:14px;padding:12px;margin-bottom:10px;display:flex;align-items:center;gap:10px;}
-.shop-icon{font-size:24px;flex-shrink:0;}
-.shop-body{flex:1;}
-.shop-name{font-size:13px;font-weight:700;margin-bottom:3px;}
-.shop-cost{font-size:11px;color:var(--gold);font-weight:700;}
-.shop-btn{background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;font-size:11px;font-weight:700;border:none;border-radius:10px;padding:7px 13px;cursor:pointer;flex-shrink:0;}
-.shop-btn:disabled{opacity:.35;cursor:not-allowed;}
-.shop-btn:active:not(:disabled){opacity:.7;}
-
-/* ── REPORT SCREEN ── */
-.gr-hero{background:linear-gradient(160deg,rgba(108,92,231,.18),rgba(255,93,160,.08));border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:16px;text-align:center;margin-bottom:12px;}
-.gr-hero .ge{font-size:36px;margin-bottom:3px;}
-.gr-hero .gb{font-size:22px;font-weight:900;color:var(--gold);margin-bottom:2px;}
-.gr-hero .gs{font-size:11px;color:var(--text2);}
-.gr-row2{display:flex;gap:8px;margin-bottom:12px;}
-.gr-mini{flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:10px 6px;text-align:center;}
-.gr-mini .ge{font-size:18px;margin-bottom:3px;}
-.gr-mini .gv{font-size:15px;font-weight:900;}
-.gr-mini .gl{font-size:9px;color:var(--text3);}
-.gr-mini .gu{font-size:10px;color:var(--green);font-weight:700;margin-top:2px;}
-.gr-chartcard{background:rgba(255,255,255,0.05);border-radius:16px;padding:12px 12px 8px;margin-bottom:12px;}
-.gr-chartcard .gt{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;}
-.gr-svg{width:100%;height:120px;}
-.gr-legend{display:flex;gap:12px;margin-top:4px;flex-wrap:wrap;}
-.gr-legend .li{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--text3);}
-.gr-legend .dot{width:6px;height:6px;border-radius:50%;}
-.gr-legend .dash{width:10px;height:2px;}
-.gr-inputcard{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:14px;margin-bottom:14px;}
-.gr-inputcard .it{font-size:12px;font-weight:700;color:#fff;margin-bottom:10px;}
-.gr-fieldrow{display:flex;gap:6px;margin-bottom:8px;}
-.gr-field{flex:1;}
-.gr-field label{display:block;font-size:9px;color:var(--text3);margin-bottom:4px;}
-.gr-field input,.gr-field select{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:9px;padding:8px;color:#fff;font-size:12px;font-family:inherit;}
-.gr-field input::-webkit-calendar-picker-indicator{filter:invert(1);}
-.gr-savebtn{width:100%;background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;font-weight:700;font-size:12px;border:none;border-radius:11px;padding:10px;cursor:pointer;}
-.gr-savebtn:active{opacity:.7;}
-.gr-toast{text-align:center;font-size:11px;color:var(--green);font-weight:700;margin-top:6px;min-height:14px;}
-
-/* weekly quest bar chart */
-.week-bars{display:flex;align-items:flex-end;gap:5px;height:60px;}
-.week-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
-.week-bar{width:100%;background:linear-gradient(180deg,var(--violet),var(--purple));border-radius:4px 4px 0 0;min-height:4px;transition:height .3s;}
-.week-bar.today{background:linear-gradient(180deg,var(--gold),#ff9d5c);}
-.week-bar-label{font-size:8px;color:var(--text3);}
-
-/* insight card */
-.insight-card{background:linear-gradient(135deg,rgba(255,215,106,.18),rgba(255,93,160,.1));border:1px solid var(--gold);border-radius:14px;padding:13px;font-size:11px;line-height:1.7;color:#fff0d0;margin-bottom:12px;}
-.insight-card b{color:var(--gold);}
-
-/* ── PARENT SCREEN ── */
-.approve-row{background:rgba(255,255,255,0.06);border-radius:14px;padding:10px;display:flex;gap:10px;align-items:center;margin-bottom:9px;}
-.thumb{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;overflow:hidden;background:linear-gradient(135deg,#3b82f6,#06b6d4);}
-.thumb img{width:100%;height:100%;object-fit:cover;}
-.approve-btn{background:#00b37e;color:#fff;font-size:11px;font-weight:700;border:none;border-radius:10px;padding:7px 13px;cursor:pointer;flex-shrink:0;}
-.approve-btn:active{opacity:.7;}
-.reject-btn{background:rgba(255,107,107,.2);color:var(--red);font-size:11px;font-weight:700;border:1px solid rgba(255,107,107,.3);border-radius:10px;padding:7px 10px;cursor:pointer;flex-shrink:0;}
-.reject-btn:active{opacity:.7;}
-
-/* ── PIN OVERLAY ── */
-.pin-overlay{
-  position:absolute;inset:0;background:rgba(0,0,0,.85);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  z-index:100;
-}
-.pin-box{background:var(--bg2);border-radius:24px;padding:30px 24px;text-align:center;width:280px;}
-.pin-title{font-size:14px;font-weight:700;margin-bottom:6px;}
-.pin-sub{font-size:11px;color:var(--text3);margin-bottom:20px;}
-.pin-dots{display:flex;justify-content:center;gap:12px;margin-bottom:20px;}
-.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--text3);transition:all .15s;}
-.pin-dot.filled{background:var(--purple);border-color:var(--purple);}
-.pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;}
-.pin-key{background:rgba(255,255,255,.08);border:none;color:#fff;font-size:16px;font-weight:700;border-radius:14px;padding:14px;cursor:pointer;transition:background .15s;}
-.pin-key:active{background:var(--purple);}
-.pin-err{font-size:11px;color:var(--red);margin-top:4px;min-height:14px;}
-.pin-cancel{font-size:12px;color:var(--text3);margin-top:12px;cursor:pointer;display:inline-block;padding:4px;}
-.pin-cancel:active{opacity:.6;}
-
-/* ── MODAL ── */
-.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;justify-content:center;z-index:90;}
-.modal-overlay.center{align-items:center;}
-.modal-box{background:var(--bg2);border-radius:24px 24px 0 0;padding:24px 20px max(env(safe-area-inset-bottom),20px);width:100%;max-width:420px;}
-.modal-box.center-box{border-radius:24px;padding:24px 20px;max-width:340px;margin:16px;}
-.modal-title{font-size:15px;font-weight:900;margin-bottom:8px;}
-.modal-sub{font-size:12px;color:var(--text3);margin-bottom:16px;line-height:1.6;}
-.modal-btn{width:100%;border:none;border-radius:14px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px;}
-.modal-btn.primary{background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;}
-.modal-btn.primary:active{opacity:.7;}
-.modal-btn.secondary{background:rgba(255,255,255,.08);color:var(--text2);}
-.modal-btn.secondary:active{opacity:.7;}
-.photo-preview{width:100%;height:160px;object-fit:cover;border-radius:14px;margin-bottom:12px;display:none;}
-.photo-upload-btn{width:100%;border:2px dashed rgba(255,255,255,.2);background:rgba(255,255,255,.04);color:var(--text3);font-size:13px;font-weight:700;border-radius:14px;padding:20px;cursor:pointer;margin-bottom:12px;text-align:center;}
-.photo-upload-btn:active{opacity:.6;}
-
-/* weekly reward banner */
-.weekly-banner{background:linear-gradient(135deg,rgba(255,215,106,.25),rgba(168,85,247,.2));border:1px solid var(--gold);border-radius:16px;padding:14px;text-align:center;margin-bottom:14px;}
-.weekly-banner .wb-icon{font-size:28px;margin-bottom:4px;}
-.weekly-banner .wb-title{font-size:13px;font-weight:900;color:var(--gold);margin-bottom:3px;}
-.weekly-banner .wb-sub{font-size:11px;color:var(--text2);}
-.weekly-banner-btn{margin-top:10px;background:var(--gold);color:#1a1228;font-size:12px;font-weight:900;border:none;border-radius:12px;padding:8px 20px;cursor:pointer;}
-.weekly-banner-btn:active{opacity:.7;}
-
-/* toast popup */
-.toast{
+/* Toast */
+.toast-popup{
   position:absolute;bottom:90px;left:50%;transform:translateX(-50%);
-  background:rgba(0,0,0,.85);color:#fff;font-size:12px;font-weight:700;
+  background:rgba(20,10,2,.95);border:1px solid #c8a84b;
+  color:#f5e28a;font-size:12px;font-weight:700;
   padding:10px 18px;border-radius:20px;white-space:nowrap;
-  opacity:0;transition:opacity .3s;pointer-events:none;z-index:200;
+  pointer-events:none;z-index:200;
+  font-family:'Noto Sans KR',sans-serif;
 }
-.toast.show{opacity:1;}
 
-/* onboarding */
-.onboard{position:absolute;inset:0;background:var(--bg);z-index:150;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 24px;}
-.onboard-icon{font-size:64px;margin-bottom:16px;}
-.onboard-title{font-family:'Press Start 2P',monospace;font-size:11px;color:var(--gold);text-align:center;margin-bottom:8px;line-height:1.8;}
-.onboard-sub{font-size:13px;color:var(--text2);text-align:center;margin-bottom:28px;line-height:1.7;}
-.onboard-field{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:12px 16px;color:#fff;font-size:16px;font-family:inherit;margin-bottom:12px;text-align:center;}
-.onboard-btn{width:100%;background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;font-weight:700;font-size:15px;border:none;border-radius:14px;padding:14px;cursor:pointer;}
-.onboard-btn:active{opacity:.7;}
-.onboard-hint{font-size:10px;color:var(--text4);margin-top:10px;text-align:center;}
+/* Gacha */
+.gacha-box-rpg{
+  width:130px;height:130px;
+  background:linear-gradient(135deg,#6b3d10,#c87820,#6b3d10);
+  border:3px solid #f5e28a;border-radius:16px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:52px;cursor:pointer;
+  box-shadow:0 0 30px rgba(245,200,66,.4),inset 0 2px 0 rgba(255,255,255,.1);
+}
+.gacha-box-rpg:active{transform:scale(.95);}
+.gacha-spin{animation:gspin .6s ease-out;}
+@keyframes gspin{0%{transform:scale(1)rotate(0);}30%{transform:scale(1.15)rotate(-8deg);}60%{transform:scale(1.2)rotate(8deg);}100%{transform:scale(1)rotate(0);}
 
-/* hidden util */
-.hidden{display:none!important;}
+/* report chart */
+}
+.week-bar{background:linear-gradient(180deg,#f5e28a,#c87820);border-radius:3px 3px 0 0;min-height:4px;transition:height .3s;}
+.week-bar.today-bar{background:linear-gradient(180deg,#ff9d5c,#ff6b6b);}
+
+/* scrollbar hide globally */
+*{scrollbar-width:none;}
+*::-webkit-scrollbar{display:none;}
 </style>
 </head>
 <body>
-<div id="app">
-  <!-- ONBOARDING -->
-  <div id="onboard" class="onboard">
-    <div class="onboard-icon">🏆</div>
-    <div class="onboard-title">키성장 퀘스트</div>
-    <div class="onboard-sub">닉네임을 입력하고<br>성장 모험을 시작하세요!</div>
-    <input id="onboardName" class="onboard-field" placeholder="이름 (예: 민준)" maxlength="6">
-    <div style="font-size:11px;color:var(--text3);margin-bottom:12px;">현재 키</div>
-    <div style="display:flex;gap:8px;width:100%;margin-bottom:20px;">
-      <input id="onboardHeight" class="onboard-field" style="margin:0;" placeholder="키 (cm)" type="number" step="0.1">
-      <input id="onboardWeight" class="onboard-field" style="margin:0;" placeholder="몸무게 (kg)" type="number" step="0.1">
-    </div>
-    <div style="font-size:11px;color:var(--text3);margin-bottom:8px;">부모 PIN 설정 (4자리)</div>
-    <input id="onboardPin" class="onboard-field" placeholder="예: 1234" type="number" maxlength="4" style="margin-bottom:20px;">
-    <button class="onboard-btn" onclick="finishOnboard()">시작하기 🚀</button>
-    <div class="onboard-hint">데이터는 이 기기에만 저장됩니다</div>
-  </div>
+<div id="root"></div>
+<script type="text/babel">
 
-  <!-- TOPBAR -->
-  <div class="topbar" id="topbar">
-    <div class="topbar-title" id="topbarTitle">⚔️ <span id="topbarName">용사</span>의 위대한 여정</div>
-    <div class="coin-badge" onclick="showCoinInfo()">🪙 <span id="coinDisplay">0</span></div>
-  </div>
-
-  <!-- SCREENS -->
-  <!-- HOME -->
-  <div class="screen active" id="screen-home">
-    <div class="scrollarea" id="homeScroll">
-      <!-- char card -->
-      <div class="char-card" style="margin-top:12px;" id="charCard">
-        <div class="char-top">
-          <div class="char-left">
-            <div class="avatar-wrap" style="width:72px;height:72px;flex-shrink:0;">
-              <div class="avatar-ring"></div>
-              <img id="avatarEl" class="avatar-img" src="avatar.png" alt="캐릭터" style="width:72px;height:72px;">
-            </div>
-          </div>
-          <div class="char-right" style="overflow:hidden;padding-left:14px;flex:1;min-width:0;">
-            <div class="lv-badge" id="charLvBadge">LV.1</div>
-            <div class="char-rank" id="charRank">4급 — 새싹 전사</div>
-            <div class="char-nick-small" id="charNick">성장을 시작한 용사</div>
-          </div>
-        </div>
-        <div class="stat-row" style="margin-top:2px;">
-          <div class="stat-box">
-            <div class="si">📏</div>
-            <div class="sv" id="statHeight">—</div>
-            <div class="sl">키(cm)</div>
-          </div>
-          <div class="stat-box">
-            <div class="si">⚖️</div>
-            <div class="sv" id="statWeight">—</div>
-            <div class="sl">몸무게</div>
-          </div>
-          <div class="stat-box">
-            <div class="si">🪙</div>
-            <div class="sv" id="statPoints">0</div>
-            <div class="sl">포인트</div>
-          </div>
-          <div class="stat-box">
-            <div class="si">🔥</div>
-            <div class="sv" id="statStreak">0</div>
-            <div class="sl">연속일</div>
-          </div>
-        </div>
-        <div class="xp-section">
-          <div class="xp-header">
-            <span class="xp-label" id="xpLabel">⚡ LV.2까지</span>
-            <span class="xp-next" id="xpNext">0 / 500P</span>
-          </div>
-          <div class="xp-track">
-            <div class="xp-fill" id="xpFill" style="width:0%"></div>
-            <div class="xp-glow"></div>
-          </div>
-          <div class="quest-today">오늘 퀘스트 <b id="todayComplete">0</b>/<span id="todayTotal">0</span> 완료</div>
-        </div>
-      </div>
-
-      <!-- weekly reward banner (hidden by default) -->
-      <div class="weekly-banner hidden" id="weeklyBanner">
-        <div class="wb-icon">🎉</div>
-        <div class="wb-title">주간 목표 달성!</div>
-        <div class="wb-sub">이번 주 5일 이상 퀘스트를 완료했어요<br>보상함에서 특별 보상을 받으세요!</div>
-        <button class="weekly-banner-btn" onclick="claimWeeklyReward()">보상 받기 →</button>
-      </div>
-
-      <!-- Story card -->
-      <div class="story-card" id="storyCard">
-        <div class="story-icon" id="storyIcon">⚔️</div>
-        <div class="story-body">
-          <div class="story-title" id="storyTitle">오늘의 미션</div>
-          <div class="story-msg" id="storyMsg">퀘스트를 완료하면 전설이 만들어진다!</div>
-        </div>
-      </div>
-
-      <div class="section-label">🌙 워밍업 퀘스트</div>
-      <div id="warmupQuests"></div>
-
-      <div class="section-label">⚡ 오늘의 핵심 퀘스트</div>
-      <div id="coreQuests"></div>
-
-      <div id="exerciseSection" class="hidden">
-        <div class="section-label">🏃 주말 운동 퀘스트</div>
-        <div id="exerciseQuests"></div>
-      </div>
-
-      <div id="rareSection" class="hidden">
-        <div class="section-label">✨ 레어 퀘스트</div>
-        <div id="rareQuests"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- GACHA / REWARD -->
-  <div class="screen" id="screen-gacha">
-    <div class="scrollarea">
-      <div class="section-label" style="margin-top:12px;">🎰 가챠 보상함</div>
-
-      <div class="gacha-stage">
-        <div class="gacha-box" id="gachaBox" onclick="openGacha()">🎁</div>
-        <div class="gacha-count-badge">대기 중인 보상 <span id="gachaCount">0</span>개</div>
-        <div id="gachaResult" class="gacha-result hidden"></div>
-        <button class="gacha-cta" id="gachaBtn" onclick="openGacha()">보상 열기!</button>
-      </div>
-
-      <div class="section-label">🛒 보상 상점</div>
-      <div id="shopList"></div>
-
-      <div class="section-label">📋 최근 보상 기록</div>
-      <div id="rewardHistory"></div>
-    </div>
-  </div>
-
-  <!-- REPORT -->
-  <div class="screen" id="screen-report">
-    <div class="scrollarea">
-      <div style="margin-top:12px;">
-        <div class="gr-hero">
-          <div class="ge" id="reportEmoji">🌱</div>
-          <div class="gb" id="reportHeight">— cm</div>
-          <div class="gs" id="reportGrowth">데이터를 입력해주세요</div>
-        </div>
-
-        <div class="gr-row2">
-          <div class="gr-mini">
-            <div class="ge">⚡</div>
-            <div class="gv" id="reportLevel">Lv.1</div>
-            <div class="gl">현재 레벨</div>
-          </div>
-          <div class="gr-mini">
-            <div class="ge">🔥</div>
-            <div class="gv" id="reportStreak">0일</div>
-            <div class="gl">연속 달성</div>
-          </div>
-          <div class="gr-mini">
-            <div class="ge">🪙</div>
-            <div class="gv" id="reportPoints">0</div>
-            <div class="gl">누적 포인트</div>
-          </div>
-        </div>
-
-        <div class="gr-chartcard">
-          <div class="gt">📏 키 성장 그래프</div>
-          <svg class="gr-svg" id="heightChart"></svg>
-          <div class="gr-legend">
-            <div class="li"><div class="dot" style="background:var(--gold)"></div>키(cm)</div>
-            <div class="li"><div class="dash" style="background:var(--cyan)"></div>활동포인트</div>
-          </div>
-        </div>
-
-        <div class="gr-chartcard">
-          <div class="gt">⚖️ 몸무게 변화</div>
-          <svg class="gr-svg" id="weightChart"></svg>
-          <div class="gr-legend">
-            <div class="li"><div class="dot" style="background:#ff9d8a"></div>몸무게(kg)</div>
-          </div>
-        </div>
-
-        <div class="gr-chartcard">
-          <div class="gt">📊 이번 주 퀘스트 현황</div>
-          <div class="week-bars" id="weekBars"></div>
-          <div id="weekInsight" class="insight-card hidden"></div>
-        </div>
-
-        <div class="gr-inputcard">
-          <div class="it">📝 신체 기록 입력</div>
-          <div class="gr-fieldrow">
-            <div class="gr-field">
-              <label>날짜</label>
-              <input type="date" id="inDate">
-            </div>
-          </div>
-          <div class="gr-fieldrow">
-            <div class="gr-field">
-              <label>키 (cm)</label>
-              <input type="number" id="inHeight" placeholder="예: 138.5" step="0.1">
-            </div>
-            <div class="gr-field">
-              <label>몸무게 (kg)</label>
-              <input type="number" id="inWeight" placeholder="예: 33.2" step="0.1">
-            </div>
-          </div>
-          <button class="gr-savebtn" onclick="saveRecord()">기록 저장하기</button>
-          <div class="gr-toast" id="toast"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PARENT VIEW (PIN protected) -->
-  <div class="screen" id="screen-parent">
-    <div class="scrollarea">
-      <div id="parentContent">
-        <!-- filled by JS after PIN verified -->
-      </div>
-    </div>
-  </div>
-
-  <!-- BOTTOM NAV -->
-  <div class="bottom-nav" id="bottomNav">
-    <div class="nav-item active" data-screen="home" onclick="switchScreen('home',this)">
-      <span class="nav-icon">🏠</span>홈
-    </div>
-    <div class="nav-item" data-screen="gacha" onclick="switchScreen('gacha',this)">
-      <span class="nav-icon">🎁</span>보상함
-    </div>
-    <div class="nav-item" data-screen="report" onclick="switchScreen('report',this)">
-      <span class="nav-icon">📈</span>리포트
-    </div>
-    <div class="nav-item" data-screen="parent" onclick="switchScreen('parent',this)">
-      <span class="nav-icon">👤</span>부모뷰
-    </div>
-  </div>
-
-  <!-- PIN OVERLAY -->
-  <div class="pin-overlay hidden" id="pinOverlay">
-    <div class="pin-box">
-      <div class="pin-title">🔐 부모 인증</div>
-      <div class="pin-sub">PIN 번호 4자리를 입력하세요</div>
-      <div class="pin-dots" id="pinDots">
-        <div class="pin-dot"></div><div class="pin-dot"></div>
-        <div class="pin-dot"></div><div class="pin-dot"></div>
-      </div>
-      <div class="pin-grid" id="pinGrid">
-        <button class="pin-key" onclick="pinInput('1')">1</button>
-        <button class="pin-key" onclick="pinInput('2')">2</button>
-        <button class="pin-key" onclick="pinInput('3')">3</button>
-        <button class="pin-key" onclick="pinInput('4')">4</button>
-        <button class="pin-key" onclick="pinInput('5')">5</button>
-        <button class="pin-key" onclick="pinInput('6')">6</button>
-        <button class="pin-key" onclick="pinInput('7')">7</button>
-        <button class="pin-key" onclick="pinInput('8')">8</button>
-        <button class="pin-key" onclick="pinInput('9')">9</button>
-        <button class="pin-key" onclick="pinInput('del')" style="font-size:12px;">⌫</button>
-        <button class="pin-key" onclick="pinInput('0')">0</button>
-        <button class="pin-key" onclick="pinInput('ok')" style="font-size:12px;background:var(--purple);">확인</button>
-      </div>
-      <div class="pin-err" id="pinErr"></div>
-      <span class="pin-cancel" onclick="cancelPin()">취소</span>
-    </div>
-  </div>
-
-  <!-- QUEST SUBMIT MODAL -->
-  <div class="modal-overlay hidden" id="questModal">
-    <div class="modal-box">
-      <div class="modal-title" id="questModalTitle"></div>
-      <div class="modal-sub" id="questModalDesc"></div>
-      <img class="photo-preview" id="photoPreview">
-      <button class="photo-upload-btn" id="photoUploadBtn" onclick="document.getElementById('questPhoto').click()">
-        📷 인증 사진 찍기 / 올리기
-      </button>
-      <input type="file" id="questPhoto" accept="image/*" onchange="previewPhoto(this)" style="display:none">
-      <button class="modal-btn primary" id="submitQuestBtn" onclick="submitQuest()">퀘스트 제출하기!</button>
-      <button class="modal-btn secondary" onclick="closeQuestModal()">나중에</button>
-    </div>
-  </div>
-
-  <!-- GACHA REVEAL MODAL -->
-  <div class="modal-overlay center hidden" id="gachaModal">
-    <div class="modal-box center-box" style="text-align:center;">
-      <div style="font-size:52px;margin-bottom:8px;" id="gachaRevealIcon">🎁</div>
-      <div style="font-size:32px;font-weight:900;color:var(--gold);margin-bottom:4px;" id="gachaRevealPts"></div>
-      <div style="font-size:13px;color:var(--text2);margin-bottom:4px;" id="gachaRevealMsg"></div>
-      <div style="font-size:11px;color:var(--text3);margin-bottom:20px;" id="gachaRevealQuest"></div>
-      <button class="modal-btn primary" onclick="closeGachaModal()">받기! 🎉</button>
-    </div>
-  </div>
-
-  <!-- TOAST -->
-  <div class="toast" id="toastPopup"></div>
-</div>
-
-<script>
-// ═══════════════════════════════════════
-// DATA MODEL
-// ═══════════════════════════════════════
+// ═══════ DATA ═══════
 const QUEST_POOL = [
-  // warmup
   {id:'w1',cat:'warmup',name:'오늘 9시간 이상 잠자기',icon:'🌙',stars:1,desc:'자는 동안 성장호르몬이 폭발 분비된다. 침대는 용사의 성장 캡슐이다.',pts:[80,100,120]},
   {id:'w2',cat:'warmup',name:'성장호르몬 주사 맞기',icon:'✨',stars:1,desc:'마법의 성장 물약 주입 완료! 오늘 밤 몸속에서 조용한 기적이 시작된다.',pts:[80,100,120]},
-  // core nutrition
   {id:'c1',cat:'core',name:'우유 한 잔 마시기',icon:'🥛',stars:2,desc:'전설의 성장 물약. 뼈를 강철처럼 만드는 칼슘 마법이 담겨 있다. 원샷!',pts:[150,200,250]},
   {id:'c2',cat:'core',name:'계란노른자 먹기',icon:'🍳',stars:2,desc:'황금 핵의 아연이 세포 분열을 가속한다. 용사의 체내에 성장 코드를 심어라.',pts:[150,200,250]},
   {id:'c3',cat:'core',name:'치즈 한 조각 도전',icon:'🧀',stars:2,desc:'아연의 보고, 치즈 한 조각. 한 입이면 충분하다. 작은 용기가 키를 키운다.',pts:[150,200,250]},
@@ -635,17 +166,14 @@ const QUEST_POOL = [
   {id:'c5',cat:'core',name:'소고기 먹기',icon:'🥩',stars:3,desc:'철과 아연의 왕. 가장 강력한 성장 원소를 몸에 채워라. 오늘 밤이 다르다.',pts:[200,280,350]},
   {id:'c6',cat:'core',name:'견과류 한 줌',icon:'🥜',stars:2,desc:'뇌와 키를 동시에 레벨업하는 마법 씨앗. 한 줌의 힘을 얕보지 마라.',pts:[150,200,250]},
   {id:'c7',cat:'core',name:'콩나물국 먹기',icon:'🥣',stars:2,desc:'땅에서 솟아오른 식이섬유 군단! 장을 정복해야 키도 자란다.',pts:[150,200,250]},
-  // exercise (weekend)
   {id:'e1',cat:'exercise',name:'수영 30분',icon:'🏊',stars:3,desc:'물속에서 중력을 거스르는 자만이 전신 성장의 비밀을 얻는다. 입수!',pts:[200,300,400],weekend:true},
   {id:'e2',cat:'exercise',name:'산책 또는 달리기',icon:'🏃',stars:2,desc:'뼈에 부하를 걸어야 더 굵고 길게 자란다. 달리는 용사는 멈추지 않는다.',pts:[150,250,300],weekend:true},
   {id:'e3',cat:'exercise',name:'배드민턴 엄마 이기기',icon:'🏸',stars:4,desc:'최종 보스전 개시! 엄마를 꺾으면 전설의 포인트가 쏟아진다. 덤벼라!',pts:[300,400,500],weekend:true},
-  // rare
   {id:'r1',cat:'rare',name:'도서관에서 책 10분 읽기',icon:'📖',stars:5,desc:'🌟 초희귀 퀘스트 등장! 지식의 탑에서 10분. 뇌가 레벨업되는 소리가 들린다.',pts:[500,700,1000]},
   {id:'r2',cat:'rare',name:'수영장 원정',icon:'🌊',stars:4,desc:'🌟 레어 원정 퀘스트! 성장의 바다로 출정하라. 전설의 포인트가 기다린다.',pts:[400,600,800]},
   {id:'r3',cat:'rare',name:'아이스스케이팅 원정',icon:'⛸️',stars:5,desc:'🌟 최고등급 퀘스트! 얼음 위의 용사. 이것을 클리어한 자에게만 전설급 보상이.',pts:[500,700,1000]},
 ];
 
-// Daily storytelling messages (rotate by day + streak)
 const STORY_POOL = [
   {icon:'⚔️', title:'위대한 여정의 시작', msg:'모든 전설은 오늘 같은 하루에서 시작됐다. 퀘스트 하나하나가 용사를 만든다. 지금 이 순간도 역사가 쓰이고 있다!'},
   {icon:'🌟', title:'성장의 예언', msg:'그림자 마법사가 예언했다 — "매일 퀘스트를 완수하는 자만이 전설의 키에 도달하리라!" 오늘도 증명해 보여라.'},
@@ -656,1044 +184,847 @@ const STORY_POOL = [
   {icon:'🗡️', title:'용사의 루틴', msg:'평범한 하루도 용사에겐 다르다. 퀘스트를 클리어한 날과 안 한 날의 차이가 1년 뒤 키의 차이가 된다. 오늘도 클리어!'},
 ];
 
-
 const SHOP_ITEMS = [
   {id:'s2',icon:'🎮',name:'게임 추가 1시간',cost:300,desc:'오늘 하루 게임 1시간 추가'},
   {id:'s5',icon:'💸',name:'게임 현질 5,000원',cost:1500,desc:'한 달 최대 30,000원'},
   {id:'s8',icon:'🐹',name:'햄스터',cost:30000,desc:'🏆 최종 목표 보상! 함께 키우자!'},
 ];
 
-// Level thresholds (by accumulated points)
 const LEVEL_TABLE = [
-  {lv:1, minPts:0,    maxPts:499,   title:'새싹 전사',    emoji:'🌱', rank:'4급'},
-  {lv:2, minPts:500,  maxPts:1499,  title:'성장 병사',    emoji:'🌿', rank:'3급'},
-  {lv:3, minPts:1500, maxPts:3499,  title:'질풍 용사',    emoji:'⚡', rank:'2급'},
-  {lv:4, minPts:3500, maxPts:6999,  title:'야제 전사',    emoji:'🌙', rank:'1급'},
-  {lv:5, minPts:7000, maxPts:12999, title:'그림자 검객',  emoji:'🌟', rank:'특급'},
-  {lv:6, minPts:13000,maxPts:99999, title:'방랑자 수호자',emoji:'👑', rank:'전설급'},
+  {lv:1,minPts:0,   maxPts:499,   title:'새싹 전사',   emoji:'🌱',rank:'4급'},
+  {lv:2,minPts:500, maxPts:1499,  title:'성장 병사',   emoji:'🌿',rank:'3급'},
+  {lv:3,minPts:1500,maxPts:3499,  title:'질풍 용사',   emoji:'⚡',rank:'2급'},
+  {lv:4,minPts:3500,maxPts:6999,  title:'야제 전사',   emoji:'🌙',rank:'1급'},
+  {lv:5,minPts:7000,maxPts:12999, title:'그림자 검객', emoji:'🌟',rank:'특급'},
+  {lv:6,minPts:13000,maxPts:99999,title:'방랑자 수호자',emoji:'👑',rank:'전설급'},
 ];
-function getLevelByPts(pts) {
-  for (let i = LEVEL_TABLE.length-1; i >= 0; i--) {
-    if (pts >= LEVEL_TABLE[i].minPts) return LEVEL_TABLE[i];
-  }
+
+// ═══════ HELPERS ═══════
+function getLevelByPts(pts){
+  for(let i=LEVEL_TABLE.length-1;i>=0;i--){if(pts>=LEVEL_TABLE[i].minPts)return LEVEL_TABLE[i];}
   return LEVEL_TABLE[0];
 }
-function getXpProgress(pts) {
-  const lv = getLevelByPts(pts);
-  const next = LEVEL_TABLE.find(l => l.lv === lv.lv + 1);
-  if (!next) return {pct:100, current:pts, needed:0, nextLv:null};
-  const inLevel = pts - lv.minPts;
-  const needed = next.minPts - lv.minPts;
-  return {pct: Math.round(inLevel/needed*100), current:inLevel, needed, nextLv:next};
+function getXpProgress(pts){
+  const lv=getLevelByPts(pts);
+  const next=LEVEL_TABLE.find(l=>l.lv===lv.lv+1);
+  if(!next)return{pct:100,current:pts,needed:lv.maxPts,nextLv:null};
+  const inLevel=pts-lv.minPts;
+  const needed=next.minPts-lv.minPts;
+  return{pct:Math.round(inLevel/needed*100),current:inLevel,needed,nextLv:next};
+}
+function today(){return new Date().toISOString().slice(0,10);}
+function isWeekend(){const d=new Date().getDay();return d===0||d===6;}
+function rand(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function randomPts(quest){
+  const base=rand(quest.pts);
+  const jitter=Math.round((Math.random()-.5)*20);
+  return Math.max(quest.pts[0],base+jitter);
+}
+function getDailyQuests(){
+  const todayD=today();
+  const seed=todayD.replace(/-/g,'');
+  const rng=(n)=>{
+    let h=0;
+    for(let i=0;i<seed.length;i++){h=(Math.imul(31,h)+seed.charCodeAt(i))|0;}
+    return Math.abs(h*n)%1000/1000;
+  };
+  const isWE=isWeekend();
+  const rarePool=QUEST_POOL.filter(q=>q.cat==='rare');
+  const exercisePool=QUEST_POOL.filter(q=>q.cat==='exercise');
+  const corePool=QUEST_POOL.filter(q=>q.cat==='core');
+  const warmup=QUEST_POOL.filter(q=>q.cat==='warmup');
+  const rareQuest=rng(7)<0.15?[rarePool[Math.floor(rng(3)*rarePool.length)]]:[];
+  const exerciseQuest=isWE?[exercisePool[Math.floor(rng(5)*exercisePool.length)]]:[];
+  const specialSlots=rareQuest.length+exerciseQuest.length;
+  const remaining=3-specialSlots-1;
+  const shuffled=[...corePool].sort(()=>rng(13)-.5);
+  const core=shuffled.slice(0,Math.max(0,remaining));
+  const w2=QUEST_POOL.find(q=>q.id==='w2');
+  return{warmup:[w2],core,exercise:exerciseQuest,rare:rareQuest};
 }
 
-// Dynamic nickname patterns based on recent quest activity
-const NICK_PATTERNS = [
-  {questCat:'c2',text:'계란노른자를 정복한'},
-  {questCat:'c3',text:'치즈를 무섭게 먹어대는'},
-  {questCat:'c5',text:'소고기 사냥꾼'},
-  {questCat:'e1',text:'수영장을 지배하는'},
-  {questCat:'e3',text:'배드민턴 챔피언'},
-  {questCat:'r1',text:'독서를 정복한'},
-  {questCat:'c1',text:'우유 마스터'},
-];
-
-function getDefaultState() {
-  return {
-    profile: {name:'',pin:'1234',points:0,streak:0,lastActiveDate:null,avatar:null,totalApproved:0},
-    heightHistory:[],
-    weightHistory:[],
-    questLog:[],       // {date, questId, pointsAwarded, timestamp}
-    pendingApprovals:[], // {id, questId, photo, submittedAt}
-    rewardHistory:[],  // {icon, name, pts, date}
+function getDefaultState(){
+  return{
+    profile:{name:'',pin:'1234',points:0,streak:0,lastActiveDate:null,totalApproved:0},
+    heightHistory:[],weightHistory:[],
+    questLog:[],pendingApprovals:[],rewardHistory:[],
     weekCycle:{startDate:null,completedDays:[],weeklyRewardPending:false,weeklyRewardClaimed:false},
-    gachaQueue:0,      // number of gachas ready to open
-    purchasedItems:[],
-    parentUnlocked:false,
+    gachaQueue:0,purchasedItems:[],parentUnlocked:false,
   };
 }
 
-let STATE = getDefaultState();
-let currentPinBuffer = '';
-let pendingScreen = null;
-let activeQuestId = null;
-let pendingPhotoData = null;
+const STORAGE_KEY='growthquest_v2';
+function loadState(){
+  try{const r=localStorage.getItem(STORAGE_KEY);if(r)return{...getDefaultState(),...JSON.parse(r)};}catch(e){}
+  return getDefaultState();
+}
+function saveState(s){localStorage.setItem(STORAGE_KEY,JSON.stringify(s));}
 
-// ═══════════════════════════════════════
-// PERSISTENCE
-// ═══════════════════════════════════════
-function saveState() {
-  localStorage.setItem('growthquest_v2', JSON.stringify(STATE));
-}
-function loadState() {
-  try {
-    const raw = localStorage.getItem('growthquest_v2');
-    if (raw) STATE = {...getDefaultState(), ...JSON.parse(raw)};
-  } catch(e) {}
-}
-
-// ═══════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════
-function init() {
-  loadState();
-  // Set today's date in report input
-  document.getElementById('inDate').value = today();
-
-  if (!STATE.profile.name) {
-    document.getElementById('onboard').classList.remove('hidden');
-    return;
-  }
-  document.getElementById('onboard').classList.add('hidden');
-  render();
-}
-
-function finishOnboard() {
-  const name = document.getElementById('onboardName').value.trim();
-  const h = parseFloat(document.getElementById('onboardHeight').value);
-  const w = parseFloat(document.getElementById('onboardWeight').value);
-  const pin = document.getElementById('onboardPin').value.trim();
-  if (!name) { alert('이름을 입력해주세요!'); return; }
-  if (!pin || pin.length < 4) { alert('PIN 4자리를 입력해주세요!'); return; }
-  STATE.profile.name = name;
-  STATE.profile.pin = pin;
-  if (!isNaN(h) && h > 0) {
-    STATE.heightHistory.push({date: today(), value: h});
-  }
-  if (!isNaN(w) && w > 0) {
-    STATE.weightHistory.push({date: today(), value: w});
-  }
-  saveState();
-  document.getElementById('onboard').classList.add('hidden');
-  render();
-}
-
-// ═══════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════
-function today() {
-  return new Date().toISOString().slice(0,10);
-}
-function todayLabel() {
-  const d = new Date();
-  return `${d.getMonth()+1}/${d.getDate()}`;
-}
-function isWeekend() {
-  const d = new Date().getDay();
-  return d === 0 || d === 6;
-}
-function rand(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-function randomPts(quest) {
-  // Variable reward: randomly pick from pts array, slight random within range
-  const base = rand(quest.pts);
-  const jitter = Math.round((Math.random() - 0.5) * 20);
-  return Math.max(quest.pts[0], base + jitter);
-}
-function getLevelInfo(height) {
-  const h = height || 0;
-  for (let i = LEVEL_TABLE.length-1; i >= 0; i--) {
-    if (h >= LEVEL_TABLE[i].min) return LEVEL_TABLE[i];
-  }
-  return LEVEL_TABLE[0];
-}
-function getCurrentHeight() {
-  if (!STATE.heightHistory.length) return 0;
-  return STATE.heightHistory[STATE.heightHistory.length-1].value;
-}
-function getCurrentWeight() {
-  if (!STATE.weightHistory.length) return 0;
-  return STATE.weightHistory[STATE.weightHistory.length-1].value;
-}
-function starsStr(n) {
-  return '★'.repeat(n); // 빈 별 미표시
-}
-
-// Quests approved today
-function getTodayApproved() {
-  const t = today();
-  return STATE.questLog.filter(l => l.date === t);
-}
-function getQuestStatusToday(questId) {
-  // pending?
-  if (STATE.pendingApprovals.find(p => p.questId === questId && p.date === today())) return 'pending';
-  // approved today?
-  if (STATE.questLog.find(l => l.questId === questId && l.date === today())) return 'approved';
-  return 'available';
-}
-
-// ═══════════════════════════════════════
-// DAILY QUEST SELECTION
-// ═══════════════════════════════════════
-function getDailyQuests() {
-  // Max 3 quests total per day
-  const missDays = calcMissDays();
-  const rareChance = Math.min(0.5, 0.12 + missDays * 0.08);
-  const dow = new Date().getDay();
-
-  // Rare quest appears? → takes 1 slot
-  const rarePool = QUEST_POOL.filter(q => q.cat === 'rare');
-  const showRare = Math.random() < rareChance;
-  const rareQuest = showRare ? [rarePool[dow % rarePool.length]] : [];
-
-  // Weekend exercise takes 1 slot
-  const exPool = QUEST_POOL.filter(q => q.cat === 'exercise');
-  const exerciseQuest = isWeekend() ? [exPool[dow % exPool.length]] : [];
-
-  // Remaining slots fill with warmup(1) + core
-  const specialSlots = rareQuest.length + exerciseQuest.length;
-  const remaining = 3 - specialSlots; // always ≥ 1
-
-  // 1 warmup always first
-  const warmup = [QUEST_POOL.find(q => q.id === 'w2')]; // 주사 as warmup anchor
-
-  // Fill rest with core (milk priority, then 1 zinc)
-  const coreSlots = Math.max(0, remaining - 1);
-  const corePool = [
-    QUEST_POOL.find(q => q.id === 'c1'), // 우유 항상
-    ...[QUEST_POOL.filter(q => q.cat === 'core' && q.id !== 'c1')[dow % 6]].filter(Boolean),
+function getDynamicNick(name,questLog){
+  const recent=questLog.filter(l=>{
+    const d=new Date(l.date);const now=new Date();
+    return(now-d)/(1000*60*60*24)<=7;
+  });
+  const catMap={};
+  recent.forEach(l=>{
+    const q=QUEST_POOL.find(q=>q.id===l.questId);
+    if(q)catMap[q.id]=(catMap[q.id]||0)+1;
+  });
+  const nicks=[
+    {id:'c2',text:'계란노른자를 정복한'},{id:'c3',text:'치즈를 무섭게 먹어대는'},
+    {id:'c5',text:'소고기 사냥꾼'},{id:'e1',text:'수영장을 지배하는'},
+    {id:'e3',text:'배드민턴 챔피언'},{id:'r1',text:'독서를 정복한'},{id:'c1',text:'우유 마스터'},
   ];
-  const core = corePool.slice(0, coreSlots);
-
-  return {
-    warmup: warmup.filter(Boolean),
-    core,
-    exercise: exerciseQuest,
-    rare: rareQuest,
-  };
+  const hit=nicks.find(n=>catMap[n.id]>=2);
+  return hit?`${hit.text} ${name}`:name?`${name} 용사`:'성장을 시작한 용사';
 }
 
-function calcMissDays() {
-  if (!STATE.profile.lastActiveDate) return 0;
-  const last = new Date(STATE.profile.lastActiveDate);
-  const now = new Date();
-  return Math.floor((now - last) / 86400000);
+function getStory(streak){
+  const dow=new Date().getDay();
+  const idx=(dow+Math.floor(streak/3))%STORY_POOL.length;
+  return STORY_POOL[idx];
 }
 
-// ═══════════════════════════════════════
-// STREAK & CYCLE
-// ═══════════════════════════════════════
-function updateStreak() {
-  const t = today();
-  const todayApproved = getTodayApproved();
-  if (todayApproved.length === 0) return;
+// ═══════ COMPONENTS ═══════
 
-  if (STATE.profile.lastActiveDate === t) return; // already updated today
-
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yStr = yesterday.toISOString().slice(0,10);
-
-  if (STATE.profile.lastActiveDate === yStr) {
-    STATE.profile.streak = (STATE.profile.streak || 0) + 1;
-  } else if (STATE.profile.lastActiveDate !== t) {
-    STATE.profile.streak = 1;
-  }
-  STATE.profile.lastActiveDate = t;
-}
-
-function checkWeeklyCycle() {
-  // Ensure week cycle is initialized
-  const now = new Date();
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
-  const weekStart = monday.toISOString().slice(0,10);
-
-  if (STATE.weekCycle.startDate !== weekStart) {
-    STATE.weekCycle = {startDate: weekStart, completedDays: [], weeklyRewardPending: false, weeklyRewardClaimed: false};
-  }
-
-  const t = today();
-  const todayApproved = getTodayApproved();
-  if (todayApproved.length > 0 && !STATE.weekCycle.completedDays.includes(t)) {
-    STATE.weekCycle.completedDays.push(t);
-  }
-
-  if (STATE.weekCycle.completedDays.length >= 5 && !STATE.weekCycle.weeklyRewardClaimed) {
-    STATE.weekCycle.weeklyRewardPending = true;
-  }
-}
-
-// ═══════════════════════════════════════
-// DYNAMIC NICKNAME
-// ═══════════════════════════════════════
-function getDynamicNick() {
-  // Look at last 7 days quest log for dominant category
-  const recent = STATE.questLog.filter(l => {
-    const d = new Date(l.date);
-    const now = new Date();
-    return (now - d) < 7 * 86400000;
-  });
-  const catCount = {};
-  recent.forEach(l => {
-    const q = QUEST_POOL.find(q => q.id === l.questId);
-    if (q) catCount[q.cat] = (catCount[q.cat] || 0) + 1;
-    if (q) catCount[q.id] = (catCount[q.id] || 0) + 1;
-  });
-
-  // Find best matching pattern
-  let bestPattern = null;
-  let bestCount = 0;
-  NICK_PATTERNS.forEach(p => {
-    const c = catCount[p.questCat] || 0;
-    if (c > bestCount) { bestCount = c; bestPattern = p; }
-  });
-
-  const name = STATE.profile.name || '용사';
-  if (bestPattern && bestCount >= 2) {
-    return `${bestPattern.text} ${name}`;
-  }
-  if (STATE.profile.streak >= 7) return `${name} — 7일 연속 달성자`;
-  if (STATE.profile.totalApproved >= 20) return `성장에 진심인 ${name}`;
-  return `성장을 시작한 ${name}`;
-}
-
-// ═══════════════════════════════════════
-// RENDER
-// ═══════════════════════════════════════
-function render() {
-  renderTopbar();
-  renderHomeScreen();
-  renderGachaScreen();
-  renderReportScreen();
-  // parent screen renders after PIN
-}
-
-function renderTopbar() {
-  document.getElementById('coinDisplay').textContent = (STATE.profile.points || 0).toLocaleString();
-  const name = STATE.profile.name || '용사';
-  const topbarName = document.getElementById('topbarName');
-  if (topbarName) topbarName.textContent = name;
-}
-
-function renderStoryCard() {
-  const dow = new Date().getDay();
-  const streak = STATE.profile.streak || 0;
-  const idx = (dow + Math.floor(streak / 3)) % STORY_POOL.length;
-  const story = STORY_POOL[idx];
-  document.getElementById('storyIcon').textContent = story.icon;
-  document.getElementById('storyTitle').textContent = story.title;
-  document.getElementById('storyMsg').textContent = story.msg;
-}
-
-function renderHomeScreen() {
-  const pts = STATE.profile.points || 0;
-  const lvInfo = getLevelByPts(pts);
-  const xp = getXpProgress(pts);
-  const streak = STATE.profile.streak || 0;
-  const h = getCurrentHeight();
-  const w = getCurrentWeight();
-
-  // Level badge & rank
-  document.getElementById('charLvBadge').textContent = `LV.${lvInfo.lv}`;
-  document.getElementById('charRank').textContent = `${lvInfo.rank} — ${lvInfo.title}`;
-  document.getElementById('charNick').textContent = getDynamicNick();
-
-  // Stats
-  document.getElementById('statHeight').textContent = h ? h : '—';
-  document.getElementById('statWeight').textContent = w ? w : '—';
-  document.getElementById('statPoints').textContent = pts >= 1000 ? (pts/1000).toFixed(1)+'k' : pts;
-  document.getElementById('statStreak').textContent = streak;
-
-  // XP bar
-  const xpFill = document.getElementById('xpFill');
-  xpFill.style.width = xp.pct + '%';
-  if (xp.nextLv) {
-    document.getElementById('xpLabel').textContent = `⚡ LV.${xp.nextLv.lv}까지`;
-    document.getElementById('xpNext').textContent = `${xp.current.toLocaleString()} / ${xp.needed.toLocaleString()}P`;
-  } else {
-    document.getElementById('xpLabel').textContent = '👑 최고 레벨 달성!';
-    document.getElementById('xpNext').textContent = `${pts.toLocaleString()}P`;
-  }
-
-  // Avatar
-  const avatarEl = document.getElementById('avatarEl');
-  if (STATE.profile.avatar) {
-    avatarEl.outerHTML = `<img class="avatar-img" id="avatarEl" src="${STATE.profile.avatar}" style="border-radius:50%;width:90px;height:90px;object-fit:cover;position:relative;display:block;border:3px solid var(--bg3);">`;
-  }
-
-  renderStoryCard();
-
-  // Daily quests
-  const {warmup, core, exercise, rare} = getDailyQuests();
-  let totalQ = warmup.length + core.length + exercise.length + rare.length;
-  let doneQ = 0;
-
-  function renderQuestList(containerId, quests) {
-    const el = document.getElementById(containerId);
-    el.innerHTML = '';
-    quests.forEach(q => {
-      const status = getQuestStatusToday(q.id);
-      if (status === 'approved') doneQ++;
-      el.appendChild(makeQuestCard(q, status));
-    });
-  }
-
-  renderQuestList('warmupQuests', warmup);
-  renderQuestList('coreQuests', core);
-
-  const exSec = document.getElementById('exerciseSection');
-  if (exercise.length > 0) {
-    exSec.classList.remove('hidden');
-    renderQuestList('exerciseQuests', exercise);
-  } else {
-    exSec.classList.add('hidden');
-  }
-
-  const rareSec = document.getElementById('rareSection');
-  if (rare.length > 0) {
-    rareSec.classList.remove('hidden');
-    renderQuestList('rareQuests', rare);
-  } else {
-    rareSec.classList.add('hidden');
-  }
-
-  const pct = totalQ > 0 ? Math.round(doneQ/totalQ*100) : 0;
-  document.getElementById('todayComplete').textContent = doneQ;
-  document.getElementById('todayTotal').textContent = totalQ;
-  document.getElementById('homeProgress').style.width = pct + '%';
-  document.getElementById('homeProgressLabel').textContent = `오늘의 진행률 ${pct}%`;
-
-  checkWeeklyCycle();
-  const banner = document.getElementById('weeklyBanner');
-  if (STATE.weekCycle.weeklyRewardPending && !STATE.weekCycle.weeklyRewardClaimed) {
-    banner.classList.remove('hidden');
-  } else {
-    banner.classList.add('hidden');
-  }
-}
-
-function makeQuestCard(q, status) {
-  const div = document.createElement('div');
-  let cls = 'quest-card';
-  if (q.cat === 'rare') cls += ' rare';
-  if (status === 'approved') cls += ' approved';
-  if (status === 'pending') cls += ' pending';
-
-  let badgeHtml = '';
-  if (status === 'pending') badgeHtml = '<span class="q-badge pending">대기중</span>';
-  if (status === 'approved') badgeHtml = '<span class="q-badge approved">✓ 승인</span>';
-
-  div.className = cls;
-  div.innerHTML = `
-    <div class="q-icon cat-${q.cat}">${q.icon}</div>
-    <div class="q-body">
-      <div class="q-name">${q.name}</div>
-      <div class="q-desc">${q.desc}</div>
+function ShieldEmblem({lv,emoji}){
+  return(
+    <div style={{position:'relative',width:44,height:44,flexShrink:0}}>
+      <svg viewBox="0 0 44 44" width="44" height="44">
+        <defs>
+          <linearGradient id="shieldG" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#f5e28a"/>
+            <stop offset="50%" stopColor="#c8a84b"/>
+            <stop offset="100%" stopColor="#8a6620"/>
+          </linearGradient>
+        </defs>
+        {/* Wings */}
+        <path d="M4 18 Q2 12 6 8 Q8 14 12 18" fill="#c8a84b" opacity="0.8"/>
+        <path d="M40 18 Q42 12 38 8 Q36 14 32 18" fill="#c8a84b" opacity="0.8"/>
+        {/* Shield body */}
+        <path d="M10 8 L34 8 L34 26 Q34 36 22 42 Q10 36 10 26 Z" fill="url(#shieldG)" stroke="#8a6620" strokeWidth="1"/>
+        <path d="M13 11 L31 11 L31 25 Q31 33 22 38 Q13 33 13 25 Z" fill="#2a1a08" opacity="0.6"/>
+      </svg>
+      <div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-48%)',fontSize:14,lineHeight:1}}>{emoji}</div>
+      <div style={{position:'absolute',bottom:2,left:'50%',transform:'translateX(-50%)',fontFamily:'Cinzel,serif',fontSize:7,color:'#f5e28a',fontWeight:700,whiteSpace:'nowrap'}}>LV.{lv}</div>
     </div>
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
-      <div class="q-stars">${starsStr(q.stars)}</div>
-      ${badgeHtml}
-    </div>
-  `;
-  if (status === 'available') {
-    div.onclick = () => openQuestModal(q.id);
-  }
-  return div;
+  );
 }
 
-// ── GACHA SCREEN ──
-function renderGachaScreen() {
-  const count = STATE.gachaQueue || 0;
-  document.getElementById('gachaCount').textContent = count;
-  document.getElementById('gachaBtn').disabled = count === 0;
+function StatSlot({icon,value,label}){
+  return(
+    <div className="stone-slot" style={{flex:1,borderRadius:8,padding:'6px 4px',textAlign:'center'}}>
+      <div style={{fontSize:13}}>{icon}</div>
+      <div style={{fontSize:13,fontWeight:900,color:'#f5e28a',lineHeight:1.1,marginTop:2,fontFamily:'Cinzel,serif'}}>{value}</div>
+      <div style={{fontSize:8,color:'#8a6a3a',marginTop:2,fontFamily:'Noto Sans KR,sans-serif'}}>{label}</div>
+    </div>
+  );
+}
 
-  // Shop
-  const shopEl = document.getElementById('shopList');
-  shopEl.innerHTML = '';
-  SHOP_ITEMS.forEach(item => {
-    const can = (STATE.profile.points || 0) >= item.cost;
-    const div = document.createElement('div');
-    div.className = 'shop-card';
-    div.innerHTML = `
-      <div class="shop-icon">${item.icon}</div>
-      <div class="shop-body">
-        <div class="shop-name">${item.name}</div>
-        <div style="font-size:10px;color:var(--text3);margin-bottom:3px;">${item.desc}</div>
-        <div class="shop-cost">🪙 ${item.cost.toLocaleString()}P</div>
+function XpBar({pts}){
+  const xp=getXpProgress(pts);
+  const lv=getLevelByPts(pts);
+  return(
+    <div style={{marginTop:10}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:4}}>
+        <span style={{fontFamily:'Cinzel,serif',fontSize:9,color:'#f5e28a',fontWeight:700}}>
+          {xp.nextLv?`⚡ LV.${xp.nextLv.lv}까지`:'👑 MAX LEVEL'}
+        </span>
+        <span style={{fontFamily:'Cinzel,serif',fontSize:8,color:'#8a6a3a'}}>
+          {xp.nextLv?`${xp.current} / ${xp.needed}P`:'전설급 달성'}
+        </span>
       </div>
-      <button class="shop-btn" ${can?'':'disabled'} onclick="purchaseItem('${item.id}')">교환</button>
-    `;
-    shopEl.appendChild(div);
-  });
-
-  // Reward history
-  const histEl = document.getElementById('rewardHistory');
-  histEl.innerHTML = '';
-  const hist = [...(STATE.rewardHistory||[])].reverse().slice(0,10);
-  if (hist.length === 0) {
-    histEl.innerHTML = '<div style="text-align:center;color:var(--text4);font-size:12px;padding:12px;">아직 보상 기록이 없어요</div>';
-  }
-  hist.forEach(r => {
-    const div = document.createElement('div');
-    div.className = 'reward-row';
-    div.innerHTML = `<span style="font-size:16px;">${r.icon}</span><span style="flex:1;">${r.name}</span><span style="font-size:10px;color:var(--text3);">${r.date}</span><span class="pt">+${r.pts}P</span>`;
-    histEl.appendChild(div);
-  });
+      <div className="xp-track" style={{height:14,borderRadius:6}}>
+        <div className="xp-fill" style={{height:'100%',width:`${xp.pct}%`}}/>
+        {/* Gear ornament center */}
+        <div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',fontSize:10,lineHeight:1,zIndex:2}}>⚙️</div>
+      </div>
+    </div>
+  );
 }
 
-// ── REPORT SCREEN ──
-function renderReportScreen() {
-  const h = getCurrentHeight();
-  const w = getCurrentWeight();
-  const lvInfo = getLevelByPts(STATE.profile.points||0);
-
-  document.getElementById('reportEmoji').textContent = lvInfo.emoji;
-  document.getElementById('reportHeight').textContent = h ? `${h} cm` : '— cm';
-  document.getElementById('reportLevel').textContent = `Lv.${lvInfo.lv}`;
-  document.getElementById('reportStreak').textContent = `${STATE.profile.streak||0}일`;
-  document.getElementById('reportPoints').textContent = (STATE.profile.points||0).toLocaleString();
-
-  // Growth stats
-  if (STATE.heightHistory.length >= 2) {
-    const first = STATE.heightHistory[0].value;
-    const gain = (h - first).toFixed(1);
-    document.getElementById('reportGrowth').textContent = `처음보다 +${gain}cm 성장! 계속 가자!`;
-  } else {
-    document.getElementById('reportGrowth').textContent = h ? `현재 키 ${h}cm — 기록을 쌓아가자!` : '키를 입력해주세요';
-  }
-
-  drawCharts();
-  renderWeekBars();
+function ArrowHeader({icon,text}){
+  return(
+    <div style={{display:'flex',alignItems:'center',gap:8,margin:'14px 0 10px'}}>
+      <div className="arrow-header">
+        <span style={{marginRight:5}}>{icon}</span>{text}
+      </div>
+    </div>
+  );
 }
 
-function drawCharts() {
-  // Build chart data from history + activity points
-  const heightPoints = STATE.heightHistory.slice(-6);
-  const weightPoints = STATE.weightHistory.slice(-6);
-
-  // Compute activity by month
-  const actByMonth = {};
-  (STATE.questLog||[]).forEach(l => {
-    const mon = l.date.slice(0,7);
-    actByMonth[mon] = (actByMonth[mon]||0) + (l.pointsAwarded||0);
-  });
-
-  function buildData(histArr) {
-    return histArr.map(h => {
-      const mon = h.date.slice(0,7);
-      const label = `${parseInt(h.date.slice(5,7))}월`;
-      const act = Math.min(100, Math.round((actByMonth[mon]||0) / 10));
-      return [label, h.value, act];
-    });
-  }
-
-  const hData = buildData(heightPoints);
-  const wData = buildData(weightPoints);
-
-  if (hData.length >= 1) drawLineChart('heightChart', hData, '#ffd76a', true);
-  if (wData.length >= 1) drawLineChart('weightChart', wData, '#ff9d8a', false);
+function QuestCard({quest,status,onPress}){
+  const catColors={
+    warmup:{bg:'linear-gradient(135deg,#1a0e30,#2d1855)',border:'rgba(168,85,247,.5)'},
+    core:{bg:'linear-gradient(135deg,#0a1e35,#1a3a60)',border:'rgba(90,180,255,.4)'},
+    exercise:{bg:'linear-gradient(135deg,#0a2010,#1a4020)',border:'rgba(90,200,120,.4)'},
+    rare:{bg:'linear-gradient(135deg,#2a1500,#5a3500)',border:'rgba(245,226,138,.6)'},
+  };
+  const c=catColors[quest.cat]||catColors.core;
+  const isDone=status==='done'||status==='approved';
+  const isPending=status==='pending';
+  return(
+    <div
+      className="quest-card-rpg"
+      onClick={!isDone&&!isPending?onPress:undefined}
+      style={{
+        background:isDone?'rgba(0,0,0,.3)':c.bg,
+        border:`1px solid ${isDone?'#3a2a10':c.border}`,
+        borderRadius:12,padding:'12px 14px 12px 14px',
+        display:'flex',alignItems:'center',gap:10,marginBottom:10,
+        cursor:isDone||isPending?'default':'pointer',
+        opacity:isDone?0.5:1,
+        transition:'transform .1s',
+        WebkitTapHighlightColor:'transparent',
+      }}
+      onTouchStart={e=>{if(!isDone&&!isPending)e.currentTarget.style.transform='scale(0.97)';}}
+      onTouchEnd={e=>{e.currentTarget.style.transform='';}}
+    >
+      <div className="corner-bl"/><div className="corner-br"/>
+      {/* Icon */}
+      <div style={{
+        width:40,height:40,borderRadius:10,
+        background:c.bg,border:`1px solid ${c.border}`,
+        display:'flex',alignItems:'center',justifyContent:'center',
+        fontSize:20,flexShrink:0,
+        boxShadow:`0 2px 8px rgba(0,0,0,.4)`,
+      }}>{quest.icon}</div>
+      {/* Body */}
+      <div style={{flex:1,minWidth:0}}>
+        <div style={{fontSize:12,fontWeight:700,color:isDone?'#6a5a30':'#f5e28a',marginBottom:2,fontFamily:'Noto Sans KR,sans-serif'}}>{quest.name}</div>
+        <div style={{fontSize:9,color:'#8a7040',lineHeight:1.5,fontFamily:'Noto Sans KR,sans-serif'}}>{quest.desc.slice(0,40)}...</div>
+      </div>
+      {/* Right */}
+      <div style={{textAlign:'right',flexShrink:0}}>
+        <div style={{fontSize:11,color:'#f5c842',marginBottom:3}}>{'⭐'.repeat(quest.stars)}</div>
+        {isPending&&<span style={{fontSize:9,padding:'2px 6px',background:'rgba(90,180,255,.2)',color:'#5ab4ff',borderRadius:6,fontFamily:'Cinzel,serif'}}>검토중</span>}
+        {status==='approved'&&<span style={{fontSize:9,padding:'2px 6px',background:'rgba(90,200,120,.2)',color:'#5ac878',borderRadius:6,fontFamily:'Cinzel,serif'}}>승인됨</span>}
+        {isDone&&!isPending&&<span style={{fontSize:16}}>✅</span>}
+      </div>
+    </div>
+  );
 }
 
-function drawLineChart(svgId, data, color, showActivity) {
-  const svg = document.getElementById(svgId);
-  if (!svg) return;
-  const W = svg.clientWidth || 300, H = 120;
-  const padL=36, padR=10, padT=14, padB=20;
-  const innerW = W-padL-padR, innerH = H-padT-padB;
-  const n = data.length;
-  if (n === 0) return;
-
-  const xs = n === 1 ? [padL + innerW/2] : data.map((_,i) => padL + innerW*i/(n-1));
-  const vals = data.map(d=>d[1]);
-  const vMin = Math.min(...vals), vMax = Math.max(...vals);
-  const vRange = vMax-vMin || 1;
-  const ys = vals.map(v => padT + innerH*(1-(v-vMin+vRange*.2)/(vRange*1.4)));
-
-  let s = `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="rgba(255,255,255,.12)" stroke-width="1"/>
-<line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="rgba(255,255,255,.12)" stroke-width="1"/>`;
-
-  if (showActivity && data[0][2] !== undefined) {
-    const pts2 = data.map(d=>d[2]);
-    const maxP = Math.max(...pts2, 1);
-    const ysP = pts2.map(p => padT + innerH*(1-p/maxP));
-    s += `<polyline points="${xs.map((x,i)=>`${x},${ysP[i]}`).join(' ')}" fill="none" stroke="#5ad1ff" stroke-width="1.5" stroke-dasharray="4 3" opacity=".8"/>`;
-    xs.forEach((x,i) => { s += `<circle cx="${x}" cy="${ysP[i]}" r="2" fill="#5ad1ff"/>`; });
-  }
-
-  if (n > 1) {
-    s += `<polyline points="${xs.map((x,i)=>`${x},${ys[i]}`).join(' ')}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
-  }
-  xs.forEach((x,i) => {
-    const r = i===n-1?4:3;
-    s += `<circle cx="${x}" cy="${ys[i]}" r="${r}" fill="${color}"/>`;
-    s += `<text x="${x}" y="${H-6}" font-size="8" fill="#9694b8" text-anchor="middle">${data[i][0]}</text>`;
-  });
-  const last = data[n-1];
-  s += `<text x="${xs[n-1]+4}" y="${ys[n-1]-7}" font-size="9" font-weight="700" fill="${color}" text-anchor="start">${last[1]}</text>`;
-
-  // Y axis labels
-  const yLabel1 = (vMin + vRange*.2).toFixed(n>1?1:0);
-  const yLabel2 = (vMax + vRange*.2*.2).toFixed(n>1?1:0);
-  s += `<text x="${padL-4}" y="${H-padB}" font-size="8" fill="#9694b8" text-anchor="end">${yLabel1}</text>`;
-  s += `<text x="${padL-4}" y="${padT+4}" font-size="8" fill="#9694b8" text-anchor="end">${yLabel2}</text>`;
-
-  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  svg.innerHTML = s;
+function StoryCard({streak}){
+  const s=getStory(streak);
+  return(
+    <div style={{
+      background:'linear-gradient(135deg,rgba(74,40,0,.6),rgba(26,14,5,.8))',
+      border:'1px solid #6b4a1a',borderRadius:14,
+      padding:'12px 14px',marginBottom:14,
+      display:'flex',gap:10,alignItems:'flex-start',
+    }}>
+      <div style={{fontSize:24,flexShrink:0,filter:'drop-shadow(0 0 6px rgba(245,200,66,.4))'}}>{s.icon}</div>
+      <div>
+        <div style={{fontFamily:'Cinzel,serif',fontSize:10,fontWeight:700,color:'#f5e28a',marginBottom:4,letterSpacing:1}}>{s.title}</div>
+        <div style={{fontFamily:'Noto Sans KR,sans-serif',fontSize:10,color:'#c8a87a',lineHeight:1.7}}>{s.msg}</div>
+      </div>
+    </div>
+  );
 }
 
-function renderWeekBars() {
-  const barsEl = document.getElementById('weekBars');
-  barsEl.innerHTML = '';
-  const days = ['월','화','수','목','금','토','일'];
-  const now = new Date();
-  const dow = (now.getDay()+6)%7; // 0=Mon
-
-  // Get quest counts per day this week
-  const weekStart = new Date(now);
-  weekStart.setDate(now.getDate() - dow);
-
-  let maxCount = 1;
-  const counts = days.map((_,i) => {
-    const d = new Date(weekStart);
-    d.setDate(weekStart.getDate() + i);
-    const dStr = d.toISOString().slice(0,10);
-    const c = STATE.questLog.filter(l=>l.date===dStr).length;
-    if (c > maxCount) maxCount = c;
-    return {label: days[i], count: c, isToday: i === dow};
-  });
-
-  counts.forEach(({label, count, isToday}) => {
-    const pct = Math.round(count/maxCount*100);
-    const div = document.createElement('div');
-    div.className = 'week-bar-wrap';
-    div.innerHTML = `
-      <div class="week-bar${isToday?' today':''}" style="height:${Math.max(4,pct*0.5)}px;"></div>
-      <div class="week-bar-label">${label}${count>0?`<br><b style="color:var(--text2);">${count}</b>`:''}</div>
-    `;
-    barsEl.appendChild(div);
-  });
-
-  // Insight
-  const insightEl = document.getElementById('weekInsight');
-  const weekApproved = STATE.weekCycle.completedDays.length;
-  if (weekApproved >= 3) {
-    insightEl.classList.remove('hidden');
-    insightEl.innerHTML = `이번 주 <b>${weekApproved}일</b> 퀘스트 완료! ${weekApproved>=5?'<b>주간 보상 달성! 🎉</b>':'5일 달성하면 주간 보상을 받아요!'}`;
-  } else {
-    insightEl.classList.add('hidden');
-  }
-}
-
-// ── PARENT SCREEN ──
-function renderParentScreen() {
-  const el = document.getElementById('parentContent');
-  const pending = STATE.pendingApprovals || [];
-  const name = STATE.profile.name || '용사';
-  const lvInfo = getLevelByPts(STATE.profile.points||0);
-  const weekPct = Math.round((STATE.weekCycle.completedDays.length/7)*100);
-
-  let html = '';
-
-  // Pending approvals
-  html += `<div class="section-label" style="margin-top:12px;">✅ 승인 대기 (${pending.length}건)</div>`;
-  if (pending.length === 0) {
-    html += `<div style="text-align:center;color:var(--text4);font-size:12px;padding:16px;">승인 대기 중인 퀘스트가 없어요 🎉</div>`;
-  } else {
-    pending.forEach(p => {
-      const q = QUEST_POOL.find(q=>q.id===p.questId);
-      if (!q) return;
-      html += `
-        <div class="approve-row">
-          <div class="thumb">${p.photo ? `<img src="${p.photo}">` : q.icon}</div>
-          <div style="flex:1;">
-            <div style="font-size:12px;font-weight:700;">${q.name}</div>
-            <div style="font-size:10px;color:var(--text3);">${p.date} ${p.submittedAt}</div>
+function CharCard({state}){
+  const pts=state.profile.points||0;
+  const lv=getLevelByPts(pts);
+  const nick=getDynamicNick(state.profile.name,state.questLog);
+  const lastH=state.heightHistory.length?state.heightHistory[state.heightHistory.length-1].value:'—';
+  const lastW=state.weightHistory.length?state.weightHistory[state.weightHistory.length-1].value:'—';
+  const todayLog=state.questLog.filter(l=>l.date===today());
+  const daily=getDailyQuests();
+  const totalToday=[...daily.warmup,...daily.core,...daily.exercise,...daily.rare].length;
+  return(
+    <div style={{
+      background:'radial-gradient(ellipse at 30% 20%,#d4b87a,#b89650 40%,#9a7a38 100%)',
+      border:'2px solid #8a6620',borderRadius:16,padding:'12px 12px 14px',
+      marginTop:10,marginBottom:12,position:'relative',overflow:'hidden',
+    }}>
+      {/* Rune border */}
+      <div className="rune-border" style={{marginBottom:6}}>✦ ᚱᚢᚾᛖ ✦ ᚷᚱᛟᚹᛏᚺ ✦ ᚲᚹᛖᛋᛏ ✦ ᚱᚢᚾᛖ ✦</div>
+      {/* Top row: avatar + info */}
+      <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}>
+        {/* Avatar */}
+        <div style={{position:'relative',flexShrink:0}}>
+          <div style={{
+            width:68,height:68,borderRadius:'50%',
+            border:'3px solid #8a6620',
+            background:'linear-gradient(135deg,#2a1a08,#1a0e05)',
+            overflow:'hidden',boxShadow:'0 0 12px rgba(200,168,75,.4)',
+          }}>
+            <img src="avatar.png" alt="캐릭터" style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}} onError={e=>{e.target.style.display='none';}}/>
           </div>
-          <button class="reject-btn" onclick="rejectQuest('${p.id}')">✕</button>
-          <button class="approve-btn" onclick="approveQuest('${p.id}')">승인 ✓</button>
         </div>
-      `;
-    });
-  }
-
-  // Kid status
-  html += `
-    <div class="char-card" style="margin-top:18px;">
-      <div class="char-title">${lvInfo.rank} — ${lvInfo.title}</div>
-      <div class="char-nick">${getDynamicNick()}</div>
-      <div class="day-row"><span>이번주 이행일</span><span>${STATE.weekCycle.completedDays.length}일 / 7일</span></div>
-      <div class="progress-track"><div class="progress-fill" style="width:${weekPct}%"></div></div>
-      <div class="progress-label">${weekPct}% — 5일 이상이면 주간 보상!</div>
+        {/* Shield + Text */}
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:4}}>
+            <ShieldEmblem lv={lv.lv} emoji={lv.emoji}/>
+            <div>
+              <div style={{fontFamily:'Cinzel,serif',fontSize:9,color:'#4a2800',fontWeight:700,letterSpacing:1}}>{lv.rank} — {lv.title}</div>
+              <div style={{fontFamily:'Noto Sans KR,sans-serif',fontSize:11,fontWeight:700,color:'#1a0e05',marginTop:2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{nick}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Stat slots */}
+      <div style={{display:'flex',gap:6,marginBottom:8}}>
+        <StatSlot icon="📏" value={lastH} label="키(cm)"/>
+        <StatSlot icon="⚖️" value={lastW} label="몸무게"/>
+        <StatSlot icon="🪙" value={pts} label="포인트"/>
+        <StatSlot icon="🔥" value={state.profile.streak||0} label="연속일"/>
+      </div>
+      {/* XP Bar */}
+      <XpBar pts={pts}/>
+      {/* Today progress */}
+      <div style={{textAlign:'right',fontSize:9,color:'#4a2800',marginTop:4,fontFamily:'Cinzel,serif'}}>
+        오늘 <b style={{color:'#2a6020'}}>{todayLog.length}</b>/{totalToday} 완료
+      </div>
+      {/* Bottom rune */}
+      <div className="rune-border" style={{marginTop:6}}>✦ ᚱᚢᚾᛖ ✦ ᚷᚱᛟᚹᛏᚺ ✦ ᚲᚹᛖᛋᛏ ✦ ᚱᚢᚾᛖ ✦</div>
     </div>
-  `;
+  );
+}
 
-  // Recent history
-  const recentLog = [...(STATE.questLog||[])].reverse().slice(0,5);
-  if (recentLog.length > 0) {
-    html += `<div class="section-label">📋 최근 승인 기록</div>`;
-    recentLog.forEach(l => {
-      const q = QUEST_POOL.find(q=>q.id===l.questId);
-      if (!q) return;
-      html += `<div class="reward-row"><span style="font-size:16px;">${q.icon}</span><span style="flex:1;">${q.name}</span><span style="font-size:10px;color:var(--text3);">${l.date}</span><span class="pt">+${l.pointsAwarded}P</span></div>`;
-    });
+function HomeScreen({state,setState,showToast}){
+  const [activeQuestId,setActiveQuestId]=React.useState(null);
+  const [photoData,setPhotoData]=React.useState(null);
+  const fileRef=React.useRef();
+  const daily=getDailyQuests();
+  const allQuests=[...daily.warmup,...daily.core,...daily.exercise,...daily.rare];
+  const todayLog=state.questLog.filter(l=>l.date===today());
+  const todayPending=state.pendingApprovals.filter(p=>{
+    const q=QUEST_POOL.find(q=>q.id===p.questId);
+    return q&&today()===p.submittedAt?.slice(0,10);
+  });
+  function questStatus(qid){
+    if(todayLog.find(l=>l.questId===qid))return'done';
+    if(state.pendingApprovals.find(p=>p.questId===qid))return'pending';
+    return'idle';
   }
+  function openQuestModal(qid){setActiveQuestId(qid);setPhotoData(null);}
+  function closeModal(){setActiveQuestId(null);setPhotoData(null);}
+  function handlePhotoChange(e){
+    const f=e.target.files?.[0];if(!f)return;
+    const r=new FileReader();r.onload=ev=>setPhotoData(ev.target.result);r.readAsDataURL(f);
+  }
+  function submitQuest(){
+    if(!activeQuestId)return;
+    const newPending={
+      id:Date.now().toString(),questId:activeQuestId,
+      photo:photoData,submittedAt:new Date().toISOString(),
+    };
+    const ns={...state,pendingApprovals:[...state.pendingApprovals,newPending]};
+    saveState(ns);setState(ns);
+    showToast('📸 제출 완료! 부모님 승인을 기다려요');
+    closeModal();
+  }
+  const activeQuest=QUEST_POOL.find(q=>q.id===activeQuestId);
 
-  // PIN settings
-  html += `
-    <div style="margin-top:20px;padding:14px;background:rgba(255,255,255,.05);border-radius:14px;">
-      <div style="font-size:12px;font-weight:700;margin-bottom:8px;">⚙️ 부모 설정</div>
-      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;">현재 PIN: ${'*'.repeat((STATE.profile.pin||'').length)}</div>
-      <div style="display:flex;gap:8px;">
-        <input id="newPin" type="number" placeholder="새 PIN 4자리" style="flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:9px;padding:8px;color:#fff;font-size:12px;font-family:inherit;">
-        <button onclick="changePin()" style="background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;font-size:11px;font-weight:700;border:none;border-radius:10px;padding:8px 13px;cursor:pointer;">변경</button>
+  // Weekly bonus check
+  function checkWeekly(){
+    const wc=state.weekCycle;
+    if(!wc||wc.weeklyRewardPending||wc.weeklyRewardClaimed)return false;
+    const days=(wc.completedDays||[]).length;
+    return days>=5;
+  }
+  function claimWeekly(){
+    const ns={...state,gachaQueue:(state.gachaQueue||0)+3,
+      weekCycle:{...state.weekCycle,weeklyRewardPending:false,weeklyRewardClaimed:true}};
+    saveState(ns);setState(ns);
+    showToast('🎉 주간 보상 획득! 가챠 3개 추가!');
+  }
+  const showWeekly=checkWeekly();
+  return(
+    <div className="scroll-area" style={{flex:1,overflowY:'auto',padding:'0 12px 80px'}}>
+      <CharCard state={state}/>
+      {showWeekly&&(
+        <div style={{background:'linear-gradient(135deg,rgba(200,168,75,.2),rgba(168,85,247,.15))',border:'1px solid #c8a84b',borderRadius:14,padding:14,textAlign:'center',marginBottom:14}}>
+          <div style={{fontSize:24,marginBottom:4}}>🎉</div>
+          <div style={{fontFamily:'Cinzel,serif',fontSize:12,fontWeight:700,color:'#f5e28a',marginBottom:4}}>주간 목표 달성!</div>
+          <div style={{fontFamily:'Noto Sans KR,sans-serif',fontSize:11,color:'#c8a87a',marginBottom:8}}>이번 주 5일 이상 퀘스트를 완료했어요</div>
+          <button onClick={claimWeekly} style={{background:'#c8a84b',color:'#1a0e05',fontWeight:700,fontSize:12,border:'none',borderRadius:10,padding:'8px 20px',cursor:'pointer',fontFamily:'Cinzel,serif'}}>보상 받기 →</button>
+        </div>
+      )}
+      <StoryCard streak={state.profile.streak||0}/>
+      <ArrowHeader icon="🌙" text="워밍업 퀘스트"/>
+      {daily.warmup.map(q=><QuestCard key={q.id} quest={q} status={questStatus(q.id)} onPress={()=>openQuestModal(q.id)}/>)}
+      <ArrowHeader icon="⚡" text="오늘의 핵심 퀘스트"/>
+      {daily.core.map(q=><QuestCard key={q.id} quest={q} status={questStatus(q.id)} onPress={()=>openQuestModal(q.id)}/>)}
+      {daily.exercise.length>0&&<><ArrowHeader icon="🏃" text="주말 운동 퀘스트"/>{daily.exercise.map(q=><QuestCard key={q.id} quest={q} status={questStatus(q.id)} onPress={()=>openQuestModal(q.id)}/>)}</>}
+      {daily.rare.length>0&&<><ArrowHeader icon="✨" text="레어 퀘스트"/>{daily.rare.map(q=><QuestCard key={q.id} quest={q} status={questStatus(q.id)} onPress={()=>openQuestModal(q.id)}/>)}</>}
+
+      {/* Quest modal */}
+      {activeQuestId&&(
+        <div className="modal-overlay-bg" onClick={closeModal}>
+          <div onClick={e=>e.stopPropagation()} style={{background:'linear-gradient(180deg,#2a1a08,#1a0e05)',border:'2px solid #6b4a1a',borderRadius:'20px 20px 0 0',padding:'24px 20px 30px',width:'100%',maxWidth:420}}>
+            <div style={{fontFamily:'Cinzel,serif',fontSize:14,fontWeight:700,color:'#f5e28a',marginBottom:6}}>{activeQuest?.icon} {activeQuest?.name}</div>
+            <div style={{fontFamily:'Noto Sans KR,sans-serif',fontSize:11,color:'#a07840',lineHeight:1.7,marginBottom:14}}>{activeQuest?.desc}</div>
+            {photoData&&<img src={photoData} style={{width:'100%',height:140,objectFit:'cover',borderRadius:10,marginBottom:10,border:'1px solid #6b4a1a'}}/>}
+            <div className="photo-upload-area" onClick={()=>fileRef.current?.click()}>
+              📷 인증 사진 찍기 / 올리기
+            </div>
+            <input ref={fileRef} type="file" accept="image/*" onChange={handlePhotoChange} style={{display:'none'}}/>
+            <button onClick={submitQuest} style={{width:'100%',background:'linear-gradient(135deg,#6b3d10,#c87820)',border:'1px solid #f5e28a',borderRadius:12,padding:13,fontSize:14,fontWeight:700,color:'#f5e28a',cursor:'pointer',marginTop:10,fontFamily:'Cinzel,serif'}}>퀘스트 제출!</button>
+            <button onClick={closeModal} style={{width:'100%',background:'transparent',border:'1px solid #3a2a10',borderRadius:12,padding:10,fontSize:13,color:'#6a5a40',cursor:'pointer',marginTop:8,fontFamily:'Cinzel,serif'}}>나중에</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function GachaScreen({state,setState,showToast}){
+  const [spinning,setSpinning]=React.useState(false);
+  const [result,setResult]=React.useState(null);
+  const [revealModal,setRevealModal]=React.useState(null);
+  function openGacha(){
+    if((state.gachaQueue||0)===0)return;
+    setSpinning(true);
+    setTimeout(()=>{
+      const isRare=Math.random()<0.15;
+      const ptChoices=isRare?[500,700,1000]:[80,150,200,250,300];
+      const pts=ptChoices[Math.floor(Math.random()*ptChoices.length)];
+      const jitter=Math.round((Math.random()-.5)*30);
+      const awarded=Math.max(pts,pts+jitter);
+      const ns={...state,
+        profile:{...state.profile,points:(state.profile.points||0)+awarded},
+        gachaQueue:(state.gachaQueue||0)-1,
+        rewardHistory:[{icon:isRare?'🌟':'🎁',name:isRare?'희귀 보상':'일반 보상',pts:awarded,date:today()},...(state.rewardHistory||[])].slice(0,20),
+      };
+      saveState(ns);setState(ns);
+      setSpinning(false);
+      setRevealModal({pts:awarded,isRare,icon:isRare?'🌟':'🎁'});
+    },600);
+  }
+  function buyItem(item){
+    const pts=state.profile.points||0;
+    if(pts<item.cost){showToast('포인트가 부족해요!');return;}
+    const ns={...state,
+      profile:{...state.profile,points:pts-item.cost},
+      purchasedItems:[...(state.purchasedItems||[]),{id:item.id,name:item.name,date:today()}],
+      rewardHistory:[{icon:item.icon,name:`[구매] ${item.name}`,pts:-item.cost,date:today()},...(state.rewardHistory||[])].slice(0,20),
+    };
+    saveState(ns);setState(ns);
+    showToast(`🎉 ${item.name} 구매 완료!`);
+  }
+  return(
+    <div className="scroll-area" style={{flex:1,overflowY:'auto',padding:'0 12px 80px'}}>
+      <ArrowHeader icon="🎰" text="가챠 보상함"/>
+      <div style={{display:'flex',flexDirection:'column',alignItems:'center',padding:'20px 0'}}>
+        <div className={`gacha-box-rpg${spinning?' gacha-spin':''}`} onClick={openGacha}>🎁</div>
+        <div style={{fontFamily:'Cinzel,serif',fontSize:11,color:'#f5e28a',background:'linear-gradient(135deg,#4a2800,#6b3d10)',border:'1px solid #c8a84b',borderRadius:10,padding:'4px 14px',marginTop:12,marginBottom:10}}>
+          대기 중인 보상 {state.gachaQueue||0}개
+        </div>
+        <button onClick={openGacha} disabled={!state.gachaQueue||spinning} style={{background:'linear-gradient(135deg,#6b3d10,#c87820)',border:'2px solid #f5e28a',borderRadius:14,padding:'11px 28px',fontSize:13,fontWeight:700,color:'#f5e28a',cursor:'pointer',fontFamily:'Cinzel,serif',opacity:!state.gachaQueue?0.4:1}}>
+          보상 열기!
+        </button>
+      </div>
+      <ArrowHeader icon="🛒" text="보상 상점"/>
+      {SHOP_ITEMS.map(item=>(
+        <div key={item.id} style={{background:'linear-gradient(135deg,#2a1a08,#1a0e05)',border:'1px solid #4a3010',borderRadius:12,padding:'12px',marginBottom:10,display:'flex',alignItems:'center',gap:10}}>
+          <div style={{fontSize:24,flexShrink:0}}>{item.icon}</div>
+          <div style={{flex:1}}>
+            <div style={{fontFamily:'Noto Sans KR,sans-serif',fontSize:13,fontWeight:700,color:'#f5e28a',marginBottom:2}}>{item.name}</div>
+            <div style={{fontFamily:'Cinzel,serif',fontSize:10,color:'#c8a84b',fontWeight:700}}>🪙 {item.cost.toLocaleString()}P</div>
+            <div style={{fontFamily:'Noto Sans KR,sans-serif',fontSize:10,color:'#6a5a40'}}>{item.desc}</div>
+          </div>
+          <button onClick={()=>buyItem(item)} disabled={(state.profile.points||0)<item.cost} style={{background:'linear-gradient(135deg,#6b3d10,#c87820)',border:'1px solid #f5e28a',borderRadius:10,padding:'7px 12px',fontSize:11,fontWeight:700,color:'#f5e28a',cursor:'pointer',flexShrink:0,fontFamily:'Cinzel,serif',opacity:(state.profile.points||0)<item.cost?0.35:1}}>
+            구매
+          </button>
+        </div>
+      ))}
+      <ArrowHeader icon="📋" text="최근 보상 기록"/>
+      {(state.rewardHistory||[]).slice(0,10).map((r,i)=>(
+        <div key={i} style={{background:'rgba(0,0,0,.3)',border:'1px solid #2a1a08',borderRadius:10,padding:'10px 12px',marginBottom:8,display:'flex',alignItems:'center',gap:10,fontFamily:'Noto Sans KR,sans-serif',fontSize:12}}>
+          <span>{r.icon}</span>
+          <span style={{flex:1,color:'#c8a87a'}}>{r.name}</span>
+          <span style={{color:r.pts>0?'#f5c842':'#ff6b6b',fontWeight:700,fontFamily:'Cinzel,serif'}}>{r.pts>0?'+':''}{r.pts}P</span>
+        </div>
+      ))}
+      {(!state.rewardHistory||state.rewardHistory.length===0)&&<div style={{textAlign:'center',color:'#4a3a20',fontSize:12,padding:20,fontFamily:'Noto Sans KR,sans-serif'}}>아직 보상 기록이 없어요</div>}
+
+      {/* Gacha reveal modal */}
+      {revealModal&&(
+        <div className="modal-overlay-bg center" onClick={()=>setRevealModal(null)}>
+          <div onClick={e=>e.stopPropagation()} style={{background:'linear-gradient(180deg,#2a1a08,#1a0e05)',border:'2px solid #c8a84b',borderRadius:20,padding:'28px 24px',maxWidth:300,margin:'0 16px',textAlign:'center',width:'100%'}}>
+            <div style={{fontSize:52,marginBottom:10}}>{revealModal.icon}</div>
+            <div style={{fontFamily:'Cinzel,serif',fontSize:28,fontWeight:900,color:'#f5e28a',marginBottom:4}}>+{revealModal.pts}P</div>
+            <div style={{fontFamily:'Noto Sans KR,sans-serif',fontSize:12,color:'#c8a87a',marginBottom:4}}>{revealModal.isRare?'🌟 희귀 보상 획득!':'보상 획득!'}</div>
+            <button onClick={()=>setRevealModal(null)} style={{width:'100%',background:'linear-gradient(135deg,#6b3d10,#c87820)',border:'2px solid #f5e28a',borderRadius:12,padding:12,fontSize:14,fontWeight:700,color:'#f5e28a',cursor:'pointer',marginTop:14,fontFamily:'Cinzel,serif'}}>받기! 🎉</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ReportScreen({state,setState,showToast}){
+  const [dateVal,setDateVal]=React.useState(today());
+  const [hVal,setHVal]=React.useState('');
+  const [wVal,setWVal]=React.useState('');
+  const [saved,setSaved]=React.useState('');
+  const pts=state.profile.points||0;
+  const lv=getLevelByPts(pts);
+  const lastH=state.heightHistory.length?state.heightHistory[state.heightHistory.length-1].value:null;
+  const lastW=state.weightHistory.length?state.weightHistory[state.weightHistory.length-1].value:null;
+  function saveRecord(){
+    const h=parseFloat(hVal),w=parseFloat(wVal);
+    if(isNaN(h)&&isNaN(w)){setSaved('키 또는 몸무게를 입력해주세요');return;}
+    let ns={...state};
+    if(!isNaN(h)&&h>0)ns={...ns,heightHistory:[...ns.heightHistory,{date:dateVal,value:h}]};
+    if(!isNaN(w)&&w>0)ns={...ns,weightHistory:[...ns.weightHistory,{date:dateVal,value:w}]};
+    saveState(ns);setState(ns);
+    setSaved('✅ 저장 완료!');setHVal('');setWVal('');
+    setTimeout(()=>setSaved(''),2000);
+  }
+  // Simple week bar chart
+  const days=['일','월','화','수','목','금','토'];
+  const today7=Array.from({length:7},(_,i)=>{
+    const d=new Date();d.setDate(d.getDate()-6+i);
+    return d.toISOString().slice(0,10);
+  });
+  const todayIdx=6;
+  const questCountByDay=today7.map(d=>state.questLog.filter(l=>l.date===d).length);
+  const maxQ=Math.max(...questCountByDay,1);
+  return(
+    <div className="scroll-area" style={{flex:1,overflowY:'auto',padding:'0 12px 80px'}}>
+      {/* Hero */}
+      <div style={{background:'linear-gradient(160deg,rgba(74,40,0,.4),rgba(26,14,5,.8))',border:'1px solid #6b4a1a',borderRadius:16,padding:16,textAlign:'center',marginTop:12,marginBottom:12}}>
+        <div style={{fontSize:32,marginBottom:4}}>{lv.emoji}</div>
+        <div style={{fontFamily:'Cinzel,serif',fontSize:20,fontWeight:900,color:'#f5e28a',marginBottom:2}}>{lastH?`${lastH} cm`:'— cm'}</div>
+        <div style={{fontFamily:'Noto Sans KR,sans-serif',fontSize:11,color:'#c8a87a'}}>{lastH?`현재 키 기록`:'키를 입력해주세요'}</div>
+      </div>
+      {/* Mini stats */}
+      <div style={{display:'flex',gap:8,marginBottom:12}}>
+        {[
+          {icon:'⚡',v:`Lv.${lv.lv}`,l:'현재 레벨'},
+          {icon:'🔥',v:`${state.profile.streak||0}일`,l:'연속 달성'},
+          {icon:'🪙',v:pts,l:'누적 포인트'},
+        ].map((m,i)=>(
+          <div key={i} className="stone-slot" style={{flex:1,borderRadius:12,padding:'10px 6px',textAlign:'center'}}>
+            <div style={{fontSize:18,marginBottom:2}}>{m.icon}</div>
+            <div style={{fontFamily:'Cinzel,serif',fontSize:14,fontWeight:900,color:'#f5e28a'}}>{m.v}</div>
+            <div style={{fontFamily:'Noto Sans KR,sans-serif',fontSize:9,color:'#6a5a40'}}>{m.l}</div>
+          </div>
+        ))}
+      </div>
+      {/* Week bar chart */}
+      <div style={{background:'rgba(0,0,0,.3)',border:'1px solid #2a1a08',borderRadius:14,padding:'12px',marginBottom:12}}>
+        <div style={{fontFamily:'Cinzel,serif',fontSize:11,fontWeight:700,color:'#c8a87a',marginBottom:10}}>📊 이번 주 퀘스트 현황</div>
+        <div style={{display:'flex',alignItems:'flex-end',gap:6,height:60}}>
+          {today7.map((d,i)=>{
+            const cnt=questCountByDay[i];
+            const h=cnt>0?Math.round(cnt/maxQ*56)+4:4;
+            const isTod=i===todayIdx;
+            const dow=new Date(d+'T12:00').getDay();
+            return(
+              <div key={i} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:3}}>
+                <div className={isTod?'today-bar':'week-bar'} style={{width:'100%',height:h}}/>
+                <div style={{fontFamily:'Cinzel,serif',fontSize:8,color:isTod?'#f5e28a':'#6a5a40'}}>{days[dow]}</div>
+              </div>
+            );
+          })}
+        </div>
+        {questCountByDay.reduce((a,b)=>a+b,0)>=15&&(
+          <div style={{background:'linear-gradient(135deg,rgba(200,168,75,.15),rgba(168,85,247,.1))',border:'1px solid #c8a84b',borderRadius:10,padding:12,fontSize:11,lineHeight:1.7,color:'#f5e28a',marginTop:8,fontFamily:'Noto Sans KR,sans-serif'}}>
+            🏆 이번 주 <b>{questCountByDay.reduce((a,b)=>a+b,0)}개</b> 퀘스트 클리어! 대단해요!
+          </div>
+        )}
+      </div>
+      {/* Input card */}
+      <div style={{background:'rgba(0,0,0,.3)',border:'1px solid #2a1a08',borderRadius:14,padding:14,marginBottom:14}}>
+        <div style={{fontFamily:'Cinzel,serif',fontSize:12,fontWeight:700,color:'#f5e28a',marginBottom:10}}>📝 신체 기록 입력</div>
+        <div style={{marginBottom:8}}>
+          <div style={{fontFamily:'Noto Sans KR,sans-serif',fontSize:9,color:'#6a5a40',marginBottom:4}}>날짜</div>
+          <input type="date" value={dateVal} onChange={e=>setDateVal(e.target.value)} className="onboard-field" style={{textAlign:'left'}}/>
+        </div>
+        <div style={{display:'flex',gap:6,marginBottom:10}}>
+          <div style={{flex:1}}>
+            <div style={{fontFamily:'Noto Sans KR,sans-serif',fontSize:9,color:'#6a5a40',marginBottom:4}}>키 (cm)</div>
+            <input type="number" value={hVal} onChange={e=>setHVal(e.target.value)} placeholder="예: 138.5" step="0.1" className="onboard-field" style={{textAlign:'left'}}/>
+          </div>
+          <div style={{flex:1}}>
+            <div style={{fontFamily:'Noto Sans KR,sans-serif',fontSize:9,color:'#6a5a40',marginBottom:4}}>몸무게 (kg)</div>
+            <input type="number" value={wVal} onChange={e=>setWVal(e.target.value)} placeholder="예: 33.2" step="0.1" className="onboard-field" style={{textAlign:'left'}}/>
+          </div>
+        </div>
+        <button onClick={saveRecord} style={{width:'100%',background:'linear-gradient(135deg,#4a2800,#8a5010)',border:'1px solid #c8a84b',borderRadius:10,padding:10,fontSize:12,fontWeight:700,color:'#f5e28a',cursor:'pointer',fontFamily:'Cinzel,serif'}}>기록 저장하기</button>
+        {saved&&<div style={{textAlign:'center',fontSize:11,color:'#5ac878',fontWeight:700,marginTop:6,fontFamily:'Noto Sans KR,sans-serif'}}>{saved}</div>}
       </div>
     </div>
-  `;
-
-  el.innerHTML = html;
+  );
 }
 
-// ═══════════════════════════════════════
-// NAVIGATION
-// ═══════════════════════════════════════
-function switchScreen(name, navEl) {
-  if (name === 'parent' && !STATE.parentUnlocked) {
-    pendingScreen = name;
-    showPin();
-    return;
+function ParentScreen({state,setState,pinVerified,showToast}){
+  function approveQuest(pendingId){
+    const pending=state.pendingApprovals.find(p=>p.id===pendingId);
+    if(!pending)return;
+    const quest=QUEST_POOL.find(q=>q.id===pending.questId);
+    const pts=randomPts(quest);
+    const newLog={date:today(),questId:pending.questId,pointsAwarded:pts,timestamp:Date.now()};
+    const newHistory=[{icon:quest.icon,name:quest.name,pts,date:today()},...(state.rewardHistory||[])].slice(0,20);
+    // update streak
+    let streak=state.profile.streak||0;
+    const last=state.profile.lastActiveDate;
+    if(last===today()){}
+    else if(last&&(new Date(today())-new Date(last))<86400000*2)streak+=1;
+    else streak=1;
+    // week cycle
+    let wc={...state.weekCycle};
+    if(!wc.startDate){const now=new Date();const dow=now.getDay();const start=new Date(now);start.setDate(now.getDate()-dow);wc.startDate=start.toISOString().slice(0,10);wc.completedDays=[];wc.weeklyRewardPending=false;wc.weeklyRewardClaimed=false;}
+    if(!wc.completedDays.includes(today()))wc.completedDays=[...wc.completedDays,today()];
+    if(wc.completedDays.length>=5&&!wc.weeklyRewardClaimed)wc.weeklyRewardPending=true;
+    const ns={...state,
+      profile:{...state.profile,points:(state.profile.points||0)+pts,streak,lastActiveDate:today(),totalApproved:(state.profile.totalApproved||0)+1},
+      questLog:[...state.questLog,newLog],
+      pendingApprovals:state.pendingApprovals.filter(p=>p.id!==pendingId),
+      rewardHistory:newHistory,
+      gachaQueue:(state.gachaQueue||0)+1,
+      weekCycle:wc,
+    };
+    saveState(ns);setState(ns);
+    showToast(`✅ 승인! +${pts}P 획득`);
   }
-  doSwitchScreen(name, navEl);
-}
-
-function doSwitchScreen(name, navEl) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById(`screen-${name}`).classList.add('active');
-  if (navEl) navEl.classList.add('active');
-  else {
-    const navItems = document.querySelectorAll('.nav-item');
-    navItems.forEach(n => { if (n.dataset.screen === name) n.classList.add('active'); });
+  function rejectQuest(pendingId){
+    const ns={...state,pendingApprovals:state.pendingApprovals.filter(p=>p.id!==pendingId)};
+    saveState(ns);setState(ns);
+    showToast('❌ 거부됨');
   }
-
-  if (name === 'home') renderHomeScreen();
-  if (name === 'gacha') renderGachaScreen();
-  if (name === 'report') renderReportScreen();
-  if (name === 'parent') { STATE.parentUnlocked = true; renderParentScreen(); }
+  function resetData(){
+    if(!window.confirm('모든 데이터를 초기화할까요?\n이 작업은 되돌릴 수 없습니다.'))return;
+    const ns=getDefaultState();
+    saveState(ns);setState(ns);
+    showToast('🗑️ 데이터 초기화 완료');
+  }
+  const pending=state.pendingApprovals||[];
+  return(
+    <div className="scroll-area" style={{flex:1,overflowY:'auto',padding:'0 12px 80px'}}>
+      <ArrowHeader icon="👤" text="부모 관리 화면"/>
+      {/* Stats summary */}
+      <div style={{background:'rgba(0,0,0,.3)',border:'1px solid #2a1a08',borderRadius:12,padding:12,marginBottom:12}}>
+        <div style={{fontFamily:'Cinzel,serif',fontSize:10,fontWeight:700,color:'#c8a84b',marginBottom:6}}>📊 현황 요약</div>
+        <div style={{display:'flex',gap:6}}>
+          {[
+            {label:'누적 포인트',value:`${state.profile.points||0}P`},
+            {label:'총 승인',value:`${state.profile.totalApproved||0}회`},
+            {label:'연속일',value:`${state.profile.streak||0}일`},
+          ].map((s,i)=>(
+            <div key={i} className="stone-slot" style={{flex:1,borderRadius:8,padding:'6px',textAlign:'center'}}>
+              <div style={{fontFamily:'Cinzel,serif',fontSize:12,fontWeight:900,color:'#f5e28a'}}>{s.value}</div>
+              <div style={{fontFamily:'Noto Sans KR,sans-serif',fontSize:8,color:'#6a5a40'}}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <ArrowHeader icon="⏳" text="승인 대기 목록"/>
+      {pending.length===0&&<div style={{textAlign:'center',color:'#4a3a20',fontSize:12,padding:16,fontFamily:'Noto Sans KR,sans-serif'}}>대기 중인 항목이 없어요</div>}
+      {pending.map(p=>{
+        const q=QUEST_POOL.find(q=>q.id===p.questId);
+        if(!q)return null;
+        return(
+          <div key={p.id} style={{background:'rgba(0,0,0,.3)',border:'1px solid #3a2a10',borderRadius:12,padding:10,display:'flex',gap:10,alignItems:'center',marginBottom:8}}>
+            {p.photo
+              ?<img src={p.photo} style={{width:48,height:48,borderRadius:8,objectFit:'cover',flexShrink:0,border:'1px solid #6b4a1a'}}/>
+              :<div style={{width:48,height:48,borderRadius:8,background:'linear-gradient(135deg,#3b82f6,#06b6d4)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,flexShrink:0}}>{q.icon}</div>}
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontFamily:'Noto Sans KR,sans-serif',fontSize:12,fontWeight:700,color:'#f5e28a',marginBottom:2}}>{q.name}</div>
+              <div style={{fontFamily:'Cinzel,serif',fontSize:9,color:'#6a5a40'}}>{new Date(p.submittedAt).toLocaleString('ko-KR')}</div>
+            </div>
+            <button onClick={()=>approveQuest(p.id)} style={{background:'#00b37e',color:'#fff',fontSize:11,fontWeight:700,border:'none',borderRadius:8,padding:'6px 10px',cursor:'pointer',flexShrink:0,fontFamily:'Cinzel,serif'}}>승인</button>
+            <button onClick={()=>rejectQuest(p.id)} style={{background:'rgba(255,107,107,.15)',color:'#ff6b6b',fontSize:11,fontWeight:700,border:'1px solid rgba(255,107,107,.3)',borderRadius:8,padding:'6px 8px',cursor:'pointer',flexShrink:0,fontFamily:'Cinzel,serif'}}>거부</button>
+          </div>
+        );
+      })}
+      {/* Data reset */}
+      <div style={{marginTop:20,borderTop:'1px solid #2a1a08',paddingTop:14}}>
+        <button onClick={resetData} style={{width:'100%',background:'rgba(255,107,107,.1)',border:'1px solid rgba(255,107,107,.3)',borderRadius:10,padding:10,fontSize:12,fontWeight:700,color:'#ff6b6b',cursor:'pointer',fontFamily:'Cinzel,serif'}}>
+          🗑️ 데이터 초기화
+        </button>
+      </div>
+    </div>
+  );
 }
 
-// ═══════════════════════════════════════
-// PIN
-// ═══════════════════════════════════════
-function showPin() {
-  currentPinBuffer = '';
-  updatePinDots();
-  document.getElementById('pinErr').textContent = '';
-  document.getElementById('pinOverlay').classList.remove('hidden');
-}
-function cancelPin() {
-  document.getElementById('pinOverlay').classList.add('hidden');
-  pendingScreen = null;
-}
-function pinInput(key) {
-  if (key === 'del') {
-    currentPinBuffer = currentPinBuffer.slice(0,-1);
-  } else if (key === 'ok') {
-    checkPin();
-    return;
-  } else {
-    if (currentPinBuffer.length >= 4) return;
-    currentPinBuffer += key;
-    if (currentPinBuffer.length === 4) {
-      setTimeout(checkPin, 100);
+function PinOverlay({onSuccess,onCancel,pin}){
+  const [buf,setBuf]=React.useState('');
+  const [err,setErr]=React.useState('');
+  function press(k){
+    if(k==='del'){setBuf(b=>b.slice(0,-1));setErr('');return;}
+    if(k==='ok'){
+      if(buf===pin){onSuccess();}
+      else{setErr('PIN이 틀렸습니다');setBuf('');}
+      return;
     }
+    if(buf.length<4)setBuf(b=>b+k);
   }
-  updatePinDots();
+  return(
+    <div style={{position:'absolute',inset:0,background:'rgba(0,0,0,.88)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',zIndex:100}}>
+      <div style={{background:'linear-gradient(180deg,#2a1a08,#1a0e05)',border:'2px solid #6b4a1a',borderRadius:20,padding:'28px 24px',textAlign:'center',width:280}}>
+        <div style={{fontFamily:'Cinzel,serif',fontSize:14,fontWeight:700,color:'#f5e28a',marginBottom:4}}>🔐 부모 인증</div>
+        <div style={{fontFamily:'Noto Sans KR,sans-serif',fontSize:11,color:'#6a5a40',marginBottom:18}}>PIN 번호 4자리를 입력하세요</div>
+        <div style={{display:'flex',justifyContent:'center',gap:10,marginBottom:18}}>
+          {[0,1,2,3].map(i=>(
+            <div key={i} style={{width:14,height:14,borderRadius:'50%',background:i<buf.length?'#c8a84b':'transparent',border:'2px solid',borderColor:i<buf.length?'#c8a84b':'#4a3010'}}/>
+          ))}
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,marginBottom:10}}>
+          {['1','2','3','4','5','6','7','8','9','del','0','ok'].map(k=>(
+            <button key={k} className="pin-key-rpg" onClick={()=>press(k)}>{k==='del'?'⌫':k==='ok'?'확인':k}</button>
+          ))}
+        </div>
+        <div style={{fontFamily:'Noto Sans KR,sans-serif',fontSize:11,color:'#ff6b6b',minHeight:14}}>{err}</div>
+        <span onClick={onCancel} style={{fontFamily:'Cinzel,serif',fontSize:11,color:'#4a3010',cursor:'pointer',display:'inline-block',marginTop:10}}>취소</span>
+      </div>
+    </div>
+  );
 }
-function updatePinDots() {
-  const dots = document.querySelectorAll('.pin-dot');
-  dots.forEach((d,i) => {
-    d.classList.toggle('filled', i < currentPinBuffer.length);
-  });
+
+function OnboardScreen({onDone}){
+  const [name,setName]=React.useState('');
+  const [h,setH]=React.useState('');
+  const [w,setW]=React.useState('');
+  const [pin,setPin]=React.useState('');
+  function submit(){
+    if(!name.trim()){alert('이름을 입력해주세요!');return;}
+    if(!pin||pin.length<4){alert('PIN 4자리를 입력해주세요!');return;}
+    onDone(name.trim(),parseFloat(h),parseFloat(w),pin);
+  }
+  return(
+    <div style={{position:'absolute',inset:0,background:'linear-gradient(180deg,#2a1505,#1a0e05,#0e0803)',zIndex:150,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'30px 24px'}}>
+      <div style={{fontSize:56,marginBottom:14}}>🏆</div>
+      <div style={{fontFamily:'Cinzel,serif',fontSize:12,fontWeight:700,color:'#f5e28a',textAlign:'center',marginBottom:8,lineHeight:1.8,letterSpacing:2}}>키성장 퀘스트</div>
+      <div style={{fontFamily:'Noto Sans KR,sans-serif',fontSize:13,color:'#c8a87a',textAlign:'center',marginBottom:24,lineHeight:1.7}}>닉네임을 입력하고<br/>성장 모험을 시작하세요!</div>
+      <input className="onboard-field" placeholder="이름 (예: 민준)" maxLength={6} value={name} onChange={e=>setName(e.target.value)} style={{marginBottom:12}}/>
+      <div style={{fontFamily:'Noto Sans KR,sans-serif',fontSize:11,color:'#6a5a40',marginBottom:8}}>현재 키 / 몸무게</div>
+      <div style={{display:'flex',gap:8,width:'100%',marginBottom:16}}>
+        <input className="onboard-field" placeholder="키 (cm)" type="number" step="0.1" value={h} onChange={e=>setH(e.target.value)} style={{margin:0}}/>
+        <input className="onboard-field" placeholder="몸무게 (kg)" type="number" step="0.1" value={w} onChange={e=>setW(e.target.value)} style={{margin:0}}/>
+      </div>
+      <div style={{fontFamily:'Noto Sans KR,sans-serif',fontSize:11,color:'#6a5a40',marginBottom:8}}>부모 PIN 설정 (4자리)</div>
+      <input className="onboard-field" placeholder="예: 1234" type="number" maxLength={4} value={pin} onChange={e=>setPin(e.target.value)} style={{marginBottom:20}}/>
+      <button onClick={submit} style={{width:'100%',background:'linear-gradient(135deg,#4a2800,#c87820)',border:'2px solid #f5e28a',borderRadius:14,padding:14,fontSize:15,fontWeight:700,color:'#f5e28a',cursor:'pointer',fontFamily:'Cinzel,serif'}}>
+        시작하기 🚀
+      </button>
+      <div style={{fontFamily:'Noto Sans KR,sans-serif',fontSize:10,color:'#3a2a10',marginTop:10,textAlign:'center'}}>데이터는 이 기기에만 저장됩니다</div>
+    </div>
+  );
 }
-function checkPin() {
-  if (currentPinBuffer === STATE.profile.pin) {
-    document.getElementById('pinOverlay').classList.add('hidden');
-    if (pendingScreen) {
-      doSwitchScreen(pendingScreen, null);
-      pendingScreen = null;
+
+function BottomNav({active,onSwitch,gachaQueue}){
+  const tabs=[
+    {id:'home',icon:'🏠',label:'홈'},
+    {id:'gacha',icon:'🎁',label:'보상함',badge:gachaQueue},
+    {id:'report',icon:'📈',label:'리포트'},
+    {id:'parent',icon:'👤',label:'부모뷰'},
+  ];
+  return(
+    <div style={{display:'flex',justifyContent:'space-around',background:'linear-gradient(180deg,#1a0e05,#0d0803)',borderTop:'2px solid #3a2000',padding:'8px 0 max(env(safe-area-inset-bottom),10px)',flexShrink:0}}>
+      {tabs.map(t=>{
+        const isAct=active===t.id;
+        return(
+          <div key={t.id} onClick={()=>onSwitch(t.id)} style={{textAlign:'center',cursor:'pointer',padding:'2px 10px',position:'relative'}}>
+            <div style={{
+              fontSize:20,display:'block',marginBottom:2,
+              filter:isAct?'drop-shadow(0 0 6px rgba(16,185,129,.8))':'none',
+            }}>{t.icon}</div>
+            <div style={{
+              fontFamily:'Cinzel,serif',fontSize:8,fontWeight:700,
+              color:isAct?'#10b981':'#4a3010',
+              textShadow:isAct?'0 0 8px rgba(16,185,129,.6)':'none',
+            }}>{t.label}</div>
+            {t.badge>0&&<div style={{position:'absolute',top:0,right:6,background:'#f5c842',color:'#1a0e05',fontSize:9,fontWeight:900,borderRadius:'50%',width:14,height:14,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'Cinzel,serif'}}>{t.badge}</div>}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function App(){
+  const [state,setState]=React.useState(()=>loadState());
+  const [tab,setTab]=React.useState('home');
+  const [showPin,setShowPin]=React.useState(false);
+  const [pendingTab,setPendingTab]=React.useState(null);
+  const [pinVerified,setPinVerified]=React.useState(false);
+  const [toast,setToast]=React.useState(null);
+  const toastTimer=React.useRef(null);
+
+  function showToast(msg){
+    setToast(msg);
+    if(toastTimer.current)clearTimeout(toastTimer.current);
+    toastTimer.current=setTimeout(()=>setToast(null),2400);
+  }
+
+  function switchTab(id){
+    if(id==='parent'&&!pinVerified){
+      setPendingTab(id);setShowPin(true);return;
     }
-  } else {
-    document.getElementById('pinErr').textContent = '잘못된 PIN이에요. 다시 입력해주세요.';
-    currentPinBuffer = '';
-    updatePinDots();
+    setTab(id);
   }
-}
-function changePin() {
-  const np = document.getElementById('newPin').value.trim();
-  if (np.length !== 4 || isNaN(np)) { showToast('PIN은 4자리 숫자여야 해요'); return; }
-  STATE.profile.pin = np;
-  saveState();
-  showToast('PIN이 변경됐어요! 🔐');
-  renderParentScreen();
-}
-
-// ═══════════════════════════════════════
-// QUEST MODAL
-// ═══════════════════════════════════════
-function openQuestModal(questId) {
-  const q = QUEST_POOL.find(q=>q.id===questId);
-  if (!q) return;
-  activeQuestId = questId;
-  pendingPhotoData = null;
-  document.getElementById('questModalTitle').textContent = `${q.icon} ${q.name}`;
-  document.getElementById('questModalDesc').textContent = q.desc + `\n\n보상 예상: 🪙 ${q.pts[0]}~${q.pts[q.pts.length-1]}P (가챠 오픈 후 지급)`;
-  document.getElementById('photoPreview').style.display = 'none';
-  document.getElementById('photoPreview').src = '';
-  document.getElementById('questPhoto').value = '';
-  document.getElementById('questModal').classList.remove('hidden');
-}
-function closeQuestModal() {
-  document.getElementById('questModal').classList.add('hidden');
-  activeQuestId = null;
-  pendingPhotoData = null;
-}
-function previewPhoto(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    pendingPhotoData = e.target.result;
-    const prev = document.getElementById('photoPreview');
-    prev.src = pendingPhotoData;
-    prev.style.display = 'block';
-    document.getElementById('photoUploadBtn').textContent = '📷 사진 변경';
-  };
-  reader.readAsDataURL(file);
-}
-function submitQuest() {
-  if (!activeQuestId) return;
-  const q = QUEST_POOL.find(q=>q.id===activeQuestId);
-  if (!q) return;
-
-  const approvalEntry = {
-    id: Date.now().toString(),
-    questId: activeQuestId,
-    photo: pendingPhotoData,
-    date: today(),
-    submittedAt: new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}),
-  };
-  STATE.pendingApprovals = STATE.pendingApprovals || [];
-  STATE.pendingApprovals.push(approvalEntry);
-  saveState();
-  closeQuestModal();
-  showToast(`${q.icon} 퀘스트 제출 완료! 부모님 승인을 기다려요 🙌`);
-  renderHomeScreen();
-}
-
-// ═══════════════════════════════════════
-// APPROVAL
-// ═══════════════════════════════════════
-function approveQuest(approvalId) {
-  const idx = STATE.pendingApprovals.findIndex(p=>p.id===approvalId);
-  if (idx === -1) return;
-  const approval = STATE.pendingApprovals[idx];
-  const q = QUEST_POOL.find(q=>q.id===approval.questId);
-  if (!q) return;
-
-  const pts = randomPts(q);
-  STATE.questLog = STATE.questLog || [];
-  STATE.questLog.push({date: approval.date, questId: approval.questId, pointsAwarded: pts, timestamp: Date.now()});
-  STATE.profile.points = (STATE.profile.points||0) + pts;
-  STATE.profile.totalApproved = (STATE.profile.totalApproved||0) + 1;
-  STATE.gachaQueue = (STATE.gachaQueue||0) + 1;
-  STATE.pendingApprovals.splice(idx, 1);
-
-  updateStreak();
-  checkWeeklyCycle();
-  saveState();
-  showToast(`✅ 승인 완료! +${pts}P 적립, 가챠 1개 추가!`);
-  renderParentScreen();
-  renderTopbar();
-}
-
-function rejectQuest(approvalId) {
-  const idx = STATE.pendingApprovals.findIndex(p=>p.id===approvalId);
-  if (idx !== -1) {
-    STATE.pendingApprovals.splice(idx, 1);
-    saveState();
-    showToast('퀘스트 거절됨');
-    renderParentScreen();
+  function onPinSuccess(){
+    setShowPin(false);setPinVerified(true);setTab(pendingTab||'parent');setPendingTab(null);
   }
-}
+  function onPinCancel(){setShowPin(false);setPendingTab(null);}
 
-// ═══════════════════════════════════════
-// GACHA
-// ═══════════════════════════════════════
-const GACHA_MESSAGES = [
-  ['🎊','대박!','럭키!'],
-  ['✨','굿!','잘했어!'],
-  ['🔥','파이어!','퀘스트 완료!'],
-  ['⚡','찌릿!','에너지 충전!'],
-];
+  // Reset pin verification when leaving parent tab
+  React.useEffect(()=>{
+    if(tab!=='parent')setPinVerified(false);
+  },[tab]);
 
-function openGacha() {
-  if ((STATE.gachaQueue||0) === 0) return;
-
-  const box = document.getElementById('gachaBox');
-  box.classList.add('spin');
-  setTimeout(() => box.classList.remove('spin'), 600);
-
-  // Determine if rare
-  const isRare = Math.random() < 0.15;
-  const baseRange = isRare ? [300,800] : [50,250];
-  const pts = Math.round(baseRange[0] + Math.random()*(baseRange[1]-baseRange[0]));
-
-  STATE.gachaQueue = Math.max(0, (STATE.gachaQueue||0) - 1);
-  STATE.profile.points = (STATE.profile.points||0) + pts;
-  STATE.rewardHistory = STATE.rewardHistory || [];
-  const msg = rand(GACHA_MESSAGES);
-  STATE.rewardHistory.push({icon: msg[0], name: `가챠 보상 ${msg[1]}`, pts, date: todayLabel()});
-  saveState();
-
-  // Show modal
-  document.getElementById('gachaRevealIcon').textContent = isRare ? '🌟' : msg[0];
-  document.getElementById('gachaRevealPts').textContent = `+${pts}P`;
-  document.getElementById('gachaRevealMsg').textContent = isRare ? '레어 보상! 🎉' : msg[2];
-  document.getElementById('gachaRevealQuest').textContent = `총 포인트: 🪙 ${(STATE.profile.points).toLocaleString()}P`;
-  document.getElementById('gachaModal').classList.remove('hidden');
-
-  renderGachaScreen();
-  renderTopbar();
-}
-function closeGachaModal() {
-  document.getElementById('gachaModal').classList.add('hidden');
-}
-
-// Weekly reward
-function claimWeeklyReward() {
-  const pts = 500;
-  STATE.profile.points = (STATE.profile.points||0) + pts;
-  STATE.weekCycle.weeklyRewardClaimed = true;
-  STATE.weekCycle.weeklyRewardPending = false;
-  STATE.gachaQueue = (STATE.gachaQueue||0) + 3; // bonus 3 gachas
-  STATE.rewardHistory = STATE.rewardHistory||[];
-  STATE.rewardHistory.push({icon:'🏆', name:'주간 달성 보상', pts, date:todayLabel()});
-  saveState();
-  showToast('🏆 주간 보상 +500P & 가챠 3개 추가!');
-  renderHomeScreen();
-  renderTopbar();
-}
-
-// Purchase
-function purchaseItem(itemId) {
-  const item = SHOP_ITEMS.find(i=>i.id===itemId);
-  if (!item) return;
-  if ((STATE.profile.points||0) < item.cost) { showToast('포인트가 부족해요 🥲'); return; }
-  if (!confirm(`"${item.name}"을(를) ${item.cost.toLocaleString()}P로 교환할까요?`)) return;
-  STATE.profile.points -= item.cost;
-  STATE.purchasedItems = STATE.purchasedItems||[];
-  STATE.purchasedItems.push({itemId, date: today()});
-  STATE.rewardHistory = STATE.rewardHistory||[];
-  STATE.rewardHistory.push({icon:item.icon, name:item.name+' 교환', pts: -item.cost, date:todayLabel()});
-  saveState();
-  showToast(`${item.icon} "${item.name}" 교환 완료!`);
-  renderGachaScreen();
-  renderTopbar();
-}
-
-// ═══════════════════════════════════════
-// RECORD SAVE
-// ═══════════════════════════════════════
-function saveRecord() {
-  const date = document.getElementById('inDate').value;
-  const h = parseFloat(document.getElementById('inHeight').value);
-  const w = parseFloat(document.getElementById('inWeight').value);
-  const toast = document.getElementById('toast');
-
-  if (!date) { toast.style.color='var(--red)'; toast.textContent='날짜를 입력해주세요'; return; }
-  if (isNaN(h) && isNaN(w)) { toast.style.color='var(--red)'; toast.textContent='키 또는 몸무게를 입력해주세요'; return; }
-
-  if (!isNaN(h) && h > 0) {
-    STATE.heightHistory = STATE.heightHistory||[];
-    // Remove same-date entry
-    STATE.heightHistory = STATE.heightHistory.filter(e=>e.date!==date);
-    STATE.heightHistory.push({date, value:h});
-    STATE.heightHistory.sort((a,b)=>a.date.localeCompare(b.date));
-  }
-  if (!isNaN(w) && w > 0) {
-    STATE.weightHistory = STATE.weightHistory||[];
-    STATE.weightHistory = STATE.weightHistory.filter(e=>e.date!==date);
-    STATE.weightHistory.push({date, value:w});
-    STATE.weightHistory.sort((a,b)=>a.date.localeCompare(b.date));
+  function onOnboardDone(name,h,w,pin){
+    let ns={...getDefaultState(),profile:{...getDefaultState().profile,name,pin}};
+    if(!isNaN(h)&&h>0)ns.heightHistory=[{date:today(),value:h}];
+    if(!isNaN(w)&&w>0)ns.weightHistory=[{date:today(),value:w}];
+    saveState(ns);setState(ns);
   }
 
-  // Bonus points for weekly first record
-  const weekKey = getWeekKey(date);
-  const hasThisWeek = (STATE.questLog||[]).some(l=>getWeekKey(l.date)===weekKey && l.questId==='__record__');
-  if (!hasThisWeek) {
-    const bonus = 300;
-    STATE.profile.points = (STATE.profile.points||0) + bonus;
-    STATE.questLog = STATE.questLog||[];
-    STATE.questLog.push({date, questId:'__record__', pointsAwarded:bonus, timestamp:Date.now()});
-    toast.style.color = 'var(--green)';
-    toast.textContent = `저장 완료! 이번 주 첫 기록 +${bonus}P 🎉`;
-  } else {
-    toast.style.color = 'var(--text2)';
-    toast.textContent = '저장 완료! (이번 주 기록 보상은 이미 받았어요)';
+  if(!state.profile.name){
+    return(
+      <div className="wood-bg" style={{width:'100%',height:'100%',position:'relative'}}>
+        <OnboardScreen onDone={onOnboardDone}/>
+      </div>
+    );
   }
 
-  saveState();
-  document.getElementById('inHeight').value = '';
-  document.getElementById('inWeight').value = '';
-  renderReportScreen();
-  renderTopbar();
+  return(
+    <div className="wood-bg" style={{width:'100%',height:'100%',display:'flex',flexDirection:'column',position:'relative',overflow:'hidden'}}>
+      {/* Topbar */}
+      <div style={{
+        padding:'max(env(safe-area-inset-top),10px) 14px 8px',
+        background:'linear-gradient(180deg,#1a0a00,#0d0500)',
+        borderBottom:'2px solid #3a2000',flexShrink:0,
+        display:'flex',justifyContent:'space-between',alignItems:'center',
+      }}>
+        <div style={{fontFamily:'Cinzel,serif',fontSize:11,fontWeight:700,color:'#c8a84b',letterSpacing:1}}>
+          ⚔️ <span>{state.profile.name}</span>의 위대한 여정
+        </div>
+        <div onClick={()=>showToast(`누적 포인트: ${state.profile.points||0}P`)} style={{
+          background:'linear-gradient(135deg,#2a1505,#4a2800)',
+          border:'1px solid #8a6620',borderRadius:20,
+          padding:'4px 12px',fontSize:12,fontWeight:700,
+          display:'flex',alignItems:'center',gap:5,cursor:'pointer',
+          color:'#f5e28a',fontFamily:'Cinzel,serif',
+        }}>
+          🪙 <span>{state.profile.points||0}</span>
+        </div>
+      </div>
+
+      {/* Screen content */}
+      <div style={{flex:1,overflow:'hidden',display:'flex',flexDirection:'column'}}>
+        {tab==='home'&&<HomeScreen state={state} setState={setState} showToast={showToast}/>}
+        {tab==='gacha'&&<GachaScreen state={state} setState={setState} showToast={showToast}/>}
+        {tab==='report'&&<ReportScreen state={state} setState={setState} showToast={showToast}/>}
+        {tab==='parent'&&pinVerified&&<ParentScreen state={state} setState={setState} pinVerified={pinVerified} showToast={showToast}/>}
+      </div>
+
+      <BottomNav active={tab} onSwitch={switchTab} gachaQueue={state.gachaQueue||0}/>
+
+      {showPin&&<PinOverlay pin={state.profile.pin||'1234'} onSuccess={onPinSuccess} onCancel={onPinCancel}/>}
+
+      {toast&&<div className="toast-popup">{toast}</div>}
+    </div>
+  );
 }
 
-function getWeekKey(dateStr) {
-  const d = new Date(dateStr);
-  const jan1 = new Date(d.getFullYear(),0,1);
-  const week = Math.ceil(((d-jan1)/86400000 + jan1.getDay()+1)/7);
-  return `${d.getFullYear()}-W${week}`;
-}
-
-// ═══════════════════════════════════════
-// AVATAR
-// ═══════════════════════════════════════
-function changeAvatar(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    STATE.profile.avatar = e.target.result;
-    saveState();
-    // Reload avatar element
-    const el = document.getElementById('avatarEl');
-    if (el.tagName === 'DIV') {
-      el.outerHTML = `<img class="avatar-img" id="avatarEl" src="${e.target.result}" style="border-radius:50%;width:90px;height:90px;object-fit:cover;position:relative;display:block;border:3px solid var(--bg3);">`;
-    } else {
-      el.src = e.target.result;
-    }
-  };
-  reader.readAsDataURL(file);
-}
-
-// ═══════════════════════════════════════
-// TOAST
-// ═══════════════════════════════════════
-let toastTimer = null;
-function showToast(msg) {
-  const t = document.getElementById('toastPopup');
-  t.textContent = msg;
-  t.classList.add('show');
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
-}
-
-function showCoinInfo() {
-  showToast(`현재 포인트: 🪙 ${(STATE.profile.points||0).toLocaleString()}P`);
-}
-
-// Lock parent view when navigating away
-document.querySelectorAll('.nav-item').forEach(n => {
-  n.addEventListener('click', () => {
-    if (n.dataset.screen !== 'parent') STATE.parentUnlocked = false;
-  });
-});
-
-// ── START ──
-init();
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
 </script>
 </body>
 </html>
