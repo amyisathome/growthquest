@@ -76,17 +76,49 @@ body{
 /* ── CHAR CARD ── */
 .char-card{
   background:var(--card);border:1px solid var(--card-border);
-  border-radius:20px;padding:16px 14px;text-align:center;margin-bottom:14px;
+  border-radius:20px;padding:14px;margin-bottom:14px;
 }
 .char-title{
   font-family:'Press Start 2P',monospace;font-size:9px;
   color:var(--gold);margin-bottom:3px;letter-spacing:.02em;
 }
-.char-nick{font-size:13px;font-weight:700;color:#fff;margin-bottom:12px;}
+.char-nick{font-size:12px;font-weight:700;color:#fff;margin-bottom:8px;}
 .day-row{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:5px;}
 .progress-track{width:100%;height:10px;background:rgba(255,255,255,0.1);border-radius:6px;overflow:hidden;margin-bottom:4px;}
 .progress-fill{height:100%;background:linear-gradient(90deg,#ffb648,#ff7a5c);border-radius:6px;transition:width .5s;}
 .progress-label{font-size:10px;color:var(--text3);text-align:right;}
+
+/* RPG stat card */
+.char-top{display:flex;gap:12px;align-items:center;margin-bottom:12px;}
+.char-left{flex-shrink:0;}
+.char-right{flex:1;min-width:0;}
+.lv-badge{
+  font-family:'Press Start 2P',monospace;font-size:8px;
+  background:linear-gradient(135deg,var(--purple),var(--violet));
+  color:#fff;padding:3px 8px;border-radius:6px;display:inline-block;margin-bottom:5px;
+}
+.char-rank{font-size:10px;color:var(--gold);font-weight:700;margin-bottom:2px;}
+.char-nick-small{font-size:12px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.stat-row{display:flex;gap:6px;margin-bottom:10px;}
+.stat-box{
+  flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+  border-radius:10px;padding:7px 6px;text-align:center;
+}
+.stat-box .sv{font-size:14px;font-weight:900;color:#fff;line-height:1;}
+.stat-box .sl{font-size:9px;color:var(--text3);margin-top:3px;}
+.stat-box .si{font-size:12px;margin-bottom:2px;}
+.xp-section{}
+.xp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.xp-label{font-size:10px;font-weight:700;color:var(--cyan);}
+.xp-next{font-size:9px;color:var(--text3);}
+.xp-track{width:100%;height:12px;background:rgba(255,255,255,0.08);border-radius:8px;overflow:hidden;position:relative;}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--purple),var(--violet));border-radius:8px;transition:width .6s cubic-bezier(.4,0,.2,1);}
+.xp-glow{position:absolute;top:0;right:0;height:100%;width:20px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3));border-radius:0 8px 8px 0;}
+.quest-today{display:flex;align-items:center;justify-content:flex-end;gap:4px;margin-top:6px;font-size:10px;color:var(--text3);}
+.quest-today b{color:var(--green);}
+.levelup-flash{animation:lvflash .8s ease-out;}
+@keyframes lvflash{0%{box-shadow:0 0 0 0 rgba(108,92,231,.8);}100%{box-shadow:0 0 30px 10px rgba(108,92,231,0);}}
+
 
 /* ── PIXEL AVATAR ── */
 .avatar-wrap{width:90px;height:90px;margin:4px auto 10px;position:relative;cursor:pointer;}
@@ -307,19 +339,53 @@ body{
   <div class="screen active" id="screen-home">
     <div class="scrollarea" id="homeScroll">
       <!-- char card -->
-      <div class="char-card" style="margin-top:12px;">
-        <div class="avatar-wrap">
-          <div class="avatar-ring"></div>
-          <img id="avatarEl" class="avatar-img" src="avatar.png" alt="캐릭터">
+      <div class="char-card" style="margin-top:12px;" id="charCard">
+        <div class="char-top">
+          <div class="char-left">
+            <div class="avatar-wrap" style="width:72px;height:72px;flex-shrink:0;">
+              <div class="avatar-ring"></div>
+              <img id="avatarEl" class="avatar-img" src="avatar.png" alt="캐릭터" style="width:72px;height:72px;">
+            </div>
+          </div>
+          <div class="char-right" style="overflow:hidden;">
+            <div class="lv-badge" id="charLvBadge">LV.1</div>
+            <div class="char-rank" id="charRank">4급 — 새싹 전사</div>
+            <div class="char-nick-small" id="charNick">성장을 시작한 용사</div>
+          </div>
         </div>
-        <div class="char-title" id="charTitle">LV.1 — 새싹 전사</div>
-        <div class="char-nick" id="charNick">성장을 시작한 용사</div>
-        <div class="day-row">
-          <span>🔥 연속 <span id="streakDay">0</span>일째</span>
-          <span>오늘 <span id="todayComplete">0</span>/<span id="todayTotal">0</span> 완료</span>
+        <div class="stat-row" style="margin-top:2px;">
+          <div class="stat-box">
+            <div class="si">📏</div>
+            <div class="sv" id="statHeight">—</div>
+            <div class="sl">키(cm)</div>
+          </div>
+          <div class="stat-box">
+            <div class="si">⚖️</div>
+            <div class="sv" id="statWeight">—</div>
+            <div class="sl">몸무게</div>
+          </div>
+          <div class="stat-box">
+            <div class="si">🪙</div>
+            <div class="sv" id="statPoints">0</div>
+            <div class="sl">포인트</div>
+          </div>
+          <div class="stat-box">
+            <div class="si">🔥</div>
+            <div class="sv" id="statStreak">0</div>
+            <div class="sl">연속일</div>
+          </div>
         </div>
-        <div class="progress-track"><div class="progress-fill" id="homeProgress" style="width:0%"></div></div>
-        <div class="progress-label" id="homeProgressLabel">오늘의 진행률 0%</div>
+        <div class="xp-section">
+          <div class="xp-header">
+            <span class="xp-label" id="xpLabel">⚡ LV.2까지</span>
+            <span class="xp-next" id="xpNext">0 / 500P</span>
+          </div>
+          <div class="xp-track">
+            <div class="xp-fill" id="xpFill" style="width:0%"></div>
+            <div class="xp-glow"></div>
+          </div>
+          <div class="quest-today">오늘 퀘스트 <b id="todayComplete">0</b>/<span id="todayTotal">0</span> 완료</div>
+        </div>
       </div>
 
       <!-- weekly reward banner (hidden by default) -->
@@ -559,15 +625,29 @@ const SHOP_ITEMS = [
   {id:'s8',icon:'🐹',name:'햄스터',cost:30000,desc:'🏆 최종 목표 보상! 함께 키우자!'},
 ];
 
-// Level thresholds (by height cm)
+// Level thresholds (by accumulated points)
 const LEVEL_TABLE = [
-  {min:0,  max:133, lv:1, title:'새싹 전사',   emoji:'🌱', rank:'4급'},
-  {min:133,max:135, lv:2, title:'성장 병사',   emoji:'🌿', rank:'3급'},
-  {min:135,max:137, lv:3, title:'질풍 용사',   emoji:'⚡', rank:'2급'},
-  {min:137,max:139, lv:4, title:'야제 전사',   emoji:'🌙', rank:'1급'},
-  {min:139,max:141, lv:5, title:'그림자 검객', emoji:'🌟', rank:'특급'},
-  {min:141,max:999, lv:6, title:'방랑자 수호자',emoji:'👑',rank:'전설급'},
+  {lv:1, minPts:0,    maxPts:499,   title:'새싹 전사',    emoji:'🌱', rank:'4급'},
+  {lv:2, minPts:500,  maxPts:1499,  title:'성장 병사',    emoji:'🌿', rank:'3급'},
+  {lv:3, minPts:1500, maxPts:3499,  title:'질풍 용사',    emoji:'⚡', rank:'2급'},
+  {lv:4, minPts:3500, maxPts:6999,  title:'야제 전사',    emoji:'🌙', rank:'1급'},
+  {lv:5, minPts:7000, maxPts:12999, title:'그림자 검객',  emoji:'🌟', rank:'특급'},
+  {lv:6, minPts:13000,maxPts:99999, title:'방랑자 수호자',emoji:'👑', rank:'전설급'},
 ];
+function getLevelByPts(pts) {
+  for (let i = LEVEL_TABLE.length-1; i >= 0; i--) {
+    if (pts >= LEVEL_TABLE[i].minPts) return LEVEL_TABLE[i];
+  }
+  return LEVEL_TABLE[0];
+}
+function getXpProgress(pts) {
+  const lv = getLevelByPts(pts);
+  const next = LEVEL_TABLE.find(l => l.lv === lv.lv + 1);
+  if (!next) return {pct:100, current:pts, needed:0, nextLv:null};
+  const inLevel = pts - lv.minPts;
+  const needed = next.minPts - lv.minPts;
+  return {pct: Math.round(inLevel/needed*100), current:inLevel, needed, nextLv:next};
+}
 
 // Dynamic nickname patterns based on recent quest activity
 const NICK_PATTERNS = [
@@ -847,12 +927,34 @@ function renderTopbar() {
 }
 
 function renderHomeScreen() {
-  const lvInfo = getLevelInfo(getCurrentHeight());
-  document.getElementById('charTitle').textContent = `${lvInfo.rank} — ${lvInfo.title}`;
+  const pts = STATE.profile.points || 0;
+  const lvInfo = getLevelByPts(pts);
+  const xp = getXpProgress(pts);
+  const streak = STATE.profile.streak || 0;
+  const h = getCurrentHeight();
+  const w = getCurrentWeight();
+
+  // Level badge & rank
+  document.getElementById('charLvBadge').textContent = `LV.${lvInfo.lv}`;
+  document.getElementById('charRank').textContent = `${lvInfo.rank} — ${lvInfo.title}`;
   document.getElementById('charNick').textContent = getDynamicNick();
 
-  const streak = STATE.profile.streak || 0;
-  document.getElementById('streakDay').textContent = streak;
+  // Stats
+  document.getElementById('statHeight').textContent = h ? h : '—';
+  document.getElementById('statWeight').textContent = w ? w : '—';
+  document.getElementById('statPoints').textContent = pts >= 1000 ? (pts/1000).toFixed(1)+'k' : pts;
+  document.getElementById('statStreak').textContent = streak;
+
+  // XP bar
+  const xpFill = document.getElementById('xpFill');
+  xpFill.style.width = xp.pct + '%';
+  if (xp.nextLv) {
+    document.getElementById('xpLabel').textContent = `⚡ LV.${xp.nextLv.lv}까지`;
+    document.getElementById('xpNext').textContent = `${xp.current.toLocaleString()} / ${xp.needed.toLocaleString()}P`;
+  } else {
+    document.getElementById('xpLabel').textContent = '👑 최고 레벨 달성!';
+    document.getElementById('xpNext').textContent = `${pts.toLocaleString()}P`;
+  }
 
   // Avatar
   const avatarEl = document.getElementById('avatarEl');
@@ -982,7 +1084,7 @@ function renderGachaScreen() {
 function renderReportScreen() {
   const h = getCurrentHeight();
   const w = getCurrentWeight();
-  const lvInfo = getLevelInfo(h);
+  const lvInfo = getLevelByPts(STATE.profile.points||0);
 
   document.getElementById('reportEmoji').textContent = lvInfo.emoji;
   document.getElementById('reportHeight').textContent = h ? `${h} cm` : '— cm';
@@ -1126,7 +1228,7 @@ function renderParentScreen() {
   const el = document.getElementById('parentContent');
   const pending = STATE.pendingApprovals || [];
   const name = STATE.profile.name || '용사';
-  const lvInfo = getLevelInfo(getCurrentHeight());
+  const lvInfo = getLevelByPts(STATE.profile.points||0);
   const weekPct = Math.round((STATE.weekCycle.completedDays.length/7)*100);
 
   let html = '';
