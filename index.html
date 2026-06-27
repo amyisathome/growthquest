@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0d0d14">
+<title>키성장 퀘스트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#0d0d14;--bg2:#1a1a28;--bg3:#15152a;
+  --purple:#6c5ce7;--violet:#a855f7;--gold:#ffd76a;
+  --pink:#ff5da0;--cyan:#5ad1ff;--green:#5ad99a;--red:#ff6b6b;
+  --text:#fff;--text2:#cfcaf0;--text3:#9694b8;--text4:#6b6a88;
+  --card:rgba(255,255,255,0.06);--card-border:rgba(255,255,255,0.1);
+}
+html,body{height:100%;overflow:hidden;}
+body{
+  font-family:'Noto Sans KR',sans-serif;
+  background:var(--bg);color:var(--text);
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;
+}
+#app{
+  width:100%;max-width:420px;height:100%;max-height:900px;
+  background:linear-gradient(180deg,#1b1330 0%,#100c20 60%,#0a0816 100%);
+  display:flex;flex-direction:column;position:relative;overflow:hidden;
+}
+
+/* ── TOPBAR ── */
+.topbar{
+  padding:env(safe-area-inset-top,12px) 16px 10px;
+  padding-top:max(env(safe-area-inset-top),12px);
+  display:flex;justify-content:space-between;align-items:center;
+  background:rgba(0,0,0,0.2);border-bottom:1px solid rgba(255,255,255,0.05);
+  flex-shrink:0;
+}
+.topbar-title{font-size:13px;font-weight:700;color:var(--text2);letter-spacing:.05em;}
+.coin-badge{
+  background:rgba(255,255,255,0.1);border-radius:20px;
+  padding:5px 12px;font-size:12px;font-weight:700;
+  display:flex;align-items:center;gap:5px;cursor:pointer;
+}
+.coin-badge:active{opacity:.7;}
+
+/* ── SCROLL AREA ── */
+.scrollarea{flex:1;overflow-y:auto;padding:0 14px 80px;-webkit-overflow-scrolling:touch;}
+.scrollarea::-webkit-scrollbar{display:none;}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{
+  display:flex;justify-content:space-around;
+  padding:10px 0 max(env(safe-area-inset-bottom),14px);
+  background:rgba(0,0,0,0.4);border-top:1px solid rgba(255,255,255,0.08);
+  flex-shrink:0;
+}
+.nav-item{text-align:center;font-size:9px;color:var(--text4);cursor:pointer;padding:2px 10px;transition:color .2s;}
+.nav-item.active{color:#fff;}
+.nav-item:active{opacity:.7;}
+.nav-icon{font-size:18px;display:block;margin-bottom:2px;}
+
+/* ── SCREENS ── */
+.screen{display:none;flex-direction:column;height:100%;overflow:hidden;}
+.screen.active{display:flex;}
+
+/* ── SECTION LABEL ── */
+.section-label{
+  font-size:12px;font-weight:700;color:var(--text2);
+  margin:16px 0 10px;display:flex;align-items:center;gap:6px;
+}
+
+/* ── CHAR CARD ── */
+.char-card{
+  background:var(--card);border:1px solid var(--card-border);
+  border-radius:20px;padding:16px 14px;text-align:center;margin-bottom:14px;
+}
+.char-title{
+  font-family:'Press Start 2P',monospace;font-size:9px;
+  color:var(--gold);margin-bottom:3px;letter-spacing:.02em;
+}
+.char-nick{font-size:13px;font-weight:700;color:#fff;margin-bottom:12px;}
+.day-row{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:5px;}
+.progress-track{width:100%;height:10px;background:rgba(255,255,255,0.1);border-radius:6px;overflow:hidden;margin-bottom:4px;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#ffb648,#ff7a5c);border-radius:6px;transition:width .5s;}
+.progress-label{font-size:10px;color:var(--text3);text-align:right;}
+
+/* ── PIXEL AVATAR ── */
+.avatar-wrap{width:90px;height:90px;margin:4px auto 10px;position:relative;cursor:pointer;}
+.avatar-ring{position:absolute;inset:-4px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--violet),var(--cyan));}
+.avatar-img{width:90px;height:90px;border-radius:50%;object-fit:cover;position:relative;display:block;border:3px solid var(--bg3);}
+.avatar-edit{position:absolute;bottom:-2px;right:-2px;width:26px;height:26px;border-radius:50%;background:var(--bg3);border:2px solid var(--cyan);display:flex;align-items:center;justify-content:center;font-size:12px;}
+#fileInput{display:none;}
+
+/* pixel SVG avatar default */
+.pixel-char{width:90px;height:90px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1e1340,#2a1a50);position:relative;overflow:hidden;}
+
+/* ── QUEST CARDS ── */
+.quest-card{
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);
+  border-radius:14px;padding:11px 13px;display:flex;align-items:center;gap:11px;margin-bottom:9px;
+  cursor:pointer;transition:all .15s;position:relative;overflow:hidden;
+}
+.quest-card:active{transform:scale(0.98);}
+.quest-card.rare{border:1px solid var(--gold);background:linear-gradient(135deg,rgba(255,215,106,.12),rgba(255,93,160,.08));}
+.quest-card.done{opacity:.5;pointer-events:none;}
+.quest-card.pending{border:1px solid var(--cyan);background:rgba(90,209,255,.05);}
+.quest-card.approved{border:1px solid var(--green);background:rgba(90,217,154,.05);opacity:.7;pointer-events:none;}
+.q-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;background:rgba(255,255,255,0.08);flex-shrink:0;}
+.q-body{flex:1;min-width:0;}
+.q-name{font-size:13px;font-weight:700;color:#fff;margin-bottom:2px;}
+.q-desc{font-size:10px;color:var(--text3);}
+.q-stars{font-size:10px;color:var(--gold);white-space:nowrap;flex-shrink:0;font-weight:700;}
+.q-badge{font-size:9px;padding:2px 7px;border-radius:8px;font-weight:700;flex-shrink:0;}
+.q-badge.pending{background:rgba(90,209,255,.2);color:var(--cyan);}
+.q-badge.approved{background:rgba(90,217,154,.2);color:var(--green);}
+
+/* ── GACHA SCREEN ── */
+.gacha-stage{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px 20px;flex:1;
+}
+.gacha-box{
+  width:130px;height:130px;background:linear-gradient(135deg,#ffb648,var(--violet));
+  border-radius:24px;display:flex;align-items:center;justify-content:center;
+  font-size:52px;margin-bottom:20px;box-shadow:0 0 40px rgba(255,182,72,.5);
+  cursor:pointer;transition:transform .1s;
+}
+.gacha-box:active{transform:scale(.95);}
+.gacha-box.spin{animation:gacha-spin .6s ease-out;}
+@keyframes gacha-spin{0%{transform:scale(1) rotate(0);}30%{transform:scale(1.15) rotate(-8deg);}60%{transform:scale(1.2) rotate(8deg);}100%{transform:scale(1) rotate(0);}}
+.gacha-count-badge{background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;font-weight:700;font-size:11px;padding:4px 14px;border-radius:10px;margin-bottom:12px;}
+.gacha-cta{
+  background:linear-gradient(135deg,var(--purple),var(--violet));
+  color:#fff;font-weight:700;font-size:13px;
+  padding:12px 32px;border-radius:16px;border:none;cursor:pointer;transition:opacity .2s;
+}
+.gacha-cta:disabled{opacity:.4;cursor:not-allowed;}
+.gacha-cta:active:not(:disabled){opacity:.7;}
+.gacha-result{
+  text-align:center;animation:fadeIn .4s;margin-top:8px;
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+.gacha-result .pts{font-size:28px;font-weight:900;color:var(--gold);}
+.gacha-result .msg{font-size:12px;color:var(--text2);margin-top:4px;}
+
+/* reward history */
+.reward-list{width:100%;margin-top:14px;}
+.reward-row{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.05);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:12px;}
+.reward-row .pt{color:var(--gold);font-weight:700;margin-left:auto;white-space:nowrap;}
+
+/* reward shop */
+.shop-card{background:var(--card);border:1px solid var(--card-border);border-radius:14px;padding:12px;margin-bottom:10px;display:flex;align-items:center;gap:10px;}
+.shop-icon{font-size:24px;flex-shrink:0;}
+.shop-body{flex:1;}
+.shop-name{font-size:13px;font-weight:700;margin-bottom:3px;}
+.shop-cost{font-size:11px;color:var(--gold);font-weight:700;}
+.shop-btn{background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;font-size:11px;font-weight:700;border:none;border-radius:10px;padding:7px 13px;cursor:pointer;flex-shrink:0;}
+.shop-btn:disabled{opacity:.35;cursor:not-allowed;}
+.shop-btn:active:not(:disabled){opacity:.7;}
+
+/* ── REPORT SCREEN ── */
+.gr-hero{background:linear-gradient(160deg,rgba(108,92,231,.18),rgba(255,93,160,.08));border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:16px;text-align:center;margin-bottom:12px;}
+.gr-hero .ge{font-size:36px;margin-bottom:3px;}
+.gr-hero .gb{font-size:22px;font-weight:900;color:var(--gold);margin-bottom:2px;}
+.gr-hero .gs{font-size:11px;color:var(--text2);}
+.gr-row2{display:flex;gap:8px;margin-bottom:12px;}
+.gr-mini{flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:10px 6px;text-align:center;}
+.gr-mini .ge{font-size:18px;margin-bottom:3px;}
+.gr-mini .gv{font-size:15px;font-weight:900;}
+.gr-mini .gl{font-size:9px;color:var(--text3);}
+.gr-mini .gu{font-size:10px;color:var(--green);font-weight:700;margin-top:2px;}
+.gr-chartcard{background:rgba(255,255,255,0.05);border-radius:16px;padding:12px 12px 8px;margin-bottom:12px;}
+.gr-chartcard .gt{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;}
+.gr-svg{width:100%;height:120px;}
+.gr-legend{display:flex;gap:12px;margin-top:4px;flex-wrap:wrap;}
+.gr-legend .li{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--text3);}
+.gr-legend .dot{width:6px;height:6px;border-radius:50%;}
+.gr-legend .dash{width:10px;height:2px;}
+.gr-inputcard{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:14px;margin-bottom:14px;}
+.gr-inputcard .it{font-size:12px;font-weight:700;color:#fff;margin-bottom:10px;}
+.gr-fieldrow{display:flex;gap:6px;margin-bottom:8px;}
+.gr-field{flex:1;}
+.gr-field label{display:block;font-size:9px;color:var(--text3);margin-bottom:4px;}
+.gr-field input,.gr-field select{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:9px;padding:8px;color:#fff;font-size:12px;font-family:inherit;}
+.gr-field input::-webkit-calendar-picker-indicator{filter:invert(1);}
+.gr-savebtn{width:100%;background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;font-weight:700;font-size:12px;border:none;border-radius:11px;padding:10px;cursor:pointer;}
+.gr-savebtn:active{opacity:.7;}
+.gr-toast{text-align:center;font-size:11px;color:var(--green);font-weight:700;margin-top:6px;min-height:14px;}
+
+/* weekly quest bar chart */
+.week-bars{display:flex;align-items:flex-end;gap:5px;height:60px;}
+.week-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.week-bar{width:100%;background:linear-gradient(180deg,var(--violet),var(--purple));border-radius:4px 4px 0 0;min-height:4px;transition:height .3s;}
+.week-bar.today{background:linear-gradient(180deg,var(--gold),#ff9d5c);}
+.week-bar-label{font-size:8px;color:var(--text3);}
+
+/* insight card */
+.insight-card{background:linear-gradient(135deg,rgba(255,215,106,.18),rgba(255,93,160,.1));border:1px solid var(--gold);border-radius:14px;padding:13px;font-size:11px;line-height:1.7;color:#fff0d0;margin-bottom:12px;}
+.insight-card b{color:var(--gold);}
+
+/* ── PARENT SCREEN ── */
+.approve-row{background:rgba(255,255,255,0.06);border-radius:14px;padding:10px;display:flex;gap:10px;align-items:center;margin-bottom:9px;}
+.thumb{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;overflow:hidden;background:linear-gradient(135deg,#3b82f6,#06b6d4);}
+.thumb img{width:100%;height:100%;object-fit:cover;}
+.approve-btn{background:#00b37e;color:#fff;font-size:11px;font-weight:700;border:none;border-radius:10px;padding:7px 13px;cursor:pointer;flex-shrink:0;}
+.approve-btn:active{opacity:.7;}
+.reject-btn{background:rgba(255,107,107,.2);color:var(--red);font-size:11px;font-weight:700;border:1px solid rgba(255,107,107,.3);border-radius:10px;padding:7px 10px;cursor:pointer;flex-shrink:0;}
+.reject-btn:active{opacity:.7;}
+
+/* ── PIN OVERLAY ── */
+.pin-overlay{
+  position:absolute;inset:0;background:rgba(0,0,0,.85);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:100;
+}
+.pin-box{background:var(--bg2);border-radius:24px;padding:30px 24px;text-align:center;width:280px;}
+.pin-title{font-size:14px;font-weight:700;margin-bottom:6px;}
+.pin-sub{font-size:11px;color:var(--text3);margin-bottom:20px;}
+.pin-dots{display:flex;justify-content:center;gap:12px;margin-bottom:20px;}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--text3);transition:all .15s;}
+.pin-dot.filled{background:var(--purple);border-color:var(--purple);}
+.pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;}
+.pin-key{background:rgba(255,255,255,.08);border:none;color:#fff;font-size:16px;font-weight:700;border-radius:14px;padding:14px;cursor:pointer;transition:background .15s;}
+.pin-key:active{background:var(--purple);}
+.pin-err{font-size:11px;color:var(--red);margin-top:4px;min-height:14px;}
+.pin-cancel{font-size:12px;color:var(--text3);margin-top:12px;cursor:pointer;display:inline-block;padding:4px;}
+.pin-cancel:active{opacity:.6;}
+
+/* ── MODAL ── */
+.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;justify-content:center;z-index:90;}
+.modal-overlay.center{align-items:center;}
+.modal-box{background:var(--bg2);border-radius:24px 24px 0 0;padding:24px 20px max(env(safe-area-inset-bottom),20px);width:100%;max-width:420px;}
+.modal-box.center-box{border-radius:24px;padding:24px 20px;max-width:340px;margin:16px;}
+.modal-title{font-size:15px;font-weight:900;margin-bottom:8px;}
+.modal-sub{font-size:12px;color:var(--text3);margin-bottom:16px;line-height:1.6;}
+.modal-btn{width:100%;border:none;border-radius:14px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px;}
+.modal-btn.primary{background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;}
+.modal-btn.primary:active{opacity:.7;}
+.modal-btn.secondary{background:rgba(255,255,255,.08);color:var(--text2);}
+.modal-btn.secondary:active{opacity:.7;}
+.photo-preview{width:100%;height:160px;object-fit:cover;border-radius:14px;margin-bottom:12px;display:none;}
+.photo-upload-btn{width:100%;border:2px dashed rgba(255,255,255,.2);background:rgba(255,255,255,.04);color:var(--text3);font-size:13px;font-weight:700;border-radius:14px;padding:20px;cursor:pointer;margin-bottom:12px;text-align:center;}
+.photo-upload-btn:active{opacity:.6;}
+
+/* weekly reward banner */
+.weekly-banner{background:linear-gradient(135deg,rgba(255,215,106,.25),rgba(168,85,247,.2));border:1px solid var(--gold);border-radius:16px;padding:14px;text-align:center;margin-bottom:14px;}
+.weekly-banner .wb-icon{font-size:28px;margin-bottom:4px;}
+.weekly-banner .wb-title{font-size:13px;font-weight:900;color:var(--gold);margin-bottom:3px;}
+.weekly-banner .wb-sub{font-size:11px;color:var(--text2);}
+.weekly-banner-btn{margin-top:10px;background:var(--gold);color:#1a1228;font-size:12px;font-weight:900;border:none;border-radius:12px;padding:8px 20px;cursor:pointer;}
+.weekly-banner-btn:active{opacity:.7;}
+
+/* toast popup */
+.toast{
+  position:absolute;bottom:90px;left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,.85);color:#fff;font-size:12px;font-weight:700;
+  padding:10px 18px;border-radius:20px;white-space:nowrap;
+  opacity:0;transition:opacity .3s;pointer-events:none;z-index:200;
+}
+.toast.show{opacity:1;}
+
+/* onboarding */
+.onboard{position:absolute;inset:0;background:var(--bg);z-index:150;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 24px;}
+.onboard-icon{font-size:64px;margin-bottom:16px;}
+.onboard-title{font-family:'Press Start 2P',monospace;font-size:11px;color:var(--gold);text-align:center;margin-bottom:8px;line-height:1.8;}
+.onboard-sub{font-size:13px;color:var(--text2);text-align:center;margin-bottom:28px;line-height:1.7;}
+.onboard-field{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:12px 16px;color:#fff;font-size:16px;font-family:inherit;margin-bottom:12px;text-align:center;}
+.onboard-btn{width:100%;background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;font-weight:700;font-size:15px;border:none;border-radius:14px;padding:14px;cursor:pointer;}
+.onboard-btn:active{opacity:.7;}
+.onboard-hint{font-size:10px;color:var(--text4);margin-top:10px;text-align:center;}
+
+/* hidden util */
+.hidden{display:none!important;}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- ONBOARDING -->
+  <div id="onboard" class="onboard">
+    <div class="onboard-icon">🏆</div>
+    <div class="onboard-title">키성장 퀘스트</div>
+    <div class="onboard-sub">닉네임을 입력하고<br>성장 모험을 시작하세요!</div>
+    <input id="onboardName" class="onboard-field" placeholder="이름 (예: 민준)" maxlength="6">
+    <div style="font-size:11px;color:var(--text3);margin-bottom:12px;">현재 키</div>
+    <div style="display:flex;gap:8px;width:100%;margin-bottom:20px;">
+      <input id="onboardHeight" class="onboard-field" style="margin:0;" placeholder="키 (cm)" type="number" step="0.1">
+      <input id="onboardWeight" class="onboard-field" style="margin:0;" placeholder="몸무게 (kg)" type="number" step="0.1">
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:8px;">부모 PIN 설정 (4자리)</div>
+    <input id="onboardPin" class="onboard-field" placeholder="예: 1234" type="number" maxlength="4" style="margin-bottom:20px;">
+    <button class="onboard-btn" onclick="finishOnboard()">시작하기 🚀</button>
+    <div class="onboard-hint">데이터는 이 기기에만 저장됩니다</div>
+  </div>
+
+  <!-- TOPBAR -->
+  <div class="topbar" id="topbar">
+    <div class="topbar-title" id="topbarTitle">⛅ 키성장 퀘스트</div>
+    <div class="coin-badge" onclick="showCoinInfo()">🪙 <span id="coinDisplay">0</span></div>
+  </div>
+
+  <!-- SCREENS -->
+  <!-- HOME -->
+  <div class="screen active" id="screen-home">
+    <div class="scrollarea" id="homeScroll">
+      <!-- char card -->
+      <div class="char-card" style="margin-top:12px;">
+        <div class="avatar-wrap" onclick="document.getElementById('fileInput').click()">
+          <div class="avatar-ring"></div>
+          <div id="avatarEl" class="pixel-char">
+            <svg viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg" width="90" height="90">
+              <!-- bg -->
+              <circle cx="45" cy="45" r="45" fill="#f5e6c8"/>
+              <!-- body / shirt (black) -->
+              <rect x="26" y="62" width="38" height="22" rx="6" fill="#111"/>
+              <!-- neck -->
+              <rect x="39" y="57" width="12" height="8" fill="#f0d5a8"/>
+              <!-- head -->
+              <ellipse cx="45" cy="42" rx="22" ry="21" fill="#f0d5a8"/>
+              <!-- hair base -->
+              <ellipse cx="45" cy="26" rx="22" ry="14" fill="#1a1a1a"/>
+              <!-- top-knot ponytail -->
+              <ellipse cx="45" cy="13" rx="7" ry="9" fill="#1a1a1a"/>
+              <rect x="42" y="10" width="6" height="5" fill="#333"/>
+              <!-- hair tie -->
+              <rect x="41" y="18" width="8" height="3" rx="1" fill="#444"/>
+              <!-- side hair -->
+              <ellipse cx="24" cy="36" rx="5" ry="8" fill="#1a1a1a"/>
+              <ellipse cx="66" cy="36" rx="5" ry="8" fill="#1a1a1a"/>
+              <!-- ears -->
+              <ellipse cx="23" cy="43" rx="3" ry="4" fill="#e8c898"/>
+              <ellipse cx="67" cy="43" rx="3" ry="4" fill="#e8c898"/>
+              <!-- glasses frame -->
+              <circle cx="37" cy="43" r="8" fill="none" stroke="#222" stroke-width="1.5"/>
+              <circle cx="53" cy="43" r="8" fill="none" stroke="#222" stroke-width="1.5"/>
+              <line x1="45" y1="43" x2="45" y2="43" stroke="#222" stroke-width="1.5"/>
+              <line x1="29" y1="42" x2="26" y2="41" stroke="#222" stroke-width="1.5"/>
+              <line x1="61" y1="42" x2="64" y2="41" stroke="#222" stroke-width="1.5"/>
+              <!-- eyes (big, inside glasses) -->
+              <circle cx="37" cy="44" r="4" fill="#1a1a1a"/>
+              <circle cx="53" cy="44" r="4" fill="#1a1a1a"/>
+              <circle cx="38.5" cy="42.5" r="1.2" fill="#fff"/>
+              <circle cx="54.5" cy="42.5" r="1.2" fill="#fff"/>
+              <!-- smile -->
+              <path d="M37 53 Q45 60 53 53" fill="none" stroke="#c07040" stroke-width="1.5" stroke-linecap="round"/>
+              <!-- teeth -->
+              <path d="M39 54 Q45 59 51 54" fill="#fff" stroke="none"/>
+              <!-- peace sign hand (right side, small) -->
+              <rect x="64" y="50" width="5" height="10" rx="2" fill="#f0d5a8"/>
+              <rect x="66" y="44" width="3" height="8" rx="1.5" fill="#f0d5a8"/>
+              <rect x="70" y="45" width="3" height="8" rx="1.5" fill="#f0d5a8"/>
+              <!-- shorts -->
+              <rect x="26" y="72" width="16" height="14" rx="3" fill="#222"/>
+              <rect x="48" y="72" width="16" height="14" rx="3" fill="#222"/>
+            </svg>
+          </div>
+          <div class="avatar-edit">✏️</div>
+        </div>
+        <input type="file" id="fileInput" accept="image/*" onchange="changeAvatar(this)">
+        <div class="char-title" id="charTitle">LV.1 — 새싹 전사</div>
+        <div class="char-nick" id="charNick">성장을 시작한 용사</div>
+        <div class="day-row">
+          <span>🔥 연속 <span id="streakDay">0</span>일째</span>
+          <span>오늘 <span id="todayComplete">0</span>/<span id="todayTotal">0</span> 완료</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="homeProgress" style="width:0%"></div></div>
+        <div class="progress-label" id="homeProgressLabel">오늘의 진행률 0%</div>
+      </div>
+
+      <!-- weekly reward banner (hidden by default) -->
+      <div class="weekly-banner hidden" id="weeklyBanner">
+        <div class="wb-icon">🎉</div>
+        <div class="wb-title">주간 목표 달성!</div>
+        <div class="wb-sub">이번 주 5일 이상 퀘스트를 완료했어요<br>보상함에서 특별 보상을 받으세요!</div>
+        <button class="weekly-banner-btn" onclick="claimWeeklyReward()">보상 받기 →</button>
+      </div>
+
+      <div class="section-label">🌙 워밍업 퀘스트</div>
+      <div id="warmupQuests"></div>
+
+      <div class="section-label">⚡ 오늘의 핵심 퀘스트</div>
+      <div id="coreQuests"></div>
+
+      <div id="exerciseSection" class="hidden">
+        <div class="section-label">🏃 주말 운동 퀘스트</div>
+        <div id="exerciseQuests"></div>
+      </div>
+
+      <div id="rareSection" class="hidden">
+        <div class="section-label">✨ 레어 퀘스트</div>
+        <div id="rareQuests"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GACHA / REWARD -->
+  <div class="screen" id="screen-gacha">
+    <div class="scrollarea">
+      <div class="section-label" style="margin-top:12px;">🎰 가챠 보상함</div>
+
+      <div class="gacha-stage">
+        <div class="gacha-box" id="gachaBox" onclick="openGacha()">🎁</div>
+        <div class="gacha-count-badge">대기 중인 보상 <span id="gachaCount">0</span>개</div>
+        <div id="gachaResult" class="gacha-result hidden"></div>
+        <button class="gacha-cta" id="gachaBtn" onclick="openGacha()">보상 열기!</button>
+      </div>
+
+      <div class="section-label">🛒 보상 상점</div>
+      <div id="shopList"></div>
+
+      <div class="section-label">📋 최근 보상 기록</div>
+      <div id="rewardHistory"></div>
+    </div>
+  </div>
+
+  <!-- REPORT -->
+  <div class="screen" id="screen-report">
+    <div class="scrollarea">
+      <div style="margin-top:12px;">
+        <div class="gr-hero">
+          <div class="ge" id="reportEmoji">🌱</div>
+          <div class="gb" id="reportHeight">— cm</div>
+          <div class="gs" id="reportGrowth">데이터를 입력해주세요</div>
+        </div>
+
+        <div class="gr-row2">
+          <div class="gr-mini">
+            <div class="ge">⚡</div>
+            <div class="gv" id="reportLevel">Lv.1</div>
+            <div class="gl">현재 레벨</div>
+          </div>
+          <div class="gr-mini">
+            <div class="ge">🔥</div>
+            <div class="gv" id="reportStreak">0일</div>
+            <div class="gl">연속 달성</div>
+          </div>
+          <div class="gr-mini">
+            <div class="ge">🪙</div>
+            <div class="gv" id="reportPoints">0</div>
+            <div class="gl">누적 포인트</div>
+          </div>
+        </div>
+
+        <div class="gr-chartcard">
+          <div class="gt">📏 키 성장 그래프</div>
+          <svg class="gr-svg" id="heightChart"></svg>
+          <div class="gr-legend">
+            <div class="li"><div class="dot" style="background:var(--gold)"></div>키(cm)</div>
+            <div class="li"><div class="dash" style="background:var(--cyan)"></div>활동포인트</div>
+          </div>
+        </div>
+
+        <div class="gr-chartcard">
+          <div class="gt">⚖️ 몸무게 변화</div>
+          <svg class="gr-svg" id="weightChart"></svg>
+          <div class="gr-legend">
+            <div class="li"><div class="dot" style="background:#ff9d8a"></div>몸무게(kg)</div>
+          </div>
+        </div>
+
+        <div class="gr-chartcard">
+          <div class="gt">📊 이번 주 퀘스트 현황</div>
+          <div class="week-bars" id="weekBars"></div>
+          <div id="weekInsight" class="insight-card hidden"></div>
+        </div>
+
+        <div class="gr-inputcard">
+          <div class="it">📝 신체 기록 입력</div>
+          <div class="gr-fieldrow">
+            <div class="gr-field">
+              <label>날짜</label>
+              <input type="date" id="inDate">
+            </div>
+          </div>
+          <div class="gr-fieldrow">
+            <div class="gr-field">
+              <label>키 (cm)</label>
+              <input type="number" id="inHeight" placeholder="예: 138.5" step="0.1">
+            </div>
+            <div class="gr-field">
+              <label>몸무게 (kg)</label>
+              <input type="number" id="inWeight" placeholder="예: 33.2" step="0.1">
+            </div>
+          </div>
+          <button class="gr-savebtn" onclick="saveRecord()">기록 저장하기</button>
+          <div class="gr-toast" id="toast"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PARENT VIEW (PIN protected) -->
+  <div class="screen" id="screen-parent">
+    <div class="scrollarea">
+      <div id="parentContent">
+        <!-- filled by JS after PIN verified -->
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav" id="bottomNav">
+    <div class="nav-item active" data-screen="home" onclick="switchScreen('home',this)">
+      <span class="nav-icon">🏠</span>홈
+    </div>
+    <div class="nav-item" data-screen="gacha" onclick="switchScreen('gacha',this)">
+      <span class="nav-icon">🎁</span>보상함
+    </div>
+    <div class="nav-item" data-screen="report" onclick="switchScreen('report',this)">
+      <span class="nav-icon">📈</span>리포트
+    </div>
+    <div class="nav-item" data-screen="parent" onclick="switchScreen('parent',this)">
+      <span class="nav-icon">👤</span>부모뷰
+    </div>
+  </div>
+
+  <!-- PIN OVERLAY -->
+  <div class="pin-overlay hidden" id="pinOverlay">
+    <div class="pin-box">
+      <div class="pin-title">🔐 부모 인증</div>
+      <div class="pin-sub">PIN 번호 4자리를 입력하세요</div>
+      <div class="pin-dots" id="pinDots">
+        <div class="pin-dot"></div><div class="pin-dot"></div>
+        <div class="pin-dot"></div><div class="pin-dot"></div>
+      </div>
+      <div class="pin-grid" id="pinGrid">
+        <button class="pin-key" onclick="pinInput('1')">1</button>
+        <button class="pin-key" onclick="pinInput('2')">2</button>
+        <button class="pin-key" onclick="pinInput('3')">3</button>
+        <button class="pin-key" onclick="pinInput('4')">4</button>
+        <button class="pin-key" onclick="pinInput('5')">5</button>
+        <button class="pin-key" onclick="pinInput('6')">6</button>
+        <button class="pin-key" onclick="pinInput('7')">7</button>
+        <button class="pin-key" onclick="pinInput('8')">8</button>
+        <button class="pin-key" onclick="pinInput('9')">9</button>
+        <button class="pin-key" onclick="pinInput('del')" style="font-size:12px;">⌫</button>
+        <button class="pin-key" onclick="pinInput('0')">0</button>
+        <button class="pin-key" onclick="pinInput('ok')" style="font-size:12px;background:var(--purple);">확인</button>
+      </div>
+      <div class="pin-err" id="pinErr"></div>
+      <span class="pin-cancel" onclick="cancelPin()">취소</span>
+    </div>
+  </div>
+
+  <!-- QUEST SUBMIT MODAL -->
+  <div class="modal-overlay hidden" id="questModal">
+    <div class="modal-box">
+      <div class="modal-title" id="questModalTitle"></div>
+      <div class="modal-sub" id="questModalDesc"></div>
+      <img class="photo-preview" id="photoPreview">
+      <button class="photo-upload-btn" id="photoUploadBtn" onclick="document.getElementById('questPhoto').click()">
+        📷 인증 사진 찍기 / 올리기
+      </button>
+      <input type="file" id="questPhoto" accept="image/*" onchange="previewPhoto(this)" style="display:none">
+      <button class="modal-btn primary" id="submitQuestBtn" onclick="submitQuest()">퀘스트 제출하기!</button>
+      <button class="modal-btn secondary" onclick="closeQuestModal()">나중에</button>
+    </div>
+  </div>
+
+  <!-- GACHA REVEAL MODAL -->
+  <div class="modal-overlay center hidden" id="gachaModal">
+    <div class="modal-box center-box" style="text-align:center;">
+      <div style="font-size:52px;margin-bottom:8px;" id="gachaRevealIcon">🎁</div>
+      <div style="font-size:32px;font-weight:900;color:var(--gold);margin-bottom:4px;" id="gachaRevealPts"></div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:4px;" id="gachaRevealMsg"></div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:20px;" id="gachaRevealQuest"></div>
+      <button class="modal-btn primary" onclick="closeGachaModal()">받기! 🎉</button>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toastPopup"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// DATA MODEL
+// ═══════════════════════════════════════
+const QUEST_POOL = [
+  // warmup
+  {id:'w1',cat:'warmup',name:'오늘 9시간 이상 잠자기',icon:'😴',stars:1,desc:'수면 퀘스트 — 성장호르몬은 잠자는 동안 나와!',pts:[80,100,120]},
+  {id:'w2',cat:'warmup',name:'성장호르몬 주사 맞기',icon:'💉',stars:1,desc:'워밍업 퀘스트 — 오늘 주사 완료!',pts:[80,100,120]},
+  // core nutrition
+  {id:'c1',cat:'core',name:'우유 한 잔 마시기',icon:'🥛',stars:2,desc:'칼슘 핵심 퀘스트 — 키 성장 최강 콤보!',pts:[150,200,250]},
+  {id:'c2',cat:'core',name:'계란노른자 먹기',icon:'🍳',stars:2,desc:'아연 퀘스트 — 계란노른자 속 아연이 키를 키워!',pts:[150,200,250]},
+  {id:'c3',cat:'core',name:'치즈 한 조각 도전',icon:'🧀',stars:2,desc:'아연 퀘스트 — 한 조각이면 충분해!',pts:[150,200,250]},
+  {id:'c4',cat:'core',name:'두부 먹기',icon:'🫘',stars:2,desc:'아연 퀘스트 — 두부 속 식물성 단백질!',pts:[150,200,250]},
+  {id:'c5',cat:'core',name:'소고기 먹기',icon:'🥩',stars:3,desc:'아연 고급 퀘스트 — 최고 효율 아연 공급원!',pts:[200,280,350]},
+  {id:'c6',cat:'core',name:'견과류 한 줌',icon:'🥜',stars:2,desc:'아연+영양 퀘스트 — 뇌도 키도 UP!',pts:[150,200,250]},
+  {id:'c7',cat:'core',name:'콩나물국 먹기',icon:'🥗',stars:2,desc:'아연+식이섬유 퀘스트',pts:[150,200,250]},
+  // exercise (weekend)
+  {id:'e1',cat:'exercise',name:'수영 30분',icon:'🏊',stars:3,desc:'주말 운동 퀘스트 — 전신 성장 운동!',pts:[200,300,400],weekend:true},
+  {id:'e2',cat:'exercise',name:'산책 또는 달리기',icon:'🏃',stars:2,desc:'주말 운동 퀘스트 — 가볍게 뛰어도 OK!',pts:[150,250,300],weekend:true},
+  {id:'e3',cat:'exercise',name:'배드민턴 엄마 이기기',icon:'🏸',stars:4,desc:'대결 퀘스트 — 이기면 보너스 포인트!',pts:[300,400,500],weekend:true},
+  // rare
+  {id:'r1',cat:'rare',name:'도서관에서 책 10분 읽기',icon:'📚',stars:5,desc:'★ 레어 퀘스트 ★ — 10분만! 최고 보상!',pts:[500,700,1000]},
+  {id:'r2',cat:'rare',name:'수영장 가기',icon:'🏊‍♂️',stars:4,desc:'★ 레어 외출 퀘스트 ★',pts:[400,600,800]},
+  {id:'r3',cat:'rare',name:'아이스스케이팅 가기',icon:'⛸️',stars:5,desc:'★ 레어 외출 퀘스트 ★ — 최고 보상!',pts:[500,700,1000]},
+];
+
+const SHOP_ITEMS = [
+  {id:'s2',icon:'🎮',name:'게임 추가 1시간',cost:300,desc:'오늘 하루 게임 1시간 추가'},
+  {id:'s5',icon:'💸',name:'게임 현질 5,000원',cost:1500,desc:'한 달 최대 30,000원'},
+  {id:'s8',icon:'🐹',name:'햄스터',cost:30000,desc:'🏆 최종 목표 보상! 함께 키우자!'},
+];
+
+// Level thresholds (by height cm)
+const LEVEL_TABLE = [
+  {min:0,  max:133, lv:1, title:'새싹 전사',   emoji:'🌱', rank:'4급'},
+  {min:133,max:135, lv:2, title:'성장 병사',   emoji:'🌿', rank:'3급'},
+  {min:135,max:137, lv:3, title:'질풍 용사',   emoji:'⚡', rank:'2급'},
+  {min:137,max:139, lv:4, title:'야제 전사',   emoji:'🌙', rank:'1급'},
+  {min:139,max:141, lv:5, title:'그림자 검객', emoji:'🌟', rank:'특급'},
+  {min:141,max:999, lv:6, title:'방랑자 수호자',emoji:'👑',rank:'전설급'},
+];
+
+// Dynamic nickname patterns based on recent quest activity
+const NICK_PATTERNS = [
+  {questCat:'c2',text:'계란노른자를 정복한'},
+  {questCat:'c3',text:'치즈를 무섭게 먹어대는'},
+  {questCat:'c5',text:'소고기 사냥꾼'},
+  {questCat:'e1',text:'수영장을 지배하는'},
+  {questCat:'e3',text:'배드민턴 챔피언'},
+  {questCat:'r1',text:'독서를 정복한'},
+  {questCat:'c1',text:'우유 마스터'},
+];
+
+function getDefaultState() {
+  return {
+    profile: {name:'',pin:'1234',points:0,streak:0,lastActiveDate:null,avatar:null,totalApproved:0},
+    heightHistory:[],
+    weightHistory:[],
+    questLog:[],       // {date, questId, pointsAwarded, timestamp}
+    pendingApprovals:[], // {id, questId, photo, submittedAt}
+    rewardHistory:[],  // {icon, name, pts, date}
+    weekCycle:{startDate:null,completedDays:[],weeklyRewardPending:false,weeklyRewardClaimed:false},
+    gachaQueue:0,      // number of gachas ready to open
+    purchasedItems:[],
+    parentUnlocked:false,
+  };
+}
+
+let STATE = getDefaultState();
+let currentPinBuffer = '';
+let pendingScreen = null;
+let activeQuestId = null;
+let pendingPhotoData = null;
+
+// ═══════════════════════════════════════
+// PERSISTENCE
+// ═══════════════════════════════════════
+function saveState() {
+  localStorage.setItem('growthquest_v2', JSON.stringify(STATE));
+}
+function loadState() {
+  try {
+    const raw = localStorage.getItem('growthquest_v2');
+    if (raw) STATE = {...getDefaultState(), ...JSON.parse(raw)};
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+function init() {
+  loadState();
+  // Set today's date in report input
+  document.getElementById('inDate').value = today();
+
+  if (!STATE.profile.name) {
+    document.getElementById('onboard').classList.remove('hidden');
+    return;
+  }
+  document.getElementById('onboard').classList.add('hidden');
+  render();
+}
+
+function finishOnboard() {
+  const name = document.getElementById('onboardName').value.trim();
+  const h = parseFloat(document.getElementById('onboardHeight').value);
+  const w = parseFloat(document.getElementById('onboardWeight').value);
+  const pin = document.getElementById('onboardPin').value.trim();
+  if (!name) { alert('이름을 입력해주세요!'); return; }
+  if (!pin || pin.length < 4) { alert('PIN 4자리를 입력해주세요!'); return; }
+  STATE.profile.name = name;
+  STATE.profile.pin = pin;
+  if (!isNaN(h) && h > 0) {
+    STATE.heightHistory.push({date: today(), value: h});
+  }
+  if (!isNaN(w) && w > 0) {
+    STATE.weightHistory.push({date: today(), value: w});
+  }
+  saveState();
+  document.getElementById('onboard').classList.add('hidden');
+  render();
+}
+
+// ═══════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════
+function today() {
+  return new Date().toISOString().slice(0,10);
+}
+function todayLabel() {
+  const d = new Date();
+  return `${d.getMonth()+1}/${d.getDate()}`;
+}
+function isWeekend() {
+  const d = new Date().getDay();
+  return d === 0 || d === 6;
+}
+function rand(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+function randomPts(quest) {
+  // Variable reward: randomly pick from pts array, slight random within range
+  const base = rand(quest.pts);
+  const jitter = Math.round((Math.random() - 0.5) * 20);
+  return Math.max(quest.pts[0], base + jitter);
+}
+function getLevelInfo(height) {
+  const h = height || 0;
+  for (let i = LEVEL_TABLE.length-1; i >= 0; i--) {
+    if (h >= LEVEL_TABLE[i].min) return LEVEL_TABLE[i];
+  }
+  return LEVEL_TABLE[0];
+}
+function getCurrentHeight() {
+  if (!STATE.heightHistory.length) return 0;
+  return STATE.heightHistory[STATE.heightHistory.length-1].value;
+}
+function getCurrentWeight() {
+  if (!STATE.weightHistory.length) return 0;
+  return STATE.weightHistory[STATE.weightHistory.length-1].value;
+}
+function starsStr(n) {
+  return '★'.repeat(n) + '☆'.repeat(Math.max(0,5-n));
+}
+
+// Quests approved today
+function getTodayApproved() {
+  const t = today();
+  return STATE.questLog.filter(l => l.date === t);
+}
+function getQuestStatusToday(questId) {
+  // pending?
+  if (STATE.pendingApprovals.find(p => p.questId === questId && p.date === today())) return 'pending';
+  // approved today?
+  if (STATE.questLog.find(l => l.questId === questId && l.date === today())) return 'approved';
+  return 'available';
+}
+
+// ═══════════════════════════════════════
+// DAILY QUEST SELECTION
+// ═══════════════════════════════════════
+function getDailyQuests() {
+  // Max 3 quests total per day
+  const missDays = calcMissDays();
+  const rareChance = Math.min(0.5, 0.12 + missDays * 0.08);
+  const dow = new Date().getDay();
+
+  // Rare quest appears? → takes 1 slot
+  const rarePool = QUEST_POOL.filter(q => q.cat === 'rare');
+  const showRare = Math.random() < rareChance;
+  const rareQuest = showRare ? [rarePool[dow % rarePool.length]] : [];
+
+  // Weekend exercise takes 1 slot
+  const exPool = QUEST_POOL.filter(q => q.cat === 'exercise');
+  const exerciseQuest = isWeekend() ? [exPool[dow % exPool.length]] : [];
+
+  // Remaining slots fill with warmup(1) + core
+  const specialSlots = rareQuest.length + exerciseQuest.length;
+  const remaining = 3 - specialSlots; // always ≥ 1
+
+  // 1 warmup always first
+  const warmup = [QUEST_POOL.find(q => q.id === 'w2')]; // 주사 as warmup anchor
+
+  // Fill rest with core (milk priority, then 1 zinc)
+  const coreSlots = Math.max(0, remaining - 1);
+  const corePool = [
+    QUEST_POOL.find(q => q.id === 'c1'), // 우유 항상
+    ...[QUEST_POOL.filter(q => q.cat === 'core' && q.id !== 'c1')[dow % 6]].filter(Boolean),
+  ];
+  const core = corePool.slice(0, coreSlots);
+
+  return {
+    warmup: warmup.filter(Boolean),
+    core,
+    exercise: exerciseQuest,
+    rare: rareQuest,
+  };
+}
+
+function calcMissDays() {
+  if (!STATE.profile.lastActiveDate) return 0;
+  const last = new Date(STATE.profile.lastActiveDate);
+  const now = new Date();
+  return Math.floor((now - last) / 86400000);
+}
+
+// ═══════════════════════════════════════
+// STREAK & CYCLE
+// ═══════════════════════════════════════
+function updateStreak() {
+  const t = today();
+  const todayApproved = getTodayApproved();
+  if (todayApproved.length === 0) return;
+
+  if (STATE.profile.lastActiveDate === t) return; // already updated today
+
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yStr = yesterday.toISOString().slice(0,10);
+
+  if (STATE.profile.lastActiveDate === yStr) {
+    STATE.profile.streak = (STATE.profile.streak || 0) + 1;
+  } else if (STATE.profile.lastActiveDate !== t) {
+    STATE.profile.streak = 1;
+  }
+  STATE.profile.lastActiveDate = t;
+}
+
+function checkWeeklyCycle() {
+  // Ensure week cycle is initialized
+  const now = new Date();
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+  const weekStart = monday.toISOString().slice(0,10);
+
+  if (STATE.weekCycle.startDate !== weekStart) {
+    STATE.weekCycle = {startDate: weekStart, completedDays: [], weeklyRewardPending: false, weeklyRewardClaimed: false};
+  }
+
+  const t = today();
+  const todayApproved = getTodayApproved();
+  if (todayApproved.length > 0 && !STATE.weekCycle.completedDays.includes(t)) {
+    STATE.weekCycle.completedDays.push(t);
+  }
+
+  if (STATE.weekCycle.completedDays.length >= 5 && !STATE.weekCycle.weeklyRewardClaimed) {
+    STATE.weekCycle.weeklyRewardPending = true;
+  }
+}
+
+// ═══════════════════════════════════════
+// DYNAMIC NICKNAME
+// ═══════════════════════════════════════
+function getDynamicNick() {
+  // Look at last 7 days quest log for dominant category
+  const recent = STATE.questLog.filter(l => {
+    const d = new Date(l.date);
+    const now = new Date();
+    return (now - d) < 7 * 86400000;
+  });
+  const catCount = {};
+  recent.forEach(l => {
+    const q = QUEST_POOL.find(q => q.id === l.questId);
+    if (q) catCount[q.cat] = (catCount[q.cat] || 0) + 1;
+    if (q) catCount[q.id] = (catCount[q.id] || 0) + 1;
+  });
+
+  // Find best matching pattern
+  let bestPattern = null;
+  let bestCount = 0;
+  NICK_PATTERNS.forEach(p => {
+    const c = catCount[p.questCat] || 0;
+    if (c > bestCount) { bestCount = c; bestPattern = p; }
+  });
+
+  const name = STATE.profile.name || '용사';
+  if (bestPattern && bestCount >= 2) {
+    return `${bestPattern.text} ${name}`;
+  }
+  if (STATE.profile.streak >= 7) return `${name} — 7일 연속 달성자`;
+  if (STATE.profile.totalApproved >= 20) return `성장에 진심인 ${name}`;
+  return `성장을 시작한 ${name}`;
+}
+
+// ═══════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════
+function render() {
+  renderTopbar();
+  renderHomeScreen();
+  renderGachaScreen();
+  renderReportScreen();
+  // parent screen renders after PIN
+}
+
+function renderTopbar() {
+  document.getElementById('coinDisplay').textContent = (STATE.profile.points || 0).toLocaleString();
+}
+
+function renderHomeScreen() {
+  const lvInfo = getLevelInfo(getCurrentHeight());
+  document.getElementById('charTitle').textContent = `${lvInfo.rank} — ${lvInfo.title}`;
+  document.getElementById('charNick').textContent = getDynamicNick();
+
+  const streak = STATE.profile.streak || 0;
+  document.getElementById('streakDay').textContent = streak;
+
+  // Avatar
+  const avatarEl = document.getElementById('avatarEl');
+  if (STATE.profile.avatar) {
+    avatarEl.outerHTML = `<img class="avatar-img" id="avatarEl" src="${STATE.profile.avatar}" style="border-radius:50%;width:90px;height:90px;object-fit:cover;position:relative;display:block;border:3px solid var(--bg3);">`;
+  }
+
+  // Daily quests
+  const {warmup, core, exercise, rare} = getDailyQuests();
+  let totalQ = warmup.length + core.length + exercise.length + rare.length;
+  let doneQ = 0;
+
+  function renderQuestList(containerId, quests) {
+    const el = document.getElementById(containerId);
+    el.innerHTML = '';
+    quests.forEach(q => {
+      const status = getQuestStatusToday(q.id);
+      if (status === 'approved') doneQ++;
+      el.appendChild(makeQuestCard(q, status));
+    });
+  }
+
+  renderQuestList('warmupQuests', warmup);
+  renderQuestList('coreQuests', core);
+
+  const exSec = document.getElementById('exerciseSection');
+  if (exercise.length > 0) {
+    exSec.classList.remove('hidden');
+    renderQuestList('exerciseQuests', exercise);
+  } else {
+    exSec.classList.add('hidden');
+  }
+
+  const rareSec = document.getElementById('rareSection');
+  if (rare.length > 0) {
+    rareSec.classList.remove('hidden');
+    renderQuestList('rareQuests', rare);
+  } else {
+    rareSec.classList.add('hidden');
+  }
+
+  const pct = totalQ > 0 ? Math.round(doneQ/totalQ*100) : 0;
+  document.getElementById('todayComplete').textContent = doneQ;
+  document.getElementById('todayTotal').textContent = totalQ;
+  document.getElementById('homeProgress').style.width = pct + '%';
+  document.getElementById('homeProgressLabel').textContent = `오늘의 진행률 ${pct}%`;
+
+  checkWeeklyCycle();
+  const banner = document.getElementById('weeklyBanner');
+  if (STATE.weekCycle.weeklyRewardPending && !STATE.weekCycle.weeklyRewardClaimed) {
+    banner.classList.remove('hidden');
+  } else {
+    banner.classList.add('hidden');
+  }
+}
+
+function makeQuestCard(q, status) {
+  const div = document.createElement('div');
+  let cls = 'quest-card';
+  if (q.cat === 'rare') cls += ' rare';
+  if (status === 'approved') cls += ' approved';
+  if (status === 'pending') cls += ' pending';
+
+  let badgeHtml = '';
+  if (status === 'pending') badgeHtml = '<span class="q-badge pending">대기중</span>';
+  if (status === 'approved') badgeHtml = '<span class="q-badge approved">✓ 승인</span>';
+
+  div.className = cls;
+  div.innerHTML = `
+    <div class="q-icon">${q.icon}</div>
+    <div class="q-body">
+      <div class="q-name">${q.name}</div>
+      <div class="q-desc">${q.desc}</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+      <div class="q-stars">${starsStr(q.stars)}</div>
+      ${badgeHtml}
+    </div>
+  `;
+  if (status === 'available') {
+    div.onclick = () => openQuestModal(q.id);
+  }
+  return div;
+}
+
+// ── GACHA SCREEN ──
+function renderGachaScreen() {
+  const count = STATE.gachaQueue || 0;
+  document.getElementById('gachaCount').textContent = count;
+  document.getElementById('gachaBtn').disabled = count === 0;
+
+  // Shop
+  const shopEl = document.getElementById('shopList');
+  shopEl.innerHTML = '';
+  SHOP_ITEMS.forEach(item => {
+    const can = (STATE.profile.points || 0) >= item.cost;
+    const div = document.createElement('div');
+    div.className = 'shop-card';
+    div.innerHTML = `
+      <div class="shop-icon">${item.icon}</div>
+      <div class="shop-body">
+        <div class="shop-name">${item.name}</div>
+        <div style="font-size:10px;color:var(--text3);margin-bottom:3px;">${item.desc}</div>
+        <div class="shop-cost">🪙 ${item.cost.toLocaleString()}P</div>
+      </div>
+      <button class="shop-btn" ${can?'':'disabled'} onclick="purchaseItem('${item.id}')">교환</button>
+    `;
+    shopEl.appendChild(div);
+  });
+
+  // Reward history
+  const histEl = document.getElementById('rewardHistory');
+  histEl.innerHTML = '';
+  const hist = [...(STATE.rewardHistory||[])].reverse().slice(0,10);
+  if (hist.length === 0) {
+    histEl.innerHTML = '<div style="text-align:center;color:var(--text4);font-size:12px;padding:12px;">아직 보상 기록이 없어요</div>';
+  }
+  hist.forEach(r => {
+    const div = document.createElement('div');
+    div.className = 'reward-row';
+    div.innerHTML = `<span style="font-size:16px;">${r.icon}</span><span style="flex:1;">${r.name}</span><span style="font-size:10px;color:var(--text3);">${r.date}</span><span class="pt">+${r.pts}P</span>`;
+    histEl.appendChild(div);
+  });
+}
+
+// ── REPORT SCREEN ──
+function renderReportScreen() {
+  const h = getCurrentHeight();
+  const w = getCurrentWeight();
+  const lvInfo = getLevelInfo(h);
+
+  document.getElementById('reportEmoji').textContent = lvInfo.emoji;
+  document.getElementById('reportHeight').textContent = h ? `${h} cm` : '— cm';
+  document.getElementById('reportLevel').textContent = `Lv.${lvInfo.lv}`;
+  document.getElementById('reportStreak').textContent = `${STATE.profile.streak||0}일`;
+  document.getElementById('reportPoints').textContent = (STATE.profile.points||0).toLocaleString();
+
+  // Growth stats
+  if (STATE.heightHistory.length >= 2) {
+    const first = STATE.heightHistory[0].value;
+    const gain = (h - first).toFixed(1);
+    document.getElementById('reportGrowth').textContent = `처음보다 +${gain}cm 성장! 계속 가자!`;
+  } else {
+    document.getElementById('reportGrowth').textContent = h ? `현재 키 ${h}cm — 기록을 쌓아가자!` : '키를 입력해주세요';
+  }
+
+  drawCharts();
+  renderWeekBars();
+}
+
+function drawCharts() {
+  // Build chart data from history + activity points
+  const heightPoints = STATE.heightHistory.slice(-6);
+  const weightPoints = STATE.weightHistory.slice(-6);
+
+  // Compute activity by month
+  const actByMonth = {};
+  (STATE.questLog||[]).forEach(l => {
+    const mon = l.date.slice(0,7);
+    actByMonth[mon] = (actByMonth[mon]||0) + (l.pointsAwarded||0);
+  });
+
+  function buildData(histArr) {
+    return histArr.map(h => {
+      const mon = h.date.slice(0,7);
+      const label = `${parseInt(h.date.slice(5,7))}월`;
+      const act = Math.min(100, Math.round((actByMonth[mon]||0) / 10));
+      return [label, h.value, act];
+    });
+  }
+
+  const hData = buildData(heightPoints);
+  const wData = buildData(weightPoints);
+
+  if (hData.length >= 1) drawLineChart('heightChart', hData, '#ffd76a', true);
+  if (wData.length >= 1) drawLineChart('weightChart', wData, '#ff9d8a', false);
+}
+
+function drawLineChart(svgId, data, color, showActivity) {
+  const svg = document.getElementById(svgId);
+  if (!svg) return;
+  const W = svg.clientWidth || 300, H = 120;
+  const padL=36, padR=10, padT=14, padB=20;
+  const innerW = W-padL-padR, innerH = H-padT-padB;
+  const n = data.length;
+  if (n === 0) return;
+
+  const xs = n === 1 ? [padL + innerW/2] : data.map((_,i) => padL + innerW*i/(n-1));
+  const vals = data.map(d=>d[1]);
+  const vMin = Math.min(...vals), vMax = Math.max(...vals);
+  const vRange = vMax-vMin || 1;
+  const ys = vals.map(v => padT + innerH*(1-(v-vMin+vRange*.2)/(vRange*1.4)));
+
+  let s = `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="rgba(255,255,255,.12)" stroke-width="1"/>
+<line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="rgba(255,255,255,.12)" stroke-width="1"/>`;
+
+  if (showActivity && data[0][2] !== undefined) {
+    const pts2 = data.map(d=>d[2]);
+    const maxP = Math.max(...pts2, 1);
+    const ysP = pts2.map(p => padT + innerH*(1-p/maxP));
+    s += `<polyline points="${xs.map((x,i)=>`${x},${ysP[i]}`).join(' ')}" fill="none" stroke="#5ad1ff" stroke-width="1.5" stroke-dasharray="4 3" opacity=".8"/>`;
+    xs.forEach((x,i) => { s += `<circle cx="${x}" cy="${ysP[i]}" r="2" fill="#5ad1ff"/>`; });
+  }
+
+  if (n > 1) {
+    s += `<polyline points="${xs.map((x,i)=>`${x},${ys[i]}`).join(' ')}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+  }
+  xs.forEach((x,i) => {
+    const r = i===n-1?4:3;
+    s += `<circle cx="${x}" cy="${ys[i]}" r="${r}" fill="${color}"/>`;
+    s += `<text x="${x}" y="${H-6}" font-size="8" fill="#9694b8" text-anchor="middle">${data[i][0]}</text>`;
+  });
+  const last = data[n-1];
+  s += `<text x="${xs[n-1]+4}" y="${ys[n-1]-7}" font-size="9" font-weight="700" fill="${color}" text-anchor="start">${last[1]}</text>`;
+
+  // Y axis labels
+  const yLabel1 = (vMin + vRange*.2).toFixed(n>1?1:0);
+  const yLabel2 = (vMax + vRange*.2*.2).toFixed(n>1?1:0);
+  s += `<text x="${padL-4}" y="${H-padB}" font-size="8" fill="#9694b8" text-anchor="end">${yLabel1}</text>`;
+  s += `<text x="${padL-4}" y="${padT+4}" font-size="8" fill="#9694b8" text-anchor="end">${yLabel2}</text>`;
+
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = s;
+}
+
+function renderWeekBars() {
+  const barsEl = document.getElementById('weekBars');
+  barsEl.innerHTML = '';
+  const days = ['월','화','수','목','금','토','일'];
+  const now = new Date();
+  const dow = (now.getDay()+6)%7; // 0=Mon
+
+  // Get quest counts per day this week
+  const weekStart = new Date(now);
+  weekStart.setDate(now.getDate() - dow);
+
+  let maxCount = 1;
+  const counts = days.map((_,i) => {
+    const d = new Date(weekStart);
+    d.setDate(weekStart.getDate() + i);
+    const dStr = d.toISOString().slice(0,10);
+    const c = STATE.questLog.filter(l=>l.date===dStr).length;
+    if (c > maxCount) maxCount = c;
+    return {label: days[i], count: c, isToday: i === dow};
+  });
+
+  counts.forEach(({label, count, isToday}) => {
+    const pct = Math.round(count/maxCount*100);
+    const div = document.createElement('div');
+    div.className = 'week-bar-wrap';
+    div.innerHTML = `
+      <div class="week-bar${isToday?' today':''}" style="height:${Math.max(4,pct*0.5)}px;"></div>
+      <div class="week-bar-label">${label}${count>0?`<br><b style="color:var(--text2);">${count}</b>`:''}</div>
+    `;
+    barsEl.appendChild(div);
+  });
+
+  // Insight
+  const insightEl = document.getElementById('weekInsight');
+  const weekApproved = STATE.weekCycle.completedDays.length;
+  if (weekApproved >= 3) {
+    insightEl.classList.remove('hidden');
+    insightEl.innerHTML = `이번 주 <b>${weekApproved}일</b> 퀘스트 완료! ${weekApproved>=5?'<b>주간 보상 달성! 🎉</b>':'5일 달성하면 주간 보상을 받아요!'}`;
+  } else {
+    insightEl.classList.add('hidden');
+  }
+}
+
+// ── PARENT SCREEN ──
+function renderParentScreen() {
+  const el = document.getElementById('parentContent');
+  const pending = STATE.pendingApprovals || [];
+  const name = STATE.profile.name || '용사';
+  const lvInfo = getLevelInfo(getCurrentHeight());
+  const weekPct = Math.round((STATE.weekCycle.completedDays.length/7)*100);
+
+  let html = '';
+
+  // Pending approvals
+  html += `<div class="section-label" style="margin-top:12px;">✅ 승인 대기 (${pending.length}건)</div>`;
+  if (pending.length === 0) {
+    html += `<div style="text-align:center;color:var(--text4);font-size:12px;padding:16px;">승인 대기 중인 퀘스트가 없어요 🎉</div>`;
+  } else {
+    pending.forEach(p => {
+      const q = QUEST_POOL.find(q=>q.id===p.questId);
+      if (!q) return;
+      html += `
+        <div class="approve-row">
+          <div class="thumb">${p.photo ? `<img src="${p.photo}">` : q.icon}</div>
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:700;">${q.name}</div>
+            <div style="font-size:10px;color:var(--text3);">${p.date} ${p.submittedAt}</div>
+          </div>
+          <button class="reject-btn" onclick="rejectQuest('${p.id}')">✕</button>
+          <button class="approve-btn" onclick="approveQuest('${p.id}')">승인 ✓</button>
+        </div>
+      `;
+    });
+  }
+
+  // Kid status
+  html += `
+    <div class="char-card" style="margin-top:18px;">
+      <div class="char-title">${lvInfo.rank} — ${lvInfo.title}</div>
+      <div class="char-nick">${getDynamicNick()}</div>
+      <div class="day-row"><span>이번주 이행일</span><span>${STATE.weekCycle.completedDays.length}일 / 7일</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:${weekPct}%"></div></div>
+      <div class="progress-label">${weekPct}% — 5일 이상이면 주간 보상!</div>
+    </div>
+  `;
+
+  // Recent history
+  const recentLog = [...(STATE.questLog||[])].reverse().slice(0,5);
+  if (recentLog.length > 0) {
+    html += `<div class="section-label">📋 최근 승인 기록</div>`;
+    recentLog.forEach(l => {
+      const q = QUEST_POOL.find(q=>q.id===l.questId);
+      if (!q) return;
+      html += `<div class="reward-row"><span style="font-size:16px;">${q.icon}</span><span style="flex:1;">${q.name}</span><span style="font-size:10px;color:var(--text3);">${l.date}</span><span class="pt">+${l.pointsAwarded}P</span></div>`;
+    });
+  }
+
+  // PIN settings
+  html += `
+    <div style="margin-top:20px;padding:14px;background:rgba(255,255,255,.05);border-radius:14px;">
+      <div style="font-size:12px;font-weight:700;margin-bottom:8px;">⚙️ 부모 설정</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;">현재 PIN: ${'*'.repeat((STATE.profile.pin||'').length)}</div>
+      <div style="display:flex;gap:8px;">
+        <input id="newPin" type="number" placeholder="새 PIN 4자리" style="flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:9px;padding:8px;color:#fff;font-size:12px;font-family:inherit;">
+        <button onclick="changePin()" style="background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;font-size:11px;font-weight:700;border:none;border-radius:10px;padding:8px 13px;cursor:pointer;">변경</button>
+      </div>
+    </div>
+  `;
+
+  el.innerHTML = html;
+}
+
+// ═══════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════
+function switchScreen(name, navEl) {
+  if (name === 'parent' && !STATE.parentUnlocked) {
+    pendingScreen = name;
+    showPin();
+    return;
+  }
+  doSwitchScreen(name, navEl);
+}
+
+function doSwitchScreen(name, navEl) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(`screen-${name}`).classList.add('active');
+  if (navEl) navEl.classList.add('active');
+  else {
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(n => { if (n.dataset.screen === name) n.classList.add('active'); });
+  }
+
+  if (name === 'home') renderHomeScreen();
+  if (name === 'gacha') renderGachaScreen();
+  if (name === 'report') renderReportScreen();
+  if (name === 'parent') { STATE.parentUnlocked = true; renderParentScreen(); }
+}
+
+// ═══════════════════════════════════════
+// PIN
+// ═══════════════════════════════════════
+function showPin() {
+  currentPinBuffer = '';
+  updatePinDots();
+  document.getElementById('pinErr').textContent = '';
+  document.getElementById('pinOverlay').classList.remove('hidden');
+}
+function cancelPin() {
+  document.getElementById('pinOverlay').classList.add('hidden');
+  pendingScreen = null;
+}
+function pinInput(key) {
+  if (key === 'del') {
+    currentPinBuffer = currentPinBuffer.slice(0,-1);
+  } else if (key === 'ok') {
+    checkPin();
+    return;
+  } else {
+    if (currentPinBuffer.length >= 4) return;
+    currentPinBuffer += key;
+    if (currentPinBuffer.length === 4) {
+      setTimeout(checkPin, 100);
+    }
+  }
+  updatePinDots();
+}
+function updatePinDots() {
+  const dots = document.querySelectorAll('.pin-dot');
+  dots.forEach((d,i) => {
+    d.classList.toggle('filled', i < currentPinBuffer.length);
+  });
+}
+function checkPin() {
+  if (currentPinBuffer === STATE.profile.pin) {
+    document.getElementById('pinOverlay').classList.add('hidden');
+    if (pendingScreen) {
+      doSwitchScreen(pendingScreen, null);
+      pendingScreen = null;
+    }
+  } else {
+    document.getElementById('pinErr').textContent = '잘못된 PIN이에요. 다시 입력해주세요.';
+    currentPinBuffer = '';
+    updatePinDots();
+  }
+}
+function changePin() {
+  const np = document.getElementById('newPin').value.trim();
+  if (np.length !== 4 || isNaN(np)) { showToast('PIN은 4자리 숫자여야 해요'); return; }
+  STATE.profile.pin = np;
+  saveState();
+  showToast('PIN이 변경됐어요! 🔐');
+  renderParentScreen();
+}
+
+// ═══════════════════════════════════════
+// QUEST MODAL
+// ═══════════════════════════════════════
+function openQuestModal(questId) {
+  const q = QUEST_POOL.find(q=>q.id===questId);
+  if (!q) return;
+  activeQuestId = questId;
+  pendingPhotoData = null;
+  document.getElementById('questModalTitle').textContent = `${q.icon} ${q.name}`;
+  document.getElementById('questModalDesc').textContent = q.desc + `\n\n보상 예상: 🪙 ${q.pts[0]}~${q.pts[q.pts.length-1]}P (가챠 오픈 후 지급)`;
+  document.getElementById('photoPreview').style.display = 'none';
+  document.getElementById('photoPreview').src = '';
+  document.getElementById('questPhoto').value = '';
+  document.getElementById('questModal').classList.remove('hidden');
+}
+function closeQuestModal() {
+  document.getElementById('questModal').classList.add('hidden');
+  activeQuestId = null;
+  pendingPhotoData = null;
+}
+function previewPhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    pendingPhotoData = e.target.result;
+    const prev = document.getElementById('photoPreview');
+    prev.src = pendingPhotoData;
+    prev.style.display = 'block';
+    document.getElementById('photoUploadBtn').textContent = '📷 사진 변경';
+  };
+  reader.readAsDataURL(file);
+}
+function submitQuest() {
+  if (!activeQuestId) return;
+  const q = QUEST_POOL.find(q=>q.id===activeQuestId);
+  if (!q) return;
+
+  const approvalEntry = {
+    id: Date.now().toString(),
+    questId: activeQuestId,
+    photo: pendingPhotoData,
+    date: today(),
+    submittedAt: new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}),
+  };
+  STATE.pendingApprovals = STATE.pendingApprovals || [];
+  STATE.pendingApprovals.push(approvalEntry);
+  saveState();
+  closeQuestModal();
+  showToast(`${q.icon} 퀘스트 제출 완료! 부모님 승인을 기다려요 🙌`);
+  renderHomeScreen();
+}
+
+// ═══════════════════════════════════════
+// APPROVAL
+// ═══════════════════════════════════════
+function approveQuest(approvalId) {
+  const idx = STATE.pendingApprovals.findIndex(p=>p.id===approvalId);
+  if (idx === -1) return;
+  const approval = STATE.pendingApprovals[idx];
+  const q = QUEST_POOL.find(q=>q.id===approval.questId);
+  if (!q) return;
+
+  const pts = randomPts(q);
+  STATE.questLog = STATE.questLog || [];
+  STATE.questLog.push({date: approval.date, questId: approval.questId, pointsAwarded: pts, timestamp: Date.now()});
+  STATE.profile.points = (STATE.profile.points||0) + pts;
+  STATE.profile.totalApproved = (STATE.profile.totalApproved||0) + 1;
+  STATE.gachaQueue = (STATE.gachaQueue||0) + 1;
+  STATE.pendingApprovals.splice(idx, 1);
+
+  updateStreak();
+  checkWeeklyCycle();
+  saveState();
+  showToast(`✅ 승인 완료! +${pts}P 적립, 가챠 1개 추가!`);
+  renderParentScreen();
+  renderTopbar();
+}
+
+function rejectQuest(approvalId) {
+  const idx = STATE.pendingApprovals.findIndex(p=>p.id===approvalId);
+  if (idx !== -1) {
+    STATE.pendingApprovals.splice(idx, 1);
+    saveState();
+    showToast('퀘스트 거절됨');
+    renderParentScreen();
+  }
+}
+
+// ═══════════════════════════════════════
+// GACHA
+// ═══════════════════════════════════════
+const GACHA_MESSAGES = [
+  ['🎊','대박!','럭키!'],
+  ['✨','굿!','잘했어!'],
+  ['🔥','파이어!','퀘스트 완료!'],
+  ['⚡','찌릿!','에너지 충전!'],
+];
+
+function openGacha() {
+  if ((STATE.gachaQueue||0) === 0) return;
+
+  const box = document.getElementById('gachaBox');
+  box.classList.add('spin');
+  setTimeout(() => box.classList.remove('spin'), 600);
+
+  // Determine if rare
+  const isRare = Math.random() < 0.15;
+  const baseRange = isRare ? [300,800] : [50,250];
+  const pts = Math.round(baseRange[0] + Math.random()*(baseRange[1]-baseRange[0]));
+
+  STATE.gachaQueue = Math.max(0, (STATE.gachaQueue||0) - 1);
+  STATE.profile.points = (STATE.profile.points||0) + pts;
+  STATE.rewardHistory = STATE.rewardHistory || [];
+  const msg = rand(GACHA_MESSAGES);
+  STATE.rewardHistory.push({icon: msg[0], name: `가챠 보상 ${msg[1]}`, pts, date: todayLabel()});
+  saveState();
+
+  // Show modal
+  document.getElementById('gachaRevealIcon').textContent = isRare ? '🌟' : msg[0];
+  document.getElementById('gachaRevealPts').textContent = `+${pts}P`;
+  document.getElementById('gachaRevealMsg').textContent = isRare ? '레어 보상! 🎉' : msg[2];
+  document.getElementById('gachaRevealQuest').textContent = `총 포인트: 🪙 ${(STATE.profile.points).toLocaleString()}P`;
+  document.getElementById('gachaModal').classList.remove('hidden');
+
+  renderGachaScreen();
+  renderTopbar();
+}
+function closeGachaModal() {
+  document.getElementById('gachaModal').classList.add('hidden');
+}
+
+// Weekly reward
+function claimWeeklyReward() {
+  const pts = 500;
+  STATE.profile.points = (STATE.profile.points||0) + pts;
+  STATE.weekCycle.weeklyRewardClaimed = true;
+  STATE.weekCycle.weeklyRewardPending = false;
+  STATE.gachaQueue = (STATE.gachaQueue||0) + 3; // bonus 3 gachas
+  STATE.rewardHistory = STATE.rewardHistory||[];
+  STATE.rewardHistory.push({icon:'🏆', name:'주간 달성 보상', pts, date:todayLabel()});
+  saveState();
+  showToast('🏆 주간 보상 +500P & 가챠 3개 추가!');
+  renderHomeScreen();
+  renderTopbar();
+}
+
+// Purchase
+function purchaseItem(itemId) {
+  const item = SHOP_ITEMS.find(i=>i.id===itemId);
+  if (!item) return;
+  if ((STATE.profile.points||0) < item.cost) { showToast('포인트가 부족해요 🥲'); return; }
+  if (!confirm(`"${item.name}"을(를) ${item.cost.toLocaleString()}P로 교환할까요?`)) return;
+  STATE.profile.points -= item.cost;
+  STATE.purchasedItems = STATE.purchasedItems||[];
+  STATE.purchasedItems.push({itemId, date: today()});
+  STATE.rewardHistory = STATE.rewardHistory||[];
+  STATE.rewardHistory.push({icon:item.icon, name:item.name+' 교환', pts: -item.cost, date:todayLabel()});
+  saveState();
+  showToast(`${item.icon} "${item.name}" 교환 완료!`);
+  renderGachaScreen();
+  renderTopbar();
+}
+
+// ═══════════════════════════════════════
+// RECORD SAVE
+// ═══════════════════════════════════════
+function saveRecord() {
+  const date = document.getElementById('inDate').value;
+  const h = parseFloat(document.getElementById('inHeight').value);
+  const w = parseFloat(document.getElementById('inWeight').value);
+  const toast = document.getElementById('toast');
+
+  if (!date) { toast.style.color='var(--red)'; toast.textContent='날짜를 입력해주세요'; return; }
+  if (isNaN(h) && isNaN(w)) { toast.style.color='var(--red)'; toast.textContent='키 또는 몸무게를 입력해주세요'; return; }
+
+  if (!isNaN(h) && h > 0) {
+    STATE.heightHistory = STATE.heightHistory||[];
+    // Remove same-date entry
+    STATE.heightHistory = STATE.heightHistory.filter(e=>e.date!==date);
+    STATE.heightHistory.push({date, value:h});
+    STATE.heightHistory.sort((a,b)=>a.date.localeCompare(b.date));
+  }
+  if (!isNaN(w) && w > 0) {
+    STATE.weightHistory = STATE.weightHistory||[];
+    STATE.weightHistory = STATE.weightHistory.filter(e=>e.date!==date);
+    STATE.weightHistory.push({date, value:w});
+    STATE.weightHistory.sort((a,b)=>a.date.localeCompare(b.date));
+  }
+
+  // Bonus points for weekly first record
+  const weekKey = getWeekKey(date);
+  const hasThisWeek = (STATE.questLog||[]).some(l=>getWeekKey(l.date)===weekKey && l.questId==='__record__');
+  if (!hasThisWeek) {
+    const bonus = 300;
+    STATE.profile.points = (STATE.profile.points||0) + bonus;
+    STATE.questLog = STATE.questLog||[];
+    STATE.questLog.push({date, questId:'__record__', pointsAwarded:bonus, timestamp:Date.now()});
+    toast.style.color = 'var(--green)';
+    toast.textContent = `저장 완료! 이번 주 첫 기록 +${bonus}P 🎉`;
+  } else {
+    toast.style.color = 'var(--text2)';
+    toast.textContent = '저장 완료! (이번 주 기록 보상은 이미 받았어요)';
+  }
+
+  saveState();
+  document.getElementById('inHeight').value = '';
+  document.getElementById('inWeight').value = '';
+  renderReportScreen();
+  renderTopbar();
+}
+
+function getWeekKey(dateStr) {
+  const d = new Date(dateStr);
+  const jan1 = new Date(d.getFullYear(),0,1);
+  const week = Math.ceil(((d-jan1)/86400000 + jan1.getDay()+1)/7);
+  return `${d.getFullYear()}-W${week}`;
+}
+
+// ═══════════════════════════════════════
+// AVATAR
+// ═══════════════════════════════════════
+function changeAvatar(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    STATE.profile.avatar = e.target.result;
+    saveState();
+    // Reload avatar element
+    const el = document.getElementById('avatarEl');
+    if (el.tagName === 'DIV') {
+      el.outerHTML = `<img class="avatar-img" id="avatarEl" src="${e.target.result}" style="border-radius:50%;width:90px;height:90px;object-fit:cover;position:relative;display:block;border:3px solid var(--bg3);">`;
+    } else {
+      el.src = e.target.result;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+// ═══════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════
+let toastTimer = null;
+function showToast(msg) {
+  const t = document.getElementById('toastPopup');
+  t.textContent = msg;
+  t.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function showCoinInfo() {
+  showToast(`현재 포인트: 🪙 ${(STATE.profile.points||0).toLocaleString()}P`);
+}
+
+// Lock parent view when navigating away
+document.querySelectorAll('.nav-item').forEach(n => {
+  n.addEventListener('click', () => {
+    if (n.dataset.screen !== 'parent') STATE.parentUnlocked = false;
+  });
+});
+
+// ── START ──
+init();
+</script>
+</body>
+</html>
