@@ -3,6 +3,8 @@
 // 담당: 개발자
 // ==========================================
 
+const COIN_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:2px;"><circle cx="12" cy="12" r="9" fill="#f6c945" stroke="#a86a00" stroke-width="2"/><circle cx="12" cy="12" r="4.5" fill="#ffe089"/></svg>`;
+
 let STATE = getDefaultState();
 let currentPinBuffer = '';
 let pendingScreen = null;
@@ -55,8 +57,8 @@ function finishOnboard() {
   if (!pin || pin.length < 4) { alert('PIN 4자리를 입력해주세요!'); return; }
   STATE.profile.name = name;
   STATE.profile.pin = pin;
-  if (!isNaN(h) && h > 0) STATE.heightHistory.push({date: today(), value: h});
-  if (!isNaN(w) && w > 0) STATE.weightHistory.push({date: today(), value: w});
+  if (!isNaN(h) && h > 0) { const d = today(); STATE.heightHistory.push({date: d, value: h}); fbSetHeight(d, h); }
+  if (!isNaN(w) && w > 0) { const d = today(); STATE.weightHistory.push({date: d, value: w}); fbSetWeight(d, w); }
   saveState();
   document.getElementById('onboard').classList.add('hidden');
   render();
@@ -229,7 +231,12 @@ function render() {
 
 function renderTopbar() {
   const coinEl = document.getElementById('coinDisplay');
-  if (coinEl) coinEl.textContent = (STATE.profile.points || 0).toLocaleString();
+  if (coinEl) coinEl.textContent = (STATE.profile.totalEarnedPoints || 0).toLocaleString();
+  const titleEl = document.getElementById('topbarTitle');
+  if (titleEl) {
+    const name = STATE.profile.name;
+    titleEl.textContent = name ? `${name}의 위대한 여정` : 'KEY QUEST';
+  }
 }
 
 function renderStoryCard() {
@@ -244,8 +251,9 @@ function renderStoryCard() {
 
 function renderHomeScreen() {
   const pts = STATE.profile.points || 0;
-  const lvInfo = getLevelByPts(pts);
-  const xp = getXpProgress(pts);
+  const totalPts = STATE.profile.totalEarnedPoints || pts;
+  const lvInfo = getLevelByPts(totalPts);
+  const xp = getXpProgress(totalPts);
   const h = getCurrentHeight();
   const w = getCurrentWeight();
 
@@ -293,13 +301,15 @@ function renderHomeScreen() {
     el.innerHTML = '';
     quests.forEach(q => {
       const status = getQuestStatusToday(q.id);
-      if (status === 'approved') doneQ++;
+      if (status === 'approved') { doneQ++; return; }
       el.appendChild(makeQuestCard(q, status));
     });
   }
 
   renderQuestList('warmupQuests', warmup);
   renderQuestList('coreQuests', core);
+
+  const allDoneEl = document.getElementById('allQuestsDone');
 
   const exSec = document.getElementById('exerciseSection');
   if (exercise.length > 0) {
@@ -315,6 +325,11 @@ function renderHomeScreen() {
     renderQuestList('rareQuests', rare);
   } else {
     rareSec.classList.add('hidden');
+  }
+
+  if (allDoneEl) {
+    if (totalQ > 0 && doneQ === totalQ) allDoneEl.classList.remove('hidden');
+    else allDoneEl.classList.add('hidden');
   }
 
   // 오늘 진행률
@@ -383,7 +398,7 @@ function renderGachaScreen() {
       <div class="shop-body">
         <div class="shop-name">${item.name}</div>
         <div style="font-size:14px;color:var(--text3);margin-bottom:3px;">${item.desc}</div>
-        <div class="shop-cost">🪙 ${item.cost.toLocaleString()}P</div>
+        <div class="shop-cost">${COIN_SVG} ${item.cost.toLocaleString()}P</div>
       </div>
       <button class="shop-btn" ${can?'':'disabled'} onclick="purchaseItem('${item.id}')">교환</button>
     `;
@@ -406,25 +421,6 @@ function renderGachaScreen() {
 
 // ── 리포트 화면 ──
 function renderReportScreen() {
-  const h = getCurrentHeight();
-  const lvInfo = getLevelByPts(STATE.profile.points||0);
-
-  document.getElementById('reportEmoji').textContent = lvInfo.emoji;
-  document.getElementById('reportHeight').textContent = h ? `${h} cm` : '— cm';
-  document.getElementById('reportLevel').textContent = `Lv.${lvInfo.lv}`;
-  document.getElementById('reportStreak').textContent = `${STATE.profile.streak||0}일`;
-  document.getElementById('reportPoints').textContent = (STATE.profile.points||0).toLocaleString();
-
-  if (STATE.heightHistory.length >= 2) {
-    const first = STATE.heightHistory[0].value;
-    const gain = (h - first).toFixed(1);
-    document.getElementById('reportGrowth').textContent = `처음보다 +${gain}cm 성장! 계속 가자!`;
-  } else {
-    document.getElementById('reportGrowth').textContent = h ? `현재 키 ${h}cm — 기록을 쌓아가자!` : '키를 입력해주세요';
-  }
-
-  drawCharts();
-  renderWeekBars();
 }
 
 function drawCharts() {
@@ -456,7 +452,7 @@ function drawCharts() {
 function drawLineChart(svgId, data, color, showActivity) {
   const svg = document.getElementById(svgId);
   if (!svg) return;
-  const W = svg.clientWidth || 300, H = 120;
+  const W = svg.getBoundingClientRect().width || svg.clientWidth || 300, H = 200;
   const padL=36, padR=10, padT=14, padB=20;
   const innerW = W-padL-padR, innerH = H-padT-padB;
   const n = data.length;
@@ -544,7 +540,7 @@ function renderWeekBars() {
 function renderParentScreen() {
   const el = document.getElementById('parentContent');
   const pending = STATE.pendingApprovals || [];
-  const lvInfo = getLevelByPts(STATE.profile.points||0);
+  const lvInfo = getLevelByPts(STATE.profile.totalEarnedPoints||STATE.profile.points||0);
   const weekPct = Math.round((STATE.weekCycle.completedDays.length/7)*100);
 
   let html = '';
@@ -629,7 +625,7 @@ function doSwitchScreen(name, navEl) {
 
   if (name === 'home') renderHomeScreen();
   if (name === 'gacha') renderGachaScreen();
-  if (name === 'report') renderReportScreen();
+  if (name === 'report') { renderReportScreen(); setTimeout(drawCharts, 50); }
   if (name === 'parent') { STATE.parentUnlocked = true; renderParentScreen(); }
 }
 
@@ -692,7 +688,7 @@ function openQuestModal(questId) {
   activeQuestId = questId;
   pendingPhotoData = null;
   document.getElementById('questModalTitle').textContent = `${q.icon} ${q.name}`;
-  document.getElementById('questModalDesc').textContent = q.desc + `\n\n보상: 🪙 ${q.pts}P`;
+  document.getElementById('questModalDesc').innerHTML = q.desc.replace(/\n/g, '<br>') + `<br><br>보상: ${COIN_SVG} ${q.pts}P`;
   document.getElementById('photoPreview').style.display = 'none';
   document.getElementById('photoPreview').src = '';
   document.getElementById('questPhoto').value = '';
@@ -720,34 +716,42 @@ async function submitQuest() {
   if (!activeQuestId) return;
   const q = QUEST_POOL.find(q=>q.id===activeQuestId);
   if (!q) return;
-  if (!pendingPhotoData) {
-    showToast('[시스템] 인증 사진을 첨부해야 보고서를 제출할 수 있습니다.');
-    return;
-  }
 
-  const approvalId = Date.now().toString();
-  showToast('[시스템] 사진 업로드 중...');
-
-  let photoUrl = pendingPhotoData;
   try {
-    photoUrl = await uploadPhoto(pendingPhotoData, approvalId);
-  } catch(e) {
-    console.error('[Firebase] 사진 업로드 실패, base64로 저장:', e);
-  }
+    const approvalId = Date.now().toString();
+    let photoUrl = null;
 
-  const approvalEntry = {
-    id: approvalId,
-    questId: activeQuestId,
-    photo: photoUrl,
-    date: today(),
-    submittedAt: new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}),
-  };
-  STATE.pendingApprovals = STATE.pendingApprovals || [];
-  STATE.pendingApprovals.push(approvalEntry);
-  saveState();
-  closeQuestModal();
-  showToast('[시스템] 과업 완수 보고서가 제출되었습니다. 상급자 검토를 대기하십시오.');
-  renderHomeScreen();
+    if (pendingPhotoData) {
+      showToast('[시스템] 사진 업로드 중...');
+      try {
+        // 8초 타임아웃 — Storage hang 방지
+        const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 8000));
+        photoUrl = await Promise.race([uploadPhoto(pendingPhotoData, approvalId), timeout]);
+      } catch(e) {
+        console.error('[Firebase] 사진 업로드 실패:', e);
+        photoUrl = null; // base64는 Firestore 1MB 한도 초과 → null
+      }
+    }
+
+    const approvalEntry = {
+      id: approvalId,
+      questId: activeQuestId,
+      photo: photoUrl,
+      date: today(),
+      submittedAt: new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}),
+    };
+    STATE.pendingApprovals = STATE.pendingApprovals || [];
+    const fid = await fbAddPendingApproval(approvalEntry);
+    if (fid) approvalEntry.id = fid;
+    STATE.pendingApprovals.push(approvalEntry);
+    saveState();
+  } catch(e) {
+    console.error('[submitQuest] 오류:', e);
+  } finally {
+    closeQuestModal();
+    showToast('[시스템] 과업 완수 보고서가 제출되었습니다. 상급자 검토를 대기하십시오.');
+    renderHomeScreen();
+  }
 }
 
 // ═══════════════════════════════════════
@@ -761,11 +765,15 @@ function approveQuest(approvalId) {
   if (!q) return;
 
   const pts = randomPts(q);
+  const logEntry = {date: approval.date, questId: approval.questId, pointsAwarded: pts, timestamp: Date.now()};
   STATE.questLog = STATE.questLog || [];
-  STATE.questLog.push({date: approval.date, questId: approval.questId, pointsAwarded: pts, timestamp: Date.now()});
+  STATE.questLog.push(logEntry);
+  fbAddQuestLog(logEntry);
   STATE.profile.points = (STATE.profile.points||0) + pts;
+  STATE.profile.totalEarnedPoints = (STATE.profile.totalEarnedPoints||0) + pts;
   STATE.profile.totalApproved = (STATE.profile.totalApproved||0) + 1;
   STATE.gachaQueue = (STATE.gachaQueue||0) + 1;
+  fbRemovePendingApproval(approval.id);
   STATE.pendingApprovals.splice(idx, 1);
 
   updateStreak();
@@ -779,6 +787,7 @@ function approveQuest(approvalId) {
 function rejectQuest(approvalId) {
   const idx = STATE.pendingApprovals.findIndex(p=>p.id===approvalId);
   if (idx !== -1) {
+    fbRemovePendingApproval(approvalId);
     STATE.pendingApprovals.splice(idx, 1);
     saveState();
     showToast('[시스템] 해당 과업 완수가 반려되었습니다. 재수행 후 재보고하십시오.');
@@ -802,15 +811,18 @@ function openGacha() {
 
   STATE.gachaQueue = Math.max(0, (STATE.gachaQueue||0) - 1);
   STATE.profile.points = (STATE.profile.points||0) + pts;
+  STATE.profile.totalEarnedPoints = (STATE.profile.totalEarnedPoints||0) + pts;
   STATE.rewardHistory = STATE.rewardHistory || [];
   const msg = rand(GACHA_MESSAGES);
-  STATE.rewardHistory.push({icon: msg[0], name: `가챠 보상 ${msg[1]}`, pts, date: todayLabel()});
+  const gachaReward = {icon: msg[0], name: `가챠 보상 ${msg[1]}`, pts, date: todayLabel()};
+  STATE.rewardHistory.push(gachaReward);
+  fbAddReward(gachaReward);
   saveState();
 
   document.getElementById('gachaRevealIcon').textContent = isRare ? '🌟' : msg[0];
   document.getElementById('gachaRevealPts').textContent = `+${pts}P`;
   document.getElementById('gachaRevealMsg').textContent = isRare ? '레어 보상! 🎉' : msg[2];
-  document.getElementById('gachaRevealQuest').textContent = `총 포인트: 🪙 ${(STATE.profile.points).toLocaleString()}P`;
+  document.getElementById('gachaRevealQuest').innerHTML = `총 포인트: ${COIN_SVG} ${(STATE.profile.points).toLocaleString()}P`;
   document.getElementById('gachaModal').classList.remove('hidden');
 
   renderGachaScreen();
@@ -823,11 +835,14 @@ function closeGachaModal() {
 function claimWeeklyReward() {
   const pts = 500;
   STATE.profile.points = (STATE.profile.points||0) + pts;
+  STATE.profile.totalEarnedPoints = (STATE.profile.totalEarnedPoints||0) + pts;
   STATE.weekCycle.weeklyRewardClaimed = true;
   STATE.weekCycle.weeklyRewardPending = false;
   STATE.gachaQueue = (STATE.gachaQueue||0) + 3;
   STATE.rewardHistory = STATE.rewardHistory||[];
-  STATE.rewardHistory.push({icon:'🏆', name:'주간 달성 보상', pts, date:todayLabel()});
+  const weekReward = {icon:'🏆', name:'주간 달성 보상', pts, date:todayLabel()};
+  STATE.rewardHistory.push(weekReward);
+  fbAddReward(weekReward);
   saveState();
   showToast('[시스템] 주간 과업 완수 확인. 특별 보급품 3개 및 기여도 +500P가 지급되었습니다.');
   renderHomeScreen();
@@ -843,7 +858,9 @@ function purchaseItem(itemId) {
   STATE.purchasedItems = STATE.purchasedItems||[];
   STATE.purchasedItems.push({itemId, date: today()});
   STATE.rewardHistory = STATE.rewardHistory||[];
-  STATE.rewardHistory.push({icon:item.icon, name:item.name+' 교환', pts: -item.cost, date:todayLabel()});
+  const purchaseReward = {icon:item.icon, name:item.name+' 교환', pts: -item.cost, date:todayLabel()};
+  STATE.rewardHistory.push(purchaseReward);
+  fbAddReward(purchaseReward);
   saveState();
   showToast(`[시스템] "${item.name}" 보급 신청이 완료되었습니다.`);
   renderGachaScreen();
@@ -861,18 +878,22 @@ function saveRecord() {
 
   if (!date) { toast.style.color='var(--red)'; toast.textContent='날짜를 입력해주세요'; return; }
   if (isNaN(h) && isNaN(w)) { toast.style.color='var(--red)'; toast.textContent='키 또는 몸무게를 입력해주세요'; return; }
+  if (!isNaN(h) && (h <= 0 || h >= 200)) { toast.style.color='var(--red)'; toast.textContent='키는 200cm 미만으로 입력해주세요'; return; }
+  if (!isNaN(w) && (w <= 0 || w >= 100)) { toast.style.color='var(--red)'; toast.textContent='몸무게는 100kg 미만으로 입력해주세요'; return; }
 
   if (!isNaN(h) && h > 0) {
     STATE.heightHistory = STATE.heightHistory||[];
     STATE.heightHistory = STATE.heightHistory.filter(e=>e.date!==date);
     STATE.heightHistory.push({date, value:h});
     STATE.heightHistory.sort((a,b)=>a.date.localeCompare(b.date));
+    fbSetHeight(date, h);
   }
   if (!isNaN(w) && w > 0) {
     STATE.weightHistory = STATE.weightHistory||[];
     STATE.weightHistory = STATE.weightHistory.filter(e=>e.date!==date);
     STATE.weightHistory.push({date, value:w});
     STATE.weightHistory.sort((a,b)=>a.date.localeCompare(b.date));
+    fbSetWeight(date, w);
   }
 
   const weekKey = getWeekKey(date);
@@ -880,6 +901,7 @@ function saveRecord() {
   if (!hasThisWeek) {
     const bonus = 300;
     STATE.profile.points = (STATE.profile.points||0) + bonus;
+    STATE.profile.totalEarnedPoints = (STATE.profile.totalEarnedPoints||0) + bonus;
     STATE.questLog = STATE.questLog||[];
     STATE.questLog.push({date, questId:'__record__', pointsAwarded:bonus, timestamp:Date.now()});
     toast.style.color = 'var(--green)';
@@ -893,6 +915,7 @@ function saveRecord() {
   document.getElementById('inHeight').value = '';
   document.getElementById('inWeight').value = '';
   renderReportScreen();
+  setTimeout(drawCharts, 50);
   renderTopbar();
 }
 
@@ -932,7 +955,9 @@ function showToast(msg) {
 }
 
 function showCoinInfo() {
-  showToast(`[현황] 누적 기여도: ${(STATE.profile.points||0).toLocaleString()}P`);
+  const earned = (STATE.profile.totalEarnedPoints||0).toLocaleString();
+  const remain = (STATE.profile.points||0).toLocaleString();
+  showToast(`누적 ${earned}P · 잔여 ${remain}P`);
 }
 
 // 다른 화면으로 이동 시 부모 잠금

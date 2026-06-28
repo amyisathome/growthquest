@@ -19,24 +19,20 @@
 
   <!-- ONBOARDING -->
   <div id="onboard" class="onboard hidden">
-    <div class="onboard-icon">🏆</div>
-    <div class="onboard-title">성장 훈련 시스템</div>
-    <div class="onboard-sub">[시스템 안내] 훈련병의 성명을 입력하십시오.<br>본 과업 시스템에 등록 후 성장 임무가 개시됩니다.</div>
+    <div class="onboard-icon"><img src="images/avatar.png" style="width:260px;height:260px;object-fit:cover;border-radius:50%;"></div>
+    <div class="onboard-sub">훈련병의 성명을 입력하십시오.<br>본 과업 시스템에 등록 후 성장 임무가 개시됩니다.</div>
     <input id="onboardName" class="onboard-field" placeholder="성명 (예: 민준)" maxlength="6">
-    <div style="font-size:15px;color:var(--text3);margin-bottom:12px;">현 신장 / 체중 입력</div>
-    <div style="display:flex;gap:8px;width:100%;margin-bottom:20px;">
+    <div style="display:flex;gap:8px;width:100%;margin-bottom:16px;">
       <input id="onboardHeight" class="onboard-field" style="margin:0;" placeholder="신장 (cm)" type="text" inputmode="decimal">
       <input id="onboardWeight" class="onboard-field" style="margin:0;" placeholder="체중 (kg)" type="text" inputmode="decimal">
     </div>
-    <div style="font-size:15px;color:var(--text3);margin-bottom:8px;">상급자 인증 PIN (4자리)</div>
-    <input id="onboardPin" class="onboard-field" placeholder="예: 1234" type="text" inputmode="numeric" maxlength="4" style="margin-bottom:20px;">
+    <input id="onboardPin" class="onboard-field" placeholder="부모님 PIN번호 4자리 (예: 1234)" type="text" inputmode="numeric" maxlength="4" style="margin-bottom:16px;">
     <button class="onboard-btn" onclick="finishOnboard()">임무 개시! 🚀</button>
-    <div class="onboard-hint">데이터는 이 기기에만 저장됩니다</div>
   </div>
 
   <!-- TOPBAR -->
   <div class="topbar" id="topbar">
-    <div class="topbar-title">KEY QUEST</div>
+    <div class="topbar-title" id="topbarTitle">KEY QUEST</div>
     <div class="coin-badge" onclick="showCoinInfo()">
       <svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#f6c945" stroke="#a86a00" stroke-width="2"/><circle cx="12" cy="12" r="4.5" fill="#ffe089"/></svg>
       <span id="coinDisplay">0</span>
@@ -74,7 +70,7 @@
           <div class="stat-box">
             <div class="si"><svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="#f6c945" stroke-width="2"/><path d="M12 8l1.2 2.5 2.8.3-2 2 .5 2.7L12 16.2 9.5 17.5 10 14.8l-2-2 2.8-.3z" fill="#f6c945"/></svg></div>
             <div class="sv" id="statPoints">0</div>
-            <div class="sl">포인트</div>
+            <div class="sl">잔여 포인트</div>
           </div>
         </div>
         <div class="xp-section">
@@ -103,12 +99,6 @@
         </div>
       </div>
 
-      <!-- 오늘의 진행률 -->
-      <div class="progress-track" style="margin-bottom:4px;">
-        <div class="progress-fill" id="homeProgress" style="width:0%"></div>
-      </div>
-      <div class="progress-label" id="homeProgressLabel" style="margin-bottom:10px;">오늘의 진행률 0%</div>
-
       <!-- 퀘스트 목록 -->
       <div class="quest-section-header" style="margin-top:4px;">
         <svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 2c3 4 5 6 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2.2-4.6C9.4 9.6 10.5 11 12.2 11 10.6 8 11.5 5 12 2z" fill="#f6c945"/></svg>
@@ -123,6 +113,10 @@
 
       <div id="rareSection" class="hidden">
         <div id="rareQuests"></div>
+      </div>
+
+      <div id="allQuestsDone" class="hidden" style="text-align:center;padding:32px 16px;color:var(--text3);font-size:14px;line-height:1.8;">
+        🎖️<br>오늘의 퀘스트를 모두 완수하였습니다.
       </div>
     </div>
   </div>
@@ -148,28 +142,7 @@
   <div class="screen" id="screen-report">
     <div class="scrollarea">
       <div style="margin-top:12px;">
-        <div class="gr-hero">
-          <div class="ge" id="reportEmoji">🌱</div>
-          <div class="gb" id="reportHeight">— cm</div>
-          <div class="gs" id="reportGrowth">데이터를 입력해주세요</div>
-        </div>
-        <div class="gr-row2">
-          <div class="gr-mini">
-            <div class="ge">⚡</div>
-            <div class="gv" id="reportLevel">Lv.1</div>
-            <div class="gl">현재 레벨</div>
-          </div>
-          <div class="gr-mini">
-            <div class="ge">🔥</div>
-            <div class="gv" id="reportStreak">0일</div>
-            <div class="gl">연속 달성</div>
-          </div>
-          <div class="gr-mini">
-            <div class="ge">🪙</div>
-            <div class="gv" id="reportPoints">0</div>
-            <div class="gl">누적 포인트</div>
-          </div>
-        </div>
+
         <div class="gr-chartcard">
           <div class="gt">📏 키 성장 그래프</div>
           <svg class="gr-svg" id="heightChart"></svg>
@@ -185,11 +158,7 @@
             <div class="li"><div class="dot" style="background:#ff9d8a"></div>몸무게(kg)</div>
           </div>
         </div>
-        <div class="gr-chartcard">
-          <div class="gt">📊 이번 주 퀘스트 현황</div>
-          <div class="week-bars" id="weekBars"></div>
-          <div id="weekInsight" class="insight-card hidden"></div>
-        </div>
+
         <div class="gr-inputcard">
           <div class="it">📝 신체 기록 입력</div>
           <div class="gr-fieldrow">

@@ -4,8 +4,7 @@
 
 // ---------- 이미지 경로 ----------
 const IMAGES = {
-  avatar:    'images/avatar.jpg',       // 기본 프로필 사진
-  character: 'images/character.png',    // AI 생성 캐릭터
+  avatar: 'images/avatar.png',
 };
 
 const QUEST_POOL = [
@@ -32,7 +31,7 @@ const QUEST_POOL = [
 
 // Daily storytelling messages (rotate by day + streak)
 const STORY_POOL = [
-  {icon:'📋', title:'금일 작전 브리핑', msg:'금일 성장 과업이 정상 하달되었습니다.\n각 과업을 순서대로 완수하십시오.\n미완수 항목은 신체 기여도에 반영되지 않습니다.\n낙오 없이 전 과업을 완수하길 바랍니다.'},
+  {icon:'📋', title:'오늘의 작전 브리핑', msg:'금일 성장 과업이 정상 하달되었습니다.\n각 과업을 순서대로 완수하십시오.\n미완수 항목은 신체 기여도에 반영되지 않습니다.\n낙오 없이 전 과업을 완수하길 바랍니다.'},
   {icon:'🎖️', title:'상급자 훈시', msg:'매일 과업을 완수하는 자만이 신장의 정점에 도달할 수 있습니다.\n단 하루의 이탈도 누적 기여도에 공백을 남깁니다.\n흔들리지 말고 오늘의 과업을 완수하십시오.'},
   {icon:'📊', title:'신체 기여도 현황 보고', msg:'현재까지의 과업 완수 기록이 신체 기여도에 정상 반영 중입니다.\n전설의 취사병도 처음엔 훈련병이었습니다.\n오늘의 과업이 내일의 계급을 결정합니다.'},
   {icon:'⚙️', title:'성장 시스템 가동 현황', msg:'신체 성장 시스템 정상 가동 중입니다.\n영양 보급, 신체 훈련, 수면 확보 —\n세 항목 중 하나라도 미완수 시 성장 효율이 저하됩니다.\n전 항목 완수를 권고합니다.'},
@@ -85,7 +84,7 @@ const NICK_PATTERNS = [
 
 function getDefaultState() {
   return {
-    profile: {name:'',pin:'1234',points:0,streak:0,lastActiveDate:null,avatar:null,totalApproved:0},
+    profile: {name:'',pin:'1234',points:0,totalEarnedPoints:0,streak:0,lastActiveDate:null,avatar:null,totalApproved:0},
     heightHistory:[],
     weightHistory:[],
     questLog:[],       // {date, questId, pointsAwarded, timestamp}
