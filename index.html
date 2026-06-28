@@ -637,6 +637,12 @@ body{
   <div class="toast" id="toastPopup"></div>
 </div>
 
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script src="firebase.js?v=4"></script>
 <script src="data.js"></script>
 <script>
 let STATE = getDefaultState();
@@ -646,23 +652,33 @@ let activeQuestId = null;
 let pendingPhotoData = null;
 
 // ═══════════════════════════════════════
-// PERSISTENCE
+// PERSISTENCE (Firebase)
 // ═══════════════════════════════════════
 function saveState() {
-  localStorage.setItem('growthquest_v2', JSON.stringify(STATE));
+  fbSaveState(STATE); // 비동기 fire-and-forget
 }
-function loadState() {
-  try {
-    const raw = localStorage.getItem('growthquest_v2');
-    if (raw) STATE = {...getDefaultState(), ...JSON.parse(raw)};
-  } catch(e) {}
+async function loadState() {
+  const remote = await fbLoadState();
+  if (remote) {
+    STATE = {...getDefaultState(), ...remote};
+  } else {
+    // Firebase에 데이터 없으면 localStorage 마이그레이션 시도
+    try {
+      const raw = localStorage.getItem('growthquest_v2');
+      if (raw) {
+        STATE = {...getDefaultState(), ...JSON.parse(raw)};
+        saveState(); // Firestore로 이전
+        localStorage.removeItem('growthquest_v2');
+      }
+    } catch(e) {}
+  }
 }
 
 // ═══════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════
-function init() {
-  loadState();
+async function init() {
+  await loadState();
   // Set today's date in report input
   document.getElementById('inDate').value = today();
 
@@ -1400,7 +1416,7 @@ function previewPhoto(input) {
   };
   reader.readAsDataURL(file);
 }
-function submitQuest() {
+async function submitQuest() {
   if (!activeQuestId) return;
   const q = QUEST_POOL.find(q=>q.id===activeQuestId);
   if (!q) return;
@@ -1409,10 +1425,20 @@ function submitQuest() {
     return;
   }
 
+  const approvalId = Date.now().toString();
+  showToast('[시스템] 사진 업로드 중...');
+
+  let photoUrl = pendingPhotoData; // 업로드 실패 시 base64 fallback
+  try {
+    photoUrl = await uploadPhoto(pendingPhotoData, approvalId);
+  } catch(e) {
+    console.error('[Firebase] 사진 업로드 실패, base64로 저장:', e);
+  }
+
   const approvalEntry = {
-    id: Date.now().toString(),
+    id: approvalId,
     questId: activeQuestId,
-    photo: pendingPhotoData,
+    photo: photoUrl,
     date: today(),
     submittedAt: new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}),
   };
