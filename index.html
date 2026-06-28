@@ -17,11 +17,18 @@
   <div class="scanline"></div>
   <div class="dotgrid"></div>
 
+  <!-- LOGIN -->
+  <div id="loginScreen" class="onboard hidden">
+    <div class="onboard-icon"><img src="images/avatar.png" style="width:260px;height:260px;object-fit:cover;border-radius:50%;"></div>
+    <div class="onboard-sub">이름을 입력하고<br>임무를 시작하십시오.</div>
+    <input id="loginName" class="onboard-field" placeholder="이름 입력" maxlength="6">
+    <button class="onboard-btn" onclick="loginWithName()">입장 🚀</button>
+  </div>
+
   <!-- ONBOARDING -->
   <div id="onboard" class="onboard hidden">
     <div class="onboard-icon"><img src="images/avatar.png" style="width:260px;height:260px;object-fit:cover;border-radius:50%;"></div>
-    <div class="onboard-sub">훈련병의 성명을 입력하십시오.<br>본 과업 시스템에 등록 후 성장 임무가 개시됩니다.</div>
-    <input id="onboardName" class="onboard-field" placeholder="성명 (예: 민준)" maxlength="6">
+    <div class="onboard-sub">훈련병 <b id="onboardNameDisplay"></b>, 환영합니다!<br>신체 정보와 PIN을 등록하십시오.</div>
     <div style="display:flex;gap:8px;width:100%;margin-bottom:16px;">
       <input id="onboardHeight" class="onboard-field" style="margin:0;" placeholder="신장 (cm)" type="text" inputmode="decimal">
       <input id="onboardWeight" class="onboard-field" style="margin:0;" placeholder="체중 (kg)" type="text" inputmode="decimal">

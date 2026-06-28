@@ -36,16 +36,23 @@ const db      = firebase.firestore();
 const storage = firebase.storage();
 
 function getUid() {
-  let uid = localStorage.getItem('gq_device_id');
-  if (!uid) {
-    uid = 'dev_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
-    localStorage.setItem('gq_device_id', uid);
-  }
-  return uid;
+  return localStorage.getItem('gq_user_name') || '';
+}
+
+function setUid(name) {
+  localStorage.setItem('gq_user_name', name);
 }
 
 function userRef() {
   return db.collection('users').doc(getUid());
+}
+
+// ── 이름으로 유저 존재 여부 확인 ──
+async function fbCheckUserExists(name) {
+  try {
+    const doc = await db.collection('users').doc(name).get();
+    return doc.exists;
+  } catch(e) { return false; }
 }
 
 // ── 핵심 상태 저장 (profile, weekCycle 등 bounded 데이터만) ──

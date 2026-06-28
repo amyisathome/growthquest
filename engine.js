@@ -42,23 +42,48 @@ async function loadState() {
 // INIT
 // ═══════════════════════════════════════
 async function init() {
-  await loadState();
   document.getElementById('inDate').value = today();
 
-  if (!STATE.profile.name) {
-    document.getElementById('onboard').classList.remove('hidden');
-    return;
+  // 저장된 로그인 이름이 있으면 자동 로그인
+  const savedName = localStorage.getItem('gq_user_name');
+  if (savedName) {
+    await loadState();
+    if (STATE.profile.name) { render(); return; }
   }
-  document.getElementById('onboard').classList.add('hidden');
-  render();
+
+  // 로그인 화면 표시
+  document.getElementById('loginScreen').classList.remove('hidden');
+}
+
+async function loginWithName() {
+  const name = document.getElementById('loginName').value.trim();
+  if (!name) { showToast('이름을 입력해주세요!'); return; }
+
+  document.getElementById('loginName').disabled = true;
+  showToast('확인 중...');
+
+  setUid(name);
+  const exists = await fbCheckUserExists(name);
+
+  if (exists) {
+    // 기존 유저 → 데이터 로드
+    await loadState();
+    document.getElementById('loginScreen').classList.add('hidden');
+    render();
+  } else {
+    // 신규 유저 → 온보딩
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('onboardNameDisplay').textContent = name;
+    document.getElementById('onboard').classList.remove('hidden');
+  }
+  document.getElementById('loginName').disabled = false;
 }
 
 function finishOnboard() {
-  const name = document.getElementById('onboardName').value.trim();
+  const name = localStorage.getItem('gq_user_name');
   const h = parseFloat(document.getElementById('onboardHeight').value);
   const w = parseFloat(document.getElementById('onboardWeight').value);
   const pin = document.getElementById('onboardPin').value.trim();
-  if (!name) { alert('이름을 입력해주세요!'); return; }
   if (!pin || pin.length < 4) { alert('PIN 4자리를 입력해주세요!'); return; }
   STATE.profile.name = name;
   STATE.profile.pin = pin;
@@ -711,7 +736,7 @@ async function resetAllData() {
   } catch(e) {
     console.warn('Firebase 초기화 실패, 로컬만 초기화:', e);
   }
-  localStorage.removeItem('gq_device_id');
+  localStorage.removeItem('gq_user_name');
   showToast('초기화 완료! 앱을 다시 시작합니다.');
   setTimeout(() => location.reload(), 1500);
 }
