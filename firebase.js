@@ -204,6 +204,19 @@ async function fbAddReward(entry) {
   } catch (e) { console.error('[Firebase] reward 저장 실패:', e); }
 }
 
+// ── 유저 데이터 전체 초기화 ──
+async function fbResetUser() {
+  const ref = userRef();
+  const collections = ['questLog', 'heights', 'weights', 'pendingApprovals', 'rewards'];
+  for (const col of collections) {
+    const snap = await ref.collection(col).get();
+    const batch = db.batch();
+    snap.docs.forEach(doc => batch.delete(doc.ref));
+    if (snap.docs.length > 0) await batch.commit();
+  }
+  await ref.delete();
+}
+
 // ── 인증 사진 Storage 업로드 ──
 async function uploadPhoto(dataUrl, approvalId) {
   const ref = storage.ref(`photos/${getUid()}/${approvalId}`);

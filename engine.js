@@ -611,9 +611,13 @@ function renderParentScreen() {
     <div style="margin-top:20px;padding:14px;background:rgba(255,255,255,.05);border-radius:14px;">
       <div style="font-size:16px;font-weight:700;margin-bottom:8px;">⚙️ 부모 설정</div>
       <div style="font-size:15px;color:var(--text3);margin-bottom:8px;">현재 PIN: ${'*'.repeat((STATE.profile.pin||'').length)}</div>
-      <div style="display:flex;gap:8px;">
-        <input id="newPin" type="number" placeholder="새 PIN 4자리" style="flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:9px;padding:8px;color:#fff;font-size:16px;font-family:inherit;">
-        <button onclick="changePin()" style="background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;font-size:15px;font-weight:700;border:none;border-radius:10px;padding:8px 13px;cursor:pointer;">변경</button>
+      <div style="display:flex;gap:8px;box-sizing:border-box;width:100%;">
+        <input id="newPin" type="text" inputmode="numeric" maxlength="4" placeholder="새 PIN 4자리" style="flex:1;min-width:0;box-sizing:border-box;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:9px;padding:8px;color:#fff;font-size:16px;font-family:inherit;">
+        <button onclick="changePin()" style="flex-shrink:0;background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;font-size:15px;font-weight:700;border:none;border-radius:10px;padding:8px 13px;cursor:pointer;">변경</button>
+      </div>
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,.1);">
+        <div style="font-size:13px;color:var(--text3);margin-bottom:10px;">⚠️ 모든 데이터(퀘스트 기록, 포인트, 신체 기록 등)가 삭제됩니다.</div>
+        <button onclick="resetAllData()" style="width:100%;background:linear-gradient(135deg,#c0392b,#e74c3c);color:#fff;font-size:15px;font-weight:700;border:none;border-radius:10px;padding:10px;cursor:pointer;">🗑️ 데이터 초기화</button>
       </div>
     </div>
   `;
@@ -700,6 +704,18 @@ function changePin() {
   renderParentScreen();
 }
 
+async function resetAllData() {
+  if (!confirm('정말로 모든 데이터를 초기화할까요?\n이 작업은 되돌릴 수 없습니다.')) return;
+  try {
+    await fbResetUser();
+  } catch(e) {
+    console.warn('Firebase 초기화 실패, 로컬만 초기화:', e);
+  }
+  localStorage.removeItem('gq_device_id');
+  showToast('초기화 완료! 앱을 다시 시작합니다.');
+  setTimeout(() => location.reload(), 1500);
+}
+
 // ═══════════════════════════════════════
 // QUEST MODAL
 // ═══════════════════════════════════════
@@ -737,6 +753,11 @@ async function submitQuest() {
   if (!activeQuestId) return;
   const q = QUEST_POOL.find(q=>q.id===activeQuestId);
   if (!q) return;
+
+  if (!pendingPhotoData) {
+    showToast('사진을 등록해야 임무 보고가 가능해요 📷');
+    return;
+  }
 
   try {
     const approvalId = Date.now().toString();
@@ -794,12 +815,24 @@ function approveQuest(approvalId) {
   STATE.profile.points = (STATE.profile.points||0) + pts;
   STATE.profile.totalEarnedPoints = (STATE.profile.totalEarnedPoints||0) + pts;
   STATE.profile.totalApproved = (STATE.profile.totalApproved||0) + 1;
-  STATE.gachaQueue = (STATE.gachaQueue||0) + 1;
   fbRemovePendingApproval(approval.id);
   STATE.pendingApprovals.splice(idx, 1);
 
   updateStreak();
   checkWeeklyCycle();
+
+  // 오늘 모든 퀘스트 완료 시 가챠 1회 지급 (하루 1번만)
+  const t = today();
+  if (STATE.profile.gachaGivenDate !== t) {
+    const {warmup, core, exercise, rare} = getDailyQuests();
+    const todayQuests = [...warmup, ...core, ...exercise, ...rare];
+    const allApproved = todayQuests.every(q => STATE.questLog.find(l => l.questId === q.id && l.date === t));
+    if (allApproved) {
+      STATE.gachaQueue = (STATE.gachaQueue||0) + 1;
+      STATE.profile.gachaGivenDate = t;
+    }
+  }
+
   saveState();
 
   const lvEvent = getLevelUpEventType(prevPts, STATE.profile.totalEarnedPoints);
