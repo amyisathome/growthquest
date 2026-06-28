@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: #0d0d14;
+  background-image: radial-gradient(circle at 20% 20%, rgba(99,93,255,0.15), transparent 40%),
+                     radial-gradient(circle at 80% 80%, rgba(255,93,160,0.12), transparent 40%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 16px 60px;
+  color: #fff;
+}
+h1.page-title {
+  font-size: 18px;
+  color: #fff;
+  margin-bottom: 6px;
+  letter-spacing: 0.02em;
+}
+p.page-sub {
+  font-size: 12px;
+  color: #8b8aa8;
+  margin-bottom: 24px;
+}
+.tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 28px;
+  background: #1a1a28;
+  padding: 5px;
+  border-radius: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.tab {
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #8b8aa8;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.tab.active {
+  background: linear-gradient(135deg,#6c5ce7,#a855f7);
+  color: #fff;
+}
+
+.phone {
+  width: 340px;
+  height: 700px;
+  background: #000;
+  border-radius: 38px;
+  padding: 12px;
+  box-shadow: 0 0 0 2px #2a2a3a, 0 20px 60px rgba(0,0,0,0.6);
+  position: relative;
+}
+.screen {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg,#1b1330 0%, #100c20 60%, #0a0816 100%);
+  border-radius: 28px;
+  overflow: hidden;
+  position: relative;
+  display: none;
+  flex-direction: column;
+}
+.screen.active { display: flex; }
+.notch {
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 110px; height: 18px;
+  background: #000;
+  border-radius: 0 0 14px 14px;
+  z-index: 10;
+}
+
+/* ---------- shared bits ---------- */
+.topbar {
+  padding: 26px 16px 10px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.topbar .title { font-size: 13px; font-weight: 700; color: #cfcaf0; letter-spacing: 0.05em;}
+.coin {
+  background: rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  display:flex; align-items:center; gap:4px;
+}
+
+.scrollarea { flex: 1; overflow-y: auto; padding: 0 16px 16px; }
+.scrollarea::-webkit-scrollbar { display:none; }
+
+/* pixel avatar (original, generic blocky shape — not based on any copyrighted character) */
+.pixel-avatar {
+  width: 150px; height: 150px;
+  margin: 4px auto 8px;
+  position: relative;
+}
+.pixel-avatar svg { width: 100%; height: 100%; }
+.avatar-wrap{
+  width:110px; height:110px; margin:4px auto 10px; position:relative;
+}
+.avatar-ring{
+  position:absolute; inset:-5px; border-radius:50%;
+  background:linear-gradient(135deg,#6c5ce7,#a855f7,#5ad1ff);
+}
+.avatar-img{
+  width:110px; height:110px; border-radius:50%; object-fit:cover;
+  position:relative; display:block; border:3px solid #15152a;
+}
+.change-btn{
+  position:absolute; bottom:-2px; right:-2px;
+  width:30px; height:30px; border-radius:50%;
+  background:#1b1b2e; border:2px solid #5ad1ff;
+  display:flex; align-items:center; justify-content:center; font-size:13px; cursor:pointer;
+}
+#fileInput{display:none;}
+.aura {
+  position:absolute; inset:-14px;
+  background: radial-gradient(circle, rgba(108,92,231,0.35), transparent 70%);
+  z-index:-1;
+}
+
+.char-card {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 18px 16px;
+  text-align: center;
+  margin-bottom: 14px;
+}
+.char-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: #ffd76a;
+  margin-bottom: 4px;
+  letter-spacing: 0.02em;
+}
+.char-nick {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 12px;
+}
+.day-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #b9b6d8;
+  margin-bottom: 6px;
+}
+.progress-track {
+  width: 100%; height: 10px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg,#ffb648,#ff7a5c);
+  border-radius: 6px;
+}
+.progress-label { font-size: 10px; color: #8b8aa8; text-align: right; }
+
+.section-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #cfcaf0;
+  margin: 16px 0 10px;
+  display:flex; align-items:center; gap:6px;
+}
+
+.quest-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.quest-card.rare {
+  border: 1px solid #ffd76a;
+  background: linear-gradient(135deg, rgba(255,215,106,0.15), rgba(255,93,160,0.08));
+}
+.q-icon {
+  width: 38px; height: 38px;
+  border-radius: 10px;
+  display:flex; align-items:center; justify-content:center;
+  font-size: 18px;
+  background: rgba(255,255,255,0.08);
+  flex-shrink:0;
+}
+.q-body { flex: 1; min-width:0; }
+.q-name { font-size: 13px; font-weight: 700; color:#fff; margin-bottom:2px;}
+.q-desc { font-size: 11px; color:#9694b8; }
+.q-stars { font-size: 10px; color:#ffd76a; white-space:nowrap; flex-shrink:0; font-weight:700;}
+
+.bottom-nav {
+  display:flex; justify-content: space-around;
+  padding: 10px 0 14px;
+  background: rgba(0,0,0,0.3);
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.nav-item { text-align:center; font-size:9px; color:#7c7a9c; }
+.nav-item.active { color:#fff; }
+.nav-icon { font-size:16px; display:block; margin-bottom:2px; }
+
+/* gacha screen */
+.gacha-stage {
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 20px;
+}
+.gacha-box {
+  width: 140px; height:140px;
+  background: linear-gradient(135deg,#ffb648,#a855f7);
+  border-radius: 24px;
+  display:flex; align-items:center; justify-content:center;
+  font-size: 56px;
+  margin-bottom: 24px;
+  box-shadow: 0 0 40px rgba(255,182,72,0.5);
+  animation: pulse 1.8s infinite;
+}
+@keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.06);} }
+.gacha-cta {
+  background: linear-gradient(135deg,#6c5ce7,#a855f7);
+  color:#fff; font-weight:700; font-size:13px;
+  padding: 12px 28px; border-radius: 16px;
+  border:none;
+}
+.reward-list { width:100%; }
+.reward-row {
+  display:flex; align-items:center; gap:10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px; padding: 10px 12px; margin-bottom:8px; font-size:12px;
+}
+.reward-row .pt { color:#ffd76a; font-weight:700; margin-left:auto; }
+
+/* parent view */
+.approve-row {
+  background: rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 10px;
+  display:flex; gap:10px; align-items:center;
+  margin-bottom: 10px;
+}
+.thumb {
+  width: 48px; height:48px; border-radius:10px;
+  background: linear-gradient(135deg,#3b82f6,#06b6d4);
+  display:flex; align-items:center; justify-content:center; font-size:20px;
+  flex-shrink:0;
+}
+.approve-btn {
+  background: #00b37e; color:#fff; font-size:11px; font-weight:700;
+  border:none; border-radius:10px; padding:6px 12px; flex-shrink:0;
+}
+
+/* report */
+.chart-card {
+  background: rgba(255,255,255,0.05);
+  border-radius:16px; padding:14px; margin-bottom:12px;
+}
+.chart-title { font-size:11px; color:#b9b6d8; margin-bottom:10px; font-weight:700;}
+.bars { display:flex; align-items:flex-end; gap:6px; height:70px; }
+.bar { flex:1; background: linear-gradient(180deg,#a855f7,#6c5ce7); border-radius: 4px 4px 0 0; min-height:6px; }
+.insight-card {
+  background: linear-gradient(135deg, rgba(255,215,106,0.18), rgba(255,93,160,0.1));
+  border: 1px solid #ffd76a;
+  border-radius:16px; padding:14px; font-size:12px; line-height:1.6; color:#fff0d0;
+}
+.insight-card b { color:#ffd76a; }
+
+.gr-hero{
+  background: linear-gradient(160deg, rgba(108,92,231,0.18), rgba(255,93,160,0.08));
+  border:1px solid rgba(255,255,255,0.12); border-radius:20px; padding:18px 14px; text-align:center; margin-bottom:14px;
+}
+.gr-hero .ge{font-size:42px; margin-bottom:4px;}
+.gr-hero .gb{font-size:24px; font-weight:900; color:#ffd76a; margin-bottom:2px;}
+.gr-hero .gs{font-size:12px; color:#cfcaf0;}
+.gr-row2{display:flex; gap:8px; margin-bottom:14px;}
+.gr-mini{flex:1; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:12px 8px; text-align:center;}
+.gr-mini .ge{font-size:20px; margin-bottom:4px;}
+.gr-mini .gv{font-size:16px; font-weight:900;}
+.gr-mini .gl{font-size:10px; color:#9694b8;}
+.gr-mini .gu{font-size:10px; color:#5ad99a; font-weight:700; margin-top:3px;}
+.gr-chartcard{background:rgba(255,255,255,0.05); border-radius:16px; padding:12px 12px 8px; margin-bottom:12px;}
+.gr-chartcard .gt{font-size:11px; font-weight:700; color:#cfcaf0; margin-bottom:8px;}
+.gr-svg{width:100%; height:130px;}
+.gr-legend{display:flex; gap:12px; margin-top:4px; flex-wrap:wrap;}
+.gr-legend .li{display:flex; align-items:center; gap:4px; font-size:9px; color:#9694b8;}
+.gr-legend .dot{width:6px; height:6px; border-radius:50%;}
+.gr-legend .dash{width:10px; height:2px;}
+.gr-inputcard{background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:14px; margin-bottom:14px;}
+.gr-inputcard .it{font-size:12px; font-weight:700; color:#fff; margin-bottom:10px;}
+.gr-fieldrow{display:flex; gap:6px; margin-bottom:8px;}
+.gr-field{flex:1;}
+.gr-field label{display:block; font-size:9px; color:#9694b8; margin-bottom:4px;}
+.gr-field input, .gr-field select{width:100%; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); border-radius:9px; padding:8px 8px; color:#fff; font-size:12px; font-family:inherit;}
+.gr-field input::-webkit-calendar-picker-indicator{filter:invert(1);}
+.caption {
+  margin-top: 18px;
+  font-size: 11px;
+  color: #6b6a88;
+  text-align: center;
+  max-width: 320px;
+}
+.gr-savebtn{width:100%; background:linear-gradient(135deg,#6c5ce7,#a855f7); color:#fff; font-weight:700; font-size:12px; border:none; border-radius:11px; padding:10px; cursor:pointer;}
+.gr-toast{text-align:center; font-size:11px; color:#5ad99a; font-weight:700; margin-top:6px; min-height:14px;}
+</style>
+</head>
+<body>
+
+<h1 class="page-title">키성장 퀘스트 — 화면 목업</h1>
+<p class="page-sub">탭을 눌러 화면을 전환해보세요</p>
+
+<div class="tabs">
+  <div class="tab active" data-screen="home">홈</div>
+  <div class="tab" data-screen="gacha">보상함</div>
+  <div class="tab" data-screen="report">성장리포트</div>
+  <div class="tab" data-screen="parent">부모뷰</div>
+</div>
+
+<div class="phone">
+  <div class="notch"></div>
+
+  <!-- HOME SCREEN -->
+  <div class="screen active" id="home">
+    <div class="topbar">
+      <div class="title"></div>
+      <div class="coin coin-display"></div>
+    </div>
+    <div class="scrollarea">
+      <div class="char-card">
+        <div class="avatar-wrap">
+          <div class="avatar-ring"></div>
+          <img class="avatar-img" id="avatarImg" src="" alt="아이 아바타">
+          <div class="change-btn" onclick="document.getElementById('fileInput').click()">✏️</div>
+          <input type="file" id="fileInput" accept="image/*">
+        </div>
+        <div class="char-title"></div>
+        <div class="char-nick"></div>
+        <div class="day-row"><span class="streak"></span><span class="today-label"></span></div>
+        <div class="progress-track"><div class="progress-fill" style="width:0%"></div></div>
+        <div class="progress-label"></div>
+      </div>
+
+      <div class="section-label">⭐ 오늘의 퀘스트</div>
+
+      <div id="quest-list"></div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item active"><span class="nav-icon">🏠</span>홈</div>
+      <div class="nav-item"><span class="nav-icon">🎁</span>보상함</div>
+      <div class="nav-item"><span class="nav-icon">📈</span>리포트</div>
+      <div class="nav-item"><span class="nav-icon">👤</span>부모뷰</div>
+    </div>
+  </div>
+
+  <!-- GACHA SCREEN -->
+  <div class="screen" id="gacha">
+    <div class="topbar">
+      <div class="title">🎁 보상함</div>
+      <div class="coin coin-display"></div>
+    </div>
+    <div class="gacha-stage">
+      <div class="gacha-box">🎁</div>
+      <div style="font-size:12px;color:#cfcaf0;margin-bottom:18px;text-align:center;">오늘 퀘스트 3개 완료!<br>박스를 열어보세요</div>
+      <button class="gacha-cta">박스 열기 (100P)</button>
+    </div>
+    <div class="scrollarea" style="flex:0;">
+      <div class="section-label">📦 교환 가능 보상</div>
+      <div class="reward-list" id="reward-list">
+
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item"><span class="nav-icon">🏠</span>홈</div>
+      <div class="nav-item active"><span class="nav-icon">🎁</span>보상함</div>
+      <div class="nav-item"><span class="nav-icon">📈</span>리포트</div>
+      <div class="nav-item"><span class="nav-icon">👤</span>부모뷰</div>
+    </div>
+  </div>
+
+  <!-- REPORT SCREEN -->
+  <div class="screen" id="report">
+    <div class="topbar">
+      <div class="title">📈 성장 리포트</div>
+      <div class="coin">주간 분석</div>
+    </div>
+    <div class="scrollarea">
+
+      <div class="gr-hero">
+        <div class="ge">📏</div>
+        <div class="gb"></div>
+        <div class="gs"></div>
+      </div>
+
+      <div class="gr-row2">
+        <div id="stat-cards" style="display:contents;"></div>
+      </div>
+
+      <div class="gr-chartcard">
+        <div class="gt">📏 키 + 활동 포인트</div>
+        <svg class="gr-svg" id="heightChart" viewBox="0 0 300 130"></svg>
+        <div class="gr-legend">
+          <div class="li"><span class="dot" style="background:#ffd76a;"></span>키(cm)</div>
+          <div class="li"><span class="dash" style="background:#5ad1ff;"></span>활동포인트</div>
+        </div>
+      </div>
+
+      <div class="gr-chartcard">
+        <div class="gt">⚖️ 몸무게 + 활동 포인트</div>
+        <svg class="gr-svg" id="weightChart" viewBox="0 0 300 130"></svg>
+        <div class="gr-legend">
+          <div class="li"><span class="dot" style="background:#ff9d8a;"></span>몸무게(kg)</div>
+          <div class="li"><span class="dash" style="background:#5ad1ff;"></span>활동포인트</div>
+        </div>
+      </div>
+
+      <div class="gr-inputcard">
+        <div class="it">✏️ 오늘 기록 추가 (키·몸무게 함께 입력)</div>
+        <div class="gr-fieldrow">
+          <div class="gr-field">
+            <label>날짜</label>
+            <input type="date" id="inDate">
+          </div>
+        </div>
+        <div class="gr-fieldrow">
+          <div class="gr-field">
+            <label>키 (cm)</label>
+            <input type="number" step="0.1" id="inHeight" placeholder="예: 138.2">
+          </div>
+          <div class="gr-field">
+            <label>몸무게 (kg)</label>
+            <input type="number" step="0.1" id="inWeight" placeholder="예: 33.6">
+          </div>
+        </div>
+        <button class="gr-savebtn" onclick="saveRecord()">기록 저장하기</button>
+        <div class="gr-toast" id="toast"></div>
+        <div style="font-size:9px; color:#7c7a9c; text-align:center; margin-top:4px;">※ 보상 포인트는 일주일에 한 번, 첫 기록에만 지급돼요</div>
+      </div>
+
+      <div id="insight-list"></div>
+
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item"><span class="nav-icon">🏠</span>홈</div>
+      <div class="nav-item"><span class="nav-icon">🎁</span>보상함</div>
+      <div class="nav-item active"><span class="nav-icon">📈</span>리포트</div>
+      <div class="nav-item"><span class="nav-icon">👤</span>부모뷰</div>
+    </div>
+  </div>
+
+  <!-- PARENT VIEW -->
+  <div class="screen" id="parent">
+    <div class="topbar">
+      <div class="title">👤 부모뷰</div>
+      <div class="coin"></div>
+    </div>
+    <div class="scrollarea">
+      <div class="section-label">✅ 승인 대기</div>
+      <div id="approval-list"></div>
+      <div class="char-card" id="parent-char-card" style="margin-top:18px;"></div>
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item"><span class="nav-icon">🏠</span>홈</div>
+      <div class="nav-item"><span class="nav-icon">🎁</span>보상함</div>
+      <div class="nav-item"><span class="nav-icon">📈</span>리포트</div>
+      <div class="nav-item active"><span class="nav-icon">👤</span>부모뷰</div>
+    </div>
+  </div>
+
+</div>
+
+<p class="caption">아바타는 기본 사진이 적용되어 있고, 프로필의 ✏️ 버튼으로 다른 사진으로 교체할 수 있습니다.</p>
+
+<script>
+document.getElementById('fileInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    document.getElementById('avatarImg').src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.screen).classList.add('active');
+  });
+});
+
+// ---- 성장 리포트: 키/몸무게 + 활동포인트 곡선 ----
+const heightData = APP_DATA.chartData.height.map(r => [r.label, r.value, r.activity]);
+const weightData = APP_DATA.chartData.weight.map(r => [r.label, r.value, r.activity]);
+
+function drawChart(svgId, data, mainColor) {
+  const svg = document.getElementById(svgId);
+  if (!svg) return;
+  const W = 300, H = 130, padL = 32, padR = 8, padT = 12, padB = 18;
+  const innerW = W - padL - padR, innerH = H - padT - padB;
+  const n = data.length;
+  const xs = data.map((d,i) => padL + (innerW * i) / (n - 1));
+
+  const vals = data.map(d => d[1]);
+  const range = Math.max(...vals) - Math.min(...vals) || 1;
+  const minV = Math.min(...vals) - range*0.3 - 0.1;
+  const maxV = Math.max(...vals) + range*0.3 + 0.1;
+  const ys = data.map(d => padT + innerH * (1 - (d[1]-minV)/(maxV-minV)));
+
+  const pts = data.map(d => d[2]);
+  const maxP = Math.max(...pts) * 1.2 || 1;
+  const ysP = data.map(d => padT + innerH * (1 - d[2]/maxP));
+
+  let s = `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+  <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>`;
+
+  let dashPts = xs.map((x,i) => `${x},${ysP[i]}`).join(" ");
+  s += `<polyline points="${dashPts}" fill="none" stroke="#5ad1ff" stroke-width="2" stroke-dasharray="4 3" opacity="0.85"/>`;
+  xs.forEach((x,i) => { s += `<circle cx="${x}" cy="${ysP[i]}" r="2.3" fill="#5ad1ff"/>`; });
+
+  let mainPts = xs.map((x,i) => `${x},${ys[i]}`).join(" ");
+  s += `<polyline points="${mainPts}" fill="none" stroke="${mainColor}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+  xs.forEach((x,i,arr) => {
+    const r = i === arr.length-1 ? 4.5 : 3;
+    s += `<circle cx="${x}" cy="${ys[i]}" r="${r}" fill="${mainColor}"/>`;
+  });
+  const last = data[data.length-1];
+  s += `<text x="${xs[xs.length-1]-4}" y="${ys[ys.length-1]-9}" font-size="10" font-weight="700" fill="${mainColor}" text-anchor="end">${last[1]}</text>`;
+
+  data.forEach((d,i) => {
+    s += `<text x="${xs[i]}" y="${H-5}" font-size="8" fill="#9694b8" text-anchor="middle">${d[0]}</text>`;
+  });
+
+  svg.innerHTML = s;
+}
+
+function renderGrowthCharts() {
+  drawChart("heightChart", heightData, "#ffd76a");
+  drawChart("weightChart", weightData, "#ff9d8a");
+}
+renderGrowthCharts();
+
+function getWeekKey(dateStr) {
+  const d = new Date(dateStr);
+  const onejan = new Date(d.getFullYear(), 0, 1);
+  const week = Math.ceil((((d - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+  return `${d.getFullYear()}-W${week}`;
+}
+let lastRewardWeek = null; // 마지막으로 보상을 받은 주
+
+function saveRecord() {
+  const date = document.getElementById("inDate").value;
+  const heightVal = parseFloat(document.getElementById("inHeight").value);
+  const weightVal = parseFloat(document.getElementById("inWeight").value);
+  const toast = document.getElementById("toast");
+
+  if (!date || isNaN(heightVal) || isNaN(weightVal)) {
+    toast.style.color = "#ff9d8a";
+    toast.textContent = "날짜, 키, 몸무게를 모두 입력해주세요";
+    return;
+  }
+
+  const label = (parseInt(date.split("-")[1]) || "") + "월";
+  heightData.push([label, heightVal, 80]);
+  weightData.push([label, weightVal, 80]);
+  renderGrowthCharts();
+
+  const weekKey = getWeekKey(date);
+  if (weekKey !== lastRewardWeek) {
+    lastRewardWeek = weekKey;
+    toast.style.color = "#5ad99a";
+    toast.textContent = "저장 완료! 이번 주 첫 기록 +300P 🎉";
+  } else {
+    toast.style.color = "#cfcaf0";
+    toast.textContent = "저장 완료! (이번 주 보상은 이미 받았어요)";
+  }
+
+  document.getElementById("inHeight").value = "";
+  document.getElementById("inWeight").value = "";
+}
+</script>
+
+<script src="data.js"></script>
+<script src="render.js"></script>
+</body>
+</html>
