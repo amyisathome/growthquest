@@ -9,356 +9,16 @@
 <title>키성장 퀘스트</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
-<style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-:root{
-  --bg:#0b0918;--bg2:#272448;--bg3:#14122b;
-  --purple:#7c5cf0;--violet:#5a3fd6;--gold:#f6c945;
-  --pink:#ff5da0;--cyan:#5cc6f2;--green:#46d6a0;--red:#ff6b6b;
-  --text:#fff;--text2:#d7d2ff;--text3:#9b95c8;--text4:#6b66a0;
-  --border:#0a0917;
-  --card:#272448;--card-border:#0a0917;
-  --px-shadow:inset 2px 2px 0 rgba(255,255,255,.1),inset -2px -2px 0 rgba(0,0,0,.4),3px 3px 0 #0a0917;
-}
-@keyframes shineSweep{0%{transform:translateX(-120%)}60%,100%{transform:translateX(320%)}}
-@keyframes pixelPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
-html,body{height:100%;overflow:hidden;}
-body{
-  font-family:'Noto Sans KR',sans-serif;
-  background:#0b0918;color:var(--text);
-  display:flex;flex-direction:column;align-items:center;
-  justify-content:center;
-}
-#app{
-  width:100%;max-width:420px;height:100%;max-height:900px;
-  background:#14122b;
-  display:flex;flex-direction:column;position:relative;overflow:hidden;
-}
-.scanline{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px);pointer-events:none;z-index:10;}
-.dotgrid{position:absolute;inset:0;opacity:.2;background-image:radial-gradient(rgba(255,255,255,.6) 1px,transparent 1px);background-size:36px 36px;pointer-events:none;z-index:9;}
-.bggrad{position:absolute;inset:0;background:radial-gradient(120% 60% at 50% 0%,#221c46 0%,#14122b 55%,#100e22 100%);pointer-events:none;}
-
-/* ── TOPBAR ── */
-.topbar{
-  padding:env(safe-area-inset-top,12px) 16px 10px;
-  padding-top:max(env(safe-area-inset-top),12px);
-  display:flex;justify-content:space-between;align-items:center;
-  background:rgba(0,0,0,0.3);border-bottom:2px solid var(--border);
-  flex-shrink:0;position:relative;z-index:20;
-}
-.topbar-title{
-  font-family:'Press Start 2P',monospace;
-  font-size:13px;color:var(--gold);letter-spacing:.08em;
-  text-shadow:2px 2px 0 #6b3a00;
-}
-.coin-badge{
-  background:var(--bg2);border:2px solid var(--border);
-  box-shadow:inset 2px 2px 0 rgba(255,255,255,.12),inset -2px -2px 0 rgba(0,0,0,.4),3px 3px 0 var(--border);
-  padding:5px 11px 5px 8px;font-family:'Press Start 2P',monospace;font-size:10px;font-weight:400;
-  color:#fff;display:flex;align-items:center;gap:7px;cursor:pointer;
-}
-.coin-badge:active{opacity:.7;}
-
-/* ── SCROLL AREA ── */
-.scrollarea{flex:1;overflow-y:auto;padding:0 14px 80px;-webkit-overflow-scrolling:touch;position:relative;z-index:15;}
-.scrollarea::-webkit-scrollbar{display:none;}
-
-/* ── BOTTOM NAV ── */
-.bottom-nav{
-  display:flex;
-  padding:9px 8px max(env(safe-area-inset-bottom),16px);
-  background:#1a1838;border-top:2px solid var(--border);
-  flex-shrink:0;position:relative;z-index:20;
-}
-.nav-item{flex:1;text-align:center;font-size:9px;font-weight:700;color:var(--text4);cursor:pointer;padding:2px 0;transition:color .2s;}
-.nav-item.active{color:var(--gold);}
-.nav-item:active{opacity:.7;}
-.nav-icon{font-size:22px;display:block;margin-bottom:2px;}
-
-/* ── SCREENS ── */
-.screen{display:none;flex-direction:column;height:100%;overflow:hidden;}
-.screen.active{display:flex;}
-
-/* ── SECTION LABEL ── */
-.section-label{
-  font-size:13px;font-weight:800;color:var(--text2);
-  margin:14px 2px 10px;display:flex;align-items:center;gap:7px;
-}
-.section-label::after{content:'';flex:1;height:2px;background:repeating-linear-gradient(90deg,#3a3766 0 4px,transparent 4px 8px);}
-/* ── QUEST SECTION HEADER ── */
-.quest-section-header{display:flex;align-items:center;gap:7px;margin:14px 2px 10px;}
-.quest-section-header span{font:800 13px 'Noto Sans KR';color:var(--text2);}
-.quest-section-header::after{content:'';flex:1;height:2px;background:repeating-linear-gradient(90deg,#3a3766 0 4px,transparent 4px 8px);}
-
-/* ── CHAR CARD ── */
-.char-card{
-  background:var(--bg2);border:2px solid var(--border);
-  box-shadow:var(--px-shadow);
-  padding:14px;margin-bottom:12px;
-}
-.char-title{
-  font-family:'Press Start 2P',monospace;font-size:10px;
-  color:var(--gold);margin-bottom:3px;letter-spacing:.02em;text-shadow:2px 2px 0 #6b3a00;
-}
-.char-nick{font-size:14px;font-weight:700;color:#fff;margin-bottom:8px;}
-.day-row{display:flex;justify-content:space-between;font-size:14px;color:var(--text2);margin-bottom:5px;}
-.progress-track{width:100%;height:14px;background:#100e22;border:2px solid var(--border);box-shadow:inset 1px 1px 0 rgba(0,0,0,.6);padding:2px;margin-bottom:4px;}
-.progress-fill{height:100%;background:repeating-linear-gradient(90deg,var(--cyan) 0 5px,var(--purple) 5px 10px);transition:width .5s;}
-.progress-label{font-size:13px;color:var(--text3);text-align:right;}
-
-/* story card */
-.story-card{
-  background:linear-gradient(135deg,rgba(124,92,240,.2),rgba(90,63,214,.1));
-  border:2px solid var(--border);
-  box-shadow:var(--px-shadow);
-  padding:13px 14px;margin-bottom:12px;display:flex;gap:10px;align-items:flex-start;
-}
-.story-icon{font-size:32px;flex-shrink:0;filter:drop-shadow(0 0 6px rgba(246,201,69,.5));}
-.story-body{}
-.story-title{font-size:14px;font-weight:900;color:var(--gold);margin-bottom:4px;letter-spacing:.03em;}
-.story-msg{font-size:14px;color:var(--text2);line-height:1.7;}
-
-/* RPG stat card */
-.char-top{display:flex;gap:0;align-items:center;margin-bottom:12px;}
-.char-left{flex-shrink:0;}
-.char-right{flex:1;min-width:0;}
-.lv-badge{
-  font-family:'Press Start 2P',monospace;font-size:8px;
-  background:linear-gradient(180deg,var(--purple),var(--violet));
-  color:#fff;padding:4px 7px;border:2px solid var(--border);box-shadow:2px 2px 0 var(--border);
-  display:inline-block;margin-bottom:5px;
-}
-.char-rank{font-size:12px;color:var(--gold);font-weight:800;margin-bottom:2px;}
-.char-nick-small{font-size:14px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.stat-row{display:flex;gap:6px;margin-bottom:10px;}
-.stat-box{
-  flex:1;background:#1a1838;border:2px solid var(--border);
-  box-shadow:inset 1px 1px 0 rgba(255,255,255,.08);
-  padding:8px 4px;text-align:center;
-}
-.stat-box .sv{font-size:17px;font-weight:900;color:#fff;line-height:1.1;margin-top:2px;}
-.stat-box .sl{font-size:9px;font-weight:700;color:var(--text3);margin-top:3px;}
-.stat-box .si{font-size:15px;margin-bottom:2px;}
-.xp-section{margin-top:14px;}
-.xp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
-.xp-label{font-size:11px;font-weight:700;color:var(--cyan);}
-.xp-next{font-family:'Press Start 2P',monospace;font-size:8px;color:var(--text3);}
-.xp-track{display:flex;gap:3px;height:18px;background:#0b0919;border:2px solid var(--border);box-shadow:inset 0 2px 4px rgba(0,0,0,.7);padding:2px;}
-.xp-seg{flex:1;background:#0f0d28;border:1px solid #1a1640;}
-.xp-seg.on{background:linear-gradient(180deg,var(--purple),var(--violet));box-shadow:0 0 5px rgba(124,92,240,.5);}
-.xp-seg.on-c{background:linear-gradient(180deg,var(--cyan),#3a9fc0);box-shadow:0 0 4px rgba(92,198,242,.4);}
-.xp-seg.on-g{background:linear-gradient(180deg,var(--green),#2fa87c);}
-.quest-today{display:flex;align-items:center;justify-content:flex-end;gap:4px;margin-top:6px;font-size:13px;color:var(--text3);}
-.quest-today b{color:var(--green);}
-.levelup-flash{animation:lvflash .8s ease-out;}
-@keyframes lvflash{0%{box-shadow:0 0 0 0 rgba(124,92,240,.8);}100%{box-shadow:0 0 30px 10px rgba(124,92,240,0);}}
-
-
-/* ── PIXEL AVATAR ── */
-.avatar-wrap{width:76px;height:76px;position:relative;flex-shrink:0;}
-.avatar-ring{display:none;}
-.avatar-img{width:76px;height:76px;object-fit:cover;object-position:50% 22%;display:block;background:linear-gradient(#3a2f6e,#241c48);border:2px solid var(--border);box-shadow:inset 2px 2px 0 rgba(255,255,255,.12);}
-.avatar-edit{position:absolute;bottom:-2px;right:-2px;width:22px;height:22px;background:#1a1838;border:2px solid var(--cyan);box-shadow:2px 2px 0 var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;}
-#fileInput{display:none;}
-.pixel-char{width:76px;height:76px;display:flex;align-items:center;justify-content:center;background:linear-gradient(#3a2f6e,#241c48);border:2px solid var(--border);}
-
-/* ── QUEST CARDS ── */
-.quest-card{
-  background:var(--bg2);border:2px solid var(--border);
-  box-shadow:var(--px-shadow);
-  padding:11px 12px;display:flex;align-items:center;gap:11px;margin-bottom:9px;
-  cursor:pointer;transition:all .15s;position:relative;overflow:hidden;
-}
-.quest-card:active{opacity:.8;}
-.quest-card.rare{border:2px solid var(--gold);background:linear-gradient(135deg,#3a2c12,#2a2148);box-shadow:inset 2px 2px 0 rgba(255,255,255,.12),3px 3px 0 var(--border),0 0 16px rgba(246,201,69,.25);}
-.quest-card.rare::before{content:'';position:absolute;top:0;left:0;width:30px;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);animation:shineSweep 3.5s ease-in-out infinite;}
-.quest-card.done{opacity:.5;pointer-events:none;}
-.quest-card.pending{border:2px solid var(--cyan);}
-.quest-card.approved{border:2px solid var(--green);opacity:.7;pointer-events:none;}
-.q-icon{width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;border:2px solid var(--border);}
-.q-icon.cat-warmup{background:linear-gradient(#2d1b69,#4a2c8a);}
-.q-icon.cat-core{background:linear-gradient(#1a3a5c,#16466e);}
-.q-icon.cat-exercise{background:linear-gradient(#1a4a2a,#1f6a3a);}
-.q-icon.cat-rare{background:linear-gradient(#3a2414,#28180c);}
-.q-body{flex:1;min-width:0;}
-.q-name{font-size:14px;font-weight:700;color:#fff;margin-bottom:2px;}
-.q-desc{font-size:12px;color:var(--text3);white-space:pre-line;line-height:1.6;}
-.q-stars{font-size:11px;color:var(--gold);white-space:nowrap;flex-shrink:0;font-weight:700;}
-.q-pts{font-family:'Press Start 2P',monospace;font-size:9px;color:var(--green);}
-.q-badge{font-family:'Press Start 2P',monospace;font-size:7px;padding:2px 4px;font-weight:700;flex-shrink:0;}
-.q-badge.pending{background:rgba(92,198,242,.2);color:var(--cyan);}
-.q-badge.approved{background:rgba(70,214,160,.2);color:var(--green);}
-.q-rare-badge{font-family:'Press Start 2P',monospace;font-size:7px;color:var(--border);background:var(--gold);padding:2px 4px;}
-
-/* ── GACHA SCREEN ── */
-.gacha-stage{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:24px 20px;flex:1;
-}
-.gacha-box{
-  width:120px;height:120px;background:linear-gradient(#3a2414,#2a180c);
-  border:2px solid var(--border);
-  box-shadow:inset 2px 2px 0 rgba(255,255,255,.15),inset -3px -3px 0 rgba(0,0,0,.5),4px 4px 0 var(--border),0 0 40px rgba(246,201,69,.3);
-  display:flex;align-items:center;justify-content:center;
-  font-size:64px;margin-bottom:18px;
-  cursor:pointer;transition:transform .1s;animation:pixelPulse 1.8s infinite;
-}
-.gacha-box:active{transform:scale(.95);}
-.gacha-box.spin{animation:gacha-spin .6s ease-out;}
-@keyframes gacha-spin{0%{transform:scale(1) rotate(0);}30%{transform:scale(1.15) rotate(-8deg);}60%{transform:scale(1.2) rotate(8deg);}100%{transform:scale(1) rotate(0);}}
-.gacha-count-badge{background:linear-gradient(var(--purple),var(--violet));border:2px solid var(--border);box-shadow:2px 2px 0 var(--border);color:#fff;font-weight:700;font-size:13px;padding:4px 14px;margin-bottom:12px;}
-.gacha-cta{
-  position:relative;background:linear-gradient(var(--purple),var(--violet));
-  color:#fff;font-weight:700;font-size:14px;font-family:'Noto Sans KR',sans-serif;
-  padding:12px 36px;border:2px solid var(--border);box-shadow:inset 2px 2px 0 rgba(255,255,255,.2),3px 3px 0 var(--border);
-  cursor:pointer;transition:opacity .2s;overflow:hidden;
-}
-.gacha-cta::before{content:'';position:absolute;top:0;left:0;width:24px;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);animation:shineSweep 2.5s ease-in-out infinite;}
-.gacha-cta:disabled{opacity:.4;cursor:not-allowed;}
-.gacha-cta:active:not(:disabled){opacity:.7;}
-.gacha-result{text-align:center;animation:fadeIn .4s;margin-top:8px;}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
-.gacha-result .pts{font-family:'Press Start 2P',monospace;font-size:30px;font-weight:900;color:var(--gold);}
-.gacha-result .msg{font-size:15px;color:var(--text2);margin-top:4px;}
-
-/* reward history */
-.reward-list{width:100%;margin-top:14px;}
-.reward-row{display:flex;align-items:center;gap:10px;background:var(--bg2);border:2px solid var(--border);box-shadow:inset 1px 1px 0 rgba(255,255,255,.08),2px 2px 0 var(--border);padding:9px 12px;margin-bottom:8px;font-size:14px;}
-.reward-row .pt{color:var(--gold);font-family:'Press Start 2P',monospace;font-size:9px;margin-left:auto;white-space:nowrap;}
-
-/* reward shop */
-.shop-card{background:var(--bg2);border:2px solid var(--border);box-shadow:inset 1px 1px 0 rgba(255,255,255,.08),2px 2px 0 var(--border);padding:9px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
-.shop-icon{font-size:28px;flex-shrink:0;}
-.shop-body{flex:1;}
-.shop-name{font-size:14px;font-weight:700;margin-bottom:3px;}
-.shop-cost{font-family:'Press Start 2P',monospace;font-size:9px;color:var(--gold);}
-.shop-btn{background:linear-gradient(var(--purple),var(--violet));color:#fff;font-size:12px;font-weight:700;border:2px solid var(--border);box-shadow:2px 2px 0 var(--border);padding:6px 12px;cursor:pointer;flex-shrink:0;font-family:'Noto Sans KR',sans-serif;}
-.shop-btn:disabled{opacity:.35;cursor:not-allowed;}
-.shop-btn:active:not(:disabled){opacity:.7;}
-
-/* ── REPORT SCREEN ── */
-.gr-hero{background:linear-gradient(135deg,var(--bg2),#1a1838);border:2px solid var(--border);box-shadow:var(--px-shadow);padding:16px;text-align:center;margin-bottom:10px;}
-.gr-hero .ge{font-size:30px;margin-bottom:3px;}
-.gr-hero .gb{font-size:22px;font-weight:900;color:var(--gold);margin-bottom:2px;}
-.gr-hero .gs{font-size:13px;color:var(--text2);}
-.gr-row2{display:flex;gap:8px;margin-bottom:10px;}
-.gr-mini{flex:1;background:var(--bg2);border:2px solid var(--border);box-shadow:inset 1px 1px 0 rgba(255,255,255,.08),2px 2px 0 var(--border);padding:11px 8px;text-align:center;}
-.gr-mini .ge{font-size:18px;margin-bottom:3px;}
-.gr-mini .gv{font-size:16px;font-weight:900;}
-.gr-mini .gl{font-size:10px;color:var(--text3);}
-.gr-mini .gu{font-size:10px;color:var(--green);font-weight:700;margin-top:2px;}
-.gr-chartcard{background:#1a1838;border:2px solid var(--border);box-shadow:inset 1px 1px 0 rgba(255,255,255,.06),2px 2px 0 var(--border);padding:12px;margin-bottom:10px;}
-.gr-chartcard .gt{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;}
-.gr-svg{width:100%;height:110px;}
-.gr-legend{display:flex;gap:12px;margin-top:6px;flex-wrap:wrap;}
-.gr-legend .li{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text3);}
-.gr-legend .dot{width:8px;height:8px;}
-.gr-legend .dash{width:10px;height:2px;}
-.gr-inputcard{background:var(--bg2);border:2px solid var(--border);box-shadow:var(--px-shadow);padding:13px;margin-bottom:10px;}
-.gr-inputcard .it{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:11px;}
-.gr-fieldrow{display:flex;gap:6px;margin-bottom:8px;}
-.gr-field{flex:1;}
-.gr-field label{display:block;font-size:10px;color:var(--text3);margin-bottom:4px;}
-.gr-field input,.gr-field select{width:100%;background:#1a1838;border:2px solid #3a3766;color:#fff;font-size:12px;font-family:inherit;padding:7px 9px;}
-.gr-field input::-webkit-calendar-picker-indicator{filter:invert(.7);}
-.gr-savebtn{width:100%;background:linear-gradient(var(--purple),var(--violet));color:#fff;font-weight:700;font-size:13px;font-family:'Noto Sans KR',sans-serif;border:2px solid var(--border);box-shadow:inset 2px 2px 0 rgba(255,255,255,.2),3px 3px 0 var(--border);padding:10px;cursor:pointer;}
-.gr-savebtn:active{opacity:.7;}
-.gr-toast{text-align:center;font-size:11px;color:var(--green);font-weight:700;margin-top:6px;min-height:14px;}
-
-/* weekly quest bar chart */
-.week-bars{display:flex;align-items:flex-end;gap:5px;height:60px;}
-.week-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
-.week-bar{width:100%;background:linear-gradient(180deg,var(--violet),var(--purple));min-height:4px;transition:height .3s;}
-.week-bar.today{background:linear-gradient(180deg,var(--gold),#c87a00);}
-.week-bar-label{font-size:10px;color:var(--text3);}
-
-/* insight card */
-.insight-card{position:relative;background:linear-gradient(135deg,#3a2c12,#2a2148);border:2px solid var(--gold);box-shadow:inset 2px 2px 0 rgba(255,255,255,.12),3px 3px 0 var(--border),0 0 12px rgba(246,201,69,.2);padding:11px 12px;font-size:12px;line-height:1.7;color:#fff0d0;margin-bottom:10px;}
-.insight-card b{color:var(--gold);}
-
-/* ── PARENT SCREEN ── */
-.approve-row{background:var(--bg2);border:2px solid var(--border);box-shadow:var(--px-shadow);padding:10px 12px;display:flex;gap:10px;align-items:center;margin-bottom:9px;}
-.thumb{width:46px;height:46px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;overflow:hidden;background:linear-gradient(#1a3a5c,#16466e);border:2px solid var(--border);}
-.thumb img{width:100%;height:100%;object-fit:cover;}
-.approve-btn{background:linear-gradient(var(--green),#2fa87c);color:#0a0917;font-size:12px;font-weight:700;border:2px solid var(--border);box-shadow:2px 2px 0 var(--border);padding:6px 12px;cursor:pointer;flex-shrink:0;font-family:'Noto Sans KR',sans-serif;}
-.approve-btn:active{opacity:.7;}
-.reject-btn{background:rgba(255,107,107,.1);color:var(--red);font-size:12px;font-weight:700;border:2px solid rgba(255,107,107,.4);padding:6px 10px;cursor:pointer;flex-shrink:0;font-family:'Noto Sans KR',sans-serif;}
-.reject-btn:active{opacity:.7;}
-
-/* ── PIN OVERLAY ── */
-.pin-overlay{
-  position:absolute;inset:0;background:rgba(0,0,0,.85);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  z-index:100;
-}
-.pin-box{background:var(--bg2);border:2px solid var(--border);box-shadow:var(--px-shadow);padding:28px 24px;text-align:center;width:280px;}
-.pin-title{font-size:16px;font-weight:700;margin-bottom:6px;}
-.pin-sub{font-size:13px;color:var(--text3);margin-bottom:20px;}
-.pin-dots{display:flex;justify-content:center;gap:12px;margin-bottom:20px;}
-.pin-dot{width:14px;height:14px;border:2px solid var(--text3);transition:all .15s;}
-.pin-dot.filled{background:var(--purple);border-color:var(--purple);}
-.pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;}
-.pin-key{background:#1a1838;border:2px solid var(--border);color:#fff;font-size:20px;font-weight:700;padding:14px;cursor:pointer;transition:background .15s;font-family:'Noto Sans KR',sans-serif;}
-.pin-key:active{background:var(--purple);}
-.pin-err{font-size:13px;color:var(--red);margin-top:4px;min-height:14px;}
-.pin-cancel{font-size:14px;color:var(--text3);margin-top:12px;cursor:pointer;display:inline-block;padding:4px;}
-.pin-cancel:active{opacity:.6;}
-
-/* ── MODAL ── */
-.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;justify-content:center;z-index:90;}
-.modal-overlay.center{align-items:center;}
-.modal-box{background:var(--bg2);border:2px solid var(--border);border-bottom:none;box-shadow:-3px -3px 0 var(--border);padding:24px 20px max(env(safe-area-inset-bottom),20px);width:100%;max-width:420px;}
-.modal-box.center-box{border:2px solid var(--border);border-bottom:2px solid var(--border);box-shadow:4px 4px 0 var(--border);padding:24px 20px;max-width:340px;margin:16px;}
-.modal-title{font-size:17px;font-weight:900;margin-bottom:8px;}
-.modal-sub{font-size:13px;color:var(--text3);margin-bottom:16px;line-height:1.6;white-space:pre-line;}
-.modal-btn{width:100%;border:2px solid var(--border);padding:12px;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:8px;font-family:'Noto Sans KR',sans-serif;}
-.modal-btn.primary{background:linear-gradient(var(--purple),var(--violet));color:#fff;box-shadow:inset 2px 2px 0 rgba(255,255,255,.2),3px 3px 0 var(--border);}
-.modal-btn.primary:active{opacity:.7;}
-.modal-btn.secondary{background:rgba(255,255,255,.06);color:var(--text2);box-shadow:2px 2px 0 var(--border);}
-.modal-btn.secondary:active{opacity:.7;}
-.photo-preview{width:100%;height:160px;object-fit:cover;margin-bottom:12px;display:none;border:2px solid var(--border);}
-.photo-upload-btn{width:100%;border:2px dashed rgba(255,255,255,.2);background:rgba(255,255,255,.04);color:var(--text3);font-size:15px;font-weight:700;padding:20px;cursor:pointer;margin-bottom:12px;text-align:center;font-family:'Noto Sans KR',sans-serif;}
-.photo-upload-btn:active{opacity:.6;}
-
-/* weekly reward banner */
-.weekly-banner{position:relative;background:linear-gradient(135deg,#3a2c12,#2a2148);border:2px solid var(--gold);box-shadow:inset 2px 2px 0 rgba(255,255,255,.12),3px 3px 0 var(--border),0 0 12px rgba(246,201,69,.2);padding:14px;text-align:center;margin-bottom:12px;overflow:hidden;}
-.weekly-banner .wb-icon{font-size:36px;margin-bottom:4px;}
-.weekly-banner .wb-title{font-size:16px;font-weight:900;color:var(--gold);margin-bottom:3px;}
-.weekly-banner .wb-sub{font-size:13px;color:var(--text2);}
-.weekly-banner-btn{margin-top:10px;background:var(--gold);color:#1a1228;font-size:14px;font-weight:900;border:2px solid var(--border);box-shadow:2px 2px 0 var(--border);padding:7px 20px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;}
-.weekly-banner-btn:active{opacity:.7;}
-
-/* toast popup */
-.toast{
-  position:absolute;bottom:90px;left:50%;transform:translateX(-50%);
-  background:var(--bg2);border:2px solid var(--border);box-shadow:3px 3px 0 var(--border);
-  color:#fff;font-size:13px;font-weight:700;
-  padding:9px 16px;white-space:nowrap;
-  opacity:0;transition:opacity .3s;pointer-events:none;z-index:200;
-}
-.toast.show{opacity:1;}
-
-/* onboarding */
-.onboard{position:absolute;inset:0;background:var(--bg);z-index:150;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 24px;}
-.onboard-icon{font-size:72px;margin-bottom:16px;}
-.onboard-title{font-family:'Press Start 2P',monospace;font-size:13px;color:var(--gold);text-align:center;margin-bottom:8px;line-height:1.8;text-shadow:2px 2px 0 #6b3a00;}
-.onboard-sub{font-size:15px;color:var(--text2);text-align:center;margin-bottom:24px;line-height:1.7;}
-.onboard-field{width:100%;background:#1a1838;border:2px solid #3a3766;color:#fff;font-size:18px;font-family:inherit;margin-bottom:10px;text-align:center;padding:10px 14px;}
-.onboard-btn{width:100%;background:linear-gradient(var(--purple),var(--violet));color:#fff;font-weight:700;font-size:16px;border:2px solid var(--border);box-shadow:inset 2px 2px 0 rgba(255,255,255,.2),3px 3px 0 var(--border);padding:13px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;}
-.onboard-btn:active{opacity:.7;}
-.onboard-hint{font-size:12px;color:var(--text4);margin-top:10px;text-align:center;}
-
-/* hidden util */
-.hidden{display:none!important;}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div id="app">
   <div class="bggrad"></div>
   <div class="scanline"></div>
   <div class="dotgrid"></div>
+
   <!-- ONBOARDING -->
-  <div id="onboard" class="onboard">
+  <div id="onboard" class="onboard hidden">
     <div class="onboard-icon">🏆</div>
     <div class="onboard-title">성장 훈련 시스템</div>
     <div class="onboard-sub">[시스템 안내] 훈련병의 성명을 입력하십시오.<br>본 과업 시스템에 등록 후 성장 임무가 개시됩니다.</div>
@@ -377,14 +37,16 @@ body{
   <!-- TOPBAR -->
   <div class="topbar" id="topbar">
     <div class="topbar-title">KEY QUEST</div>
-    <div class="coin-badge" onclick="showCoinInfo()"><svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#f6c945" stroke="#a86a00" stroke-width="2"/><circle cx="12" cy="12" r="4.5" fill="#ffe089"/></svg><span id="coinDisplay">0</span></div>
+    <div class="coin-badge" onclick="showCoinInfo()">
+      <svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#f6c945" stroke="#a86a00" stroke-width="2"/><circle cx="12" cy="12" r="4.5" fill="#ffe089"/></svg>
+      <span id="coinDisplay">0</span>
+    </div>
   </div>
 
-  <!-- SCREENS -->
-  <!-- HOME -->
+  <!-- HOME 화면 -->
   <div class="screen active" id="screen-home">
     <div class="scrollarea" id="homeScroll">
-      <!-- char card -->
+      <!-- 캐릭터 카드 -->
       <div class="char-card" style="margin-top:12px;" id="charCard">
         <div class="char-top">
           <div class="char-left">
@@ -424,7 +86,7 @@ body{
         </div>
       </div>
 
-      <!-- weekly reward banner (hidden by default) -->
+      <!-- 주간 보상 배너 (기본 숨김) -->
       <div class="weekly-banner hidden" id="weeklyBanner">
         <div class="wb-icon">🎉</div>
         <div class="wb-title">주간 임무 완수!</div>
@@ -432,7 +94,7 @@ body{
         <button class="weekly-banner-btn" onclick="claimWeeklyReward()">보상 받기 →</button>
       </div>
 
-      <!-- Story card -->
+      <!-- 스토리 카드 -->
       <div class="story-card" id="storyCard">
         <div class="story-icon" id="storyIcon">⚔️</div>
         <div class="story-body">
@@ -441,6 +103,13 @@ body{
         </div>
       </div>
 
+      <!-- 오늘의 진행률 -->
+      <div class="progress-track" style="margin-bottom:4px;">
+        <div class="progress-fill" id="homeProgress" style="width:0%"></div>
+      </div>
+      <div class="progress-label" id="homeProgressLabel" style="margin-bottom:10px;">오늘의 진행률 0%</div>
+
+      <!-- 퀘스트 목록 -->
       <div class="quest-section-header" style="margin-top:4px;">
         <svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 2c3 4 5 6 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2.2-4.6C9.4 9.6 10.5 11 12.2 11 10.6 8 11.5 5 12 2z" fill="#f6c945"/></svg>
         <span>오늘의 퀘스트</span>
@@ -458,27 +127,24 @@ body{
     </div>
   </div>
 
-  <!-- GACHA / REWARD -->
+  <!-- 가챠 / 보상 화면 -->
   <div class="screen" id="screen-gacha">
     <div class="scrollarea">
       <div class="section-label" style="margin-top:12px;">🎰 가챠 보상함</div>
-
       <div class="gacha-stage">
         <div class="gacha-box" id="gachaBox" onclick="openGacha()">🎁</div>
         <div class="gacha-count-badge">대기 중인 보상 <span id="gachaCount">0</span>개</div>
         <div id="gachaResult" class="gacha-result hidden"></div>
         <button class="gacha-cta" id="gachaBtn" onclick="openGacha()">보급품 수령!</button>
       </div>
-
       <div class="section-label">🛒 보상 상점</div>
       <div id="shopList"></div>
-
       <div class="section-label">📋 최근 보상 기록</div>
       <div id="rewardHistory"></div>
     </div>
   </div>
 
-  <!-- REPORT -->
+  <!-- 리포트 화면 -->
   <div class="screen" id="screen-report">
     <div class="scrollarea">
       <div style="margin-top:12px;">
@@ -487,7 +153,6 @@ body{
           <div class="gb" id="reportHeight">— cm</div>
           <div class="gs" id="reportGrowth">데이터를 입력해주세요</div>
         </div>
-
         <div class="gr-row2">
           <div class="gr-mini">
             <div class="ge">⚡</div>
@@ -505,7 +170,6 @@ body{
             <div class="gl">누적 포인트</div>
           </div>
         </div>
-
         <div class="gr-chartcard">
           <div class="gt">📏 키 성장 그래프</div>
           <svg class="gr-svg" id="heightChart"></svg>
@@ -514,7 +178,6 @@ body{
             <div class="li"><div class="dash" style="background:var(--cyan)"></div>활동포인트</div>
           </div>
         </div>
-
         <div class="gr-chartcard">
           <div class="gt">⚖️ 몸무게 변화</div>
           <svg class="gr-svg" id="weightChart"></svg>
@@ -522,13 +185,11 @@ body{
             <div class="li"><div class="dot" style="background:#ff9d8a"></div>몸무게(kg)</div>
           </div>
         </div>
-
         <div class="gr-chartcard">
           <div class="gt">📊 이번 주 퀘스트 현황</div>
           <div class="week-bars" id="weekBars"></div>
           <div id="weekInsight" class="insight-card hidden"></div>
         </div>
-
         <div class="gr-inputcard">
           <div class="it">📝 신체 기록 입력</div>
           <div class="gr-fieldrow">
@@ -554,16 +215,14 @@ body{
     </div>
   </div>
 
-  <!-- PARENT VIEW (PIN protected) -->
+  <!-- 부모 화면 (PIN 보호) -->
   <div class="screen" id="screen-parent">
     <div class="scrollarea">
-      <div id="parentContent">
-        <!-- filled by JS after PIN verified -->
-      </div>
+      <div id="parentContent"></div>
     </div>
   </div>
 
-  <!-- BOTTOM NAV -->
+  <!-- 하단 네비게이션 -->
   <div class="bottom-nav" id="bottomNav">
     <div class="nav-item active" data-screen="home" onclick="switchScreen('home',this)">
       <span class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" fill="currentColor"/></svg></span>홈
@@ -579,7 +238,7 @@ body{
     </div>
   </div>
 
-  <!-- PIN OVERLAY -->
+  <!-- PIN 오버레이 -->
   <div class="pin-overlay hidden" id="pinOverlay">
     <div class="pin-box">
       <div class="pin-title">🔐 부모 인증</div>
@@ -607,7 +266,7 @@ body{
     </div>
   </div>
 
-  <!-- QUEST SUBMIT MODAL -->
+  <!-- 퀘스트 제출 모달 -->
   <div class="modal-overlay hidden" id="questModal">
     <div class="modal-box">
       <div class="modal-title" id="questModalTitle"></div>
@@ -622,7 +281,7 @@ body{
     </div>
   </div>
 
-  <!-- GACHA REVEAL MODAL -->
+  <!-- 가챠 결과 모달 -->
   <div class="modal-overlay center hidden" id="gachaModal">
     <div class="modal-box center-box" style="text-align:center;">
       <div style="font-size:72px;margin-bottom:8px;" id="gachaRevealIcon">🎁</div>
@@ -633,7 +292,7 @@ body{
     </div>
   </div>
 
-  <!-- TOAST -->
+  <!-- 토스트 -->
   <div class="toast" id="toastPopup"></div>
 </div>
 
@@ -642,1020 +301,8 @@ body{
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
-<script src="firebase.js?v=4"></script>
+<script src="firebase.js"></script>
 <script src="data.js"></script>
-<script>
-let STATE = getDefaultState();
-let currentPinBuffer = '';
-let pendingScreen = null;
-let activeQuestId = null;
-let pendingPhotoData = null;
-
-// ═══════════════════════════════════════
-// PERSISTENCE (Firebase)
-// ═══════════════════════════════════════
-function saveState() {
-  fbSaveState(STATE); // 비동기 fire-and-forget
-}
-async function loadState() {
-  const remote = await fbLoadState();
-  if (remote) {
-    STATE = {...getDefaultState(), ...remote};
-  } else {
-    // Firebase에 데이터 없으면 localStorage 마이그레이션 시도
-    try {
-      const raw = localStorage.getItem('growthquest_v2');
-      if (raw) {
-        STATE = {...getDefaultState(), ...JSON.parse(raw)};
-        saveState(); // Firestore로 이전
-        localStorage.removeItem('growthquest_v2');
-      }
-    } catch(e) {}
-  }
-}
-
-// ═══════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════
-async function init() {
-  await loadState();
-  // Set today's date in report input
-  document.getElementById('inDate').value = today();
-
-  if (!STATE.profile.name) {
-    document.getElementById('onboard').classList.remove('hidden');
-    return;
-  }
-  document.getElementById('onboard').classList.add('hidden');
-  render();
-}
-
-function finishOnboard() {
-  const name = document.getElementById('onboardName').value.trim();
-  const h = parseFloat(document.getElementById('onboardHeight').value);
-  const w = parseFloat(document.getElementById('onboardWeight').value);
-  const pin = document.getElementById('onboardPin').value.trim();
-  if (!name) { alert('이름을 입력해주세요!'); return; }
-  if (!pin || pin.length < 4) { alert('PIN 4자리를 입력해주세요!'); return; }
-  STATE.profile.name = name;
-  STATE.profile.pin = pin;
-  if (!isNaN(h) && h > 0) {
-    STATE.heightHistory.push({date: today(), value: h});
-  }
-  if (!isNaN(w) && w > 0) {
-    STATE.weightHistory.push({date: today(), value: w});
-  }
-  saveState();
-  document.getElementById('onboard').classList.add('hidden');
-  render();
-}
-
-// ═══════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════
-function today() {
-  return new Date().toISOString().slice(0,10);
-}
-function todayLabel() {
-  const d = new Date();
-  return `${d.getMonth()+1}/${d.getDate()}`;
-}
-function isWeekend() {
-  const d = new Date().getDay();
-  return d === 0 || d === 6;
-}
-function rand(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-function randomPts(quest) {
-  return quest.pts;
-}
-function getLevelInfo(height) {
-  const h = height || 0;
-  for (let i = LEVEL_TABLE.length-1; i >= 0; i--) {
-    if (h >= LEVEL_TABLE[i].min) return LEVEL_TABLE[i];
-  }
-  return LEVEL_TABLE[0];
-}
-function getCurrentHeight() {
-  if (!STATE.heightHistory.length) return 0;
-  return STATE.heightHistory[STATE.heightHistory.length-1].value;
-}
-function getCurrentWeight() {
-  if (!STATE.weightHistory.length) return 0;
-  return STATE.weightHistory[STATE.weightHistory.length-1].value;
-}
-function starsStr(n) {
-  return '★'.repeat(n); // 빈 별 미표시
-}
-
-// Quests approved today
-function getTodayApproved() {
-  const t = today();
-  return STATE.questLog.filter(l => l.date === t);
-}
-function getQuestStatusToday(questId) {
-  // pending?
-  if (STATE.pendingApprovals.find(p => p.questId === questId && p.date === today())) return 'pending';
-  // approved today?
-  if (STATE.questLog.find(l => l.questId === questId && l.date === today())) return 'approved';
-  return 'available';
-}
-
-// ═══════════════════════════════════════
-// DAILY QUEST SELECTION
-// ═══════════════════════════════════════
-function getDailyQuests() {
-  // Max 3 quests total per day
-  const missDays = calcMissDays();
-  const rareChance = Math.min(0.5, 0.12 + missDays * 0.08);
-  const dow = new Date().getDay();
-
-  // Rare quest appears? → takes 1 slot
-  const rarePool = QUEST_POOL.filter(q => q.cat === 'rare');
-  const showRare = Math.random() < rareChance;
-  const rareQuest = showRare ? [rarePool[dow % rarePool.length]] : [];
-
-  // Weekend exercise takes 1 slot
-  const exPool = QUEST_POOL.filter(q => q.cat === 'exercise');
-  const exerciseQuest = isWeekend() ? [exPool[dow % exPool.length]] : [];
-
-  // Remaining slots fill with warmup(1) + core
-  const specialSlots = rareQuest.length + exerciseQuest.length;
-  const remaining = 3 - specialSlots; // always ≥ 1
-
-  // 1 warmup always first
-  const warmup = [QUEST_POOL.find(q => q.id === 'w2')]; // 주사 as warmup anchor
-
-  // Fill rest with core (milk priority, then 1 zinc)
-  const coreSlots = Math.max(0, remaining - 1);
-  const corePool = [
-    QUEST_POOL.find(q => q.id === 'c1'), // 우유 항상
-    ...[QUEST_POOL.filter(q => q.cat === 'core' && q.id !== 'c1')[dow % 6]].filter(Boolean),
-  ];
-  const core = corePool.slice(0, coreSlots);
-
-  return {
-    warmup: warmup.filter(Boolean),
-    core,
-    exercise: exerciseQuest,
-    rare: rareQuest,
-  };
-}
-
-function calcMissDays() {
-  if (!STATE.profile.lastActiveDate) return 0;
-  const last = new Date(STATE.profile.lastActiveDate);
-  const now = new Date();
-  return Math.floor((now - last) / 86400000);
-}
-
-// ═══════════════════════════════════════
-// STREAK & CYCLE
-// ═══════════════════════════════════════
-function updateStreak() {
-  const t = today();
-  const todayApproved = getTodayApproved();
-  if (todayApproved.length === 0) return;
-
-  if (STATE.profile.lastActiveDate === t) return; // already updated today
-
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yStr = yesterday.toISOString().slice(0,10);
-
-  if (STATE.profile.lastActiveDate === yStr) {
-    STATE.profile.streak = (STATE.profile.streak || 0) + 1;
-  } else if (STATE.profile.lastActiveDate !== t) {
-    STATE.profile.streak = 1;
-  }
-  STATE.profile.lastActiveDate = t;
-}
-
-function checkWeeklyCycle() {
-  // Ensure week cycle is initialized
-  const now = new Date();
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
-  const weekStart = monday.toISOString().slice(0,10);
-
-  if (STATE.weekCycle.startDate !== weekStart) {
-    STATE.weekCycle = {startDate: weekStart, completedDays: [], weeklyRewardPending: false, weeklyRewardClaimed: false};
-  }
-
-  const t = today();
-  const todayApproved = getTodayApproved();
-  if (todayApproved.length > 0 && !STATE.weekCycle.completedDays.includes(t)) {
-    STATE.weekCycle.completedDays.push(t);
-  }
-
-  if (STATE.weekCycle.completedDays.length >= 5 && !STATE.weekCycle.weeklyRewardClaimed) {
-    STATE.weekCycle.weeklyRewardPending = true;
-  }
-}
-
-// ═══════════════════════════════════════
-// DYNAMIC NICKNAME
-// ═══════════════════════════════════════
-function getDynamicNick() {
-  // Look at last 7 days quest log for dominant category
-  const recent = STATE.questLog.filter(l => {
-    const d = new Date(l.date);
-    const now = new Date();
-    return (now - d) < 7 * 86400000;
-  });
-  const catCount = {};
-  recent.forEach(l => {
-    const q = QUEST_POOL.find(q => q.id === l.questId);
-    if (q) catCount[q.cat] = (catCount[q.cat] || 0) + 1;
-    if (q) catCount[q.id] = (catCount[q.id] || 0) + 1;
-  });
-
-  // Find best matching pattern
-  let bestPattern = null;
-  let bestCount = 0;
-  NICK_PATTERNS.forEach(p => {
-    const c = catCount[p.questCat] || 0;
-    if (c > bestCount) { bestCount = c; bestPattern = p; }
-  });
-
-  const name = STATE.profile.name || '용사';
-  if (bestPattern && bestCount >= 2) {
-    return `${bestPattern.text} ${name}`;
-  }
-  if (STATE.profile.streak >= 7) return `${name} — 7일 연속 달성자`;
-  if (STATE.profile.totalApproved >= 20) return `성장에 진심인 ${name}`;
-  return `성장을 시작한 ${name}`;
-}
-
-// ═══════════════════════════════════════
-// RENDER
-// ═══════════════════════════════════════
-function render() {
-  renderTopbar();
-  renderHomeScreen();
-  renderGachaScreen();
-  renderReportScreen();
-  // parent screen renders after PIN
-}
-
-function renderTopbar() {
-  const coinEl = document.getElementById('coinDisplay');
-  if (coinEl) coinEl.textContent = (STATE.profile.points || 0).toLocaleString();
-  const name = STATE.profile.name || '용사';
-  const topbarName = document.getElementById('topbarName');
-  if (topbarName) topbarName.textContent = name;
-}
-
-function renderStoryCard() {
-  const dow = new Date().getDay();
-  const streak = STATE.profile.streak || 0;
-  const idx = (dow + Math.floor(streak / 3)) % STORY_POOL.length;
-  const story = STORY_POOL[idx];
-  document.getElementById('storyIcon').textContent = story.icon;
-  document.getElementById('storyTitle').textContent = story.title;
-  document.getElementById('storyMsg').textContent = story.msg;
-}
-
-function renderHomeScreen() {
-  const pts = STATE.profile.points || 0;
-  const lvInfo = getLevelByPts(pts);
-  const xp = getXpProgress(pts);
-  const streak = STATE.profile.streak || 0;
-  const h = getCurrentHeight();
-  const w = getCurrentWeight();
-
-  // Level badge & rank
-  document.getElementById('charLvBadge').textContent = `LV.${lvInfo.lv}`;
-  const charRankEl = document.getElementById('charRank');
-  if (charRankEl) charRankEl.textContent = `${lvInfo.rank} — ${lvInfo.title}`;
-  document.getElementById('charNick').textContent = getDynamicNick();
-
-  // Stats
-  document.getElementById('statHeight').textContent = h ? h : '—';
-  document.getElementById('statWeight').textContent = w ? w : '—';
-  document.getElementById('statPoints').textContent = pts >= 1000 ? (pts/1000).toFixed(1)+'k' : pts;
-  const streakEl = document.getElementById('statStreak');
-  if (streakEl) streakEl.textContent = streak;
-
-  // XP bar (pixel segments)
-  const xpTrack = document.getElementById('xpTrack');
-  const SEG = 10;
-  const filled = xp.nextLv ? Math.round(xp.pct / 100 * SEG) : SEG;
-  xpTrack.innerHTML = Array.from({length:SEG},(_,i)=>{
-    let cls = 'xp-seg';
-    if(i < filled){ cls += i < SEG*0.4 ? ' on' : i < SEG*0.7 ? ' on-c' : ' on-g'; }
-    return `<div class="${cls}"></div>`;
-  }).join('');
-  if (xp.nextLv) {
-    document.getElementById('xpLabel').textContent = `LV.${xp.nextLv.lv} [${xp.nextLv.title}] 진급까지`;
-    document.getElementById('xpNext').textContent = `${xp.current.toLocaleString()} / ${xp.needed.toLocaleString()}P`;
-  } else {
-    document.getElementById('xpLabel').textContent = '👑 전설의 취사병 — 최고 계급';
-    document.getElementById('xpNext').textContent = `${pts.toLocaleString()}P`;
-  }
-
-  // Avatar
-  const avatarEl = document.getElementById('avatarEl');
-  if (STATE.profile.avatar) {
-    avatarEl.outerHTML = `<img class="avatar-img" id="avatarEl" src="${STATE.profile.avatar}" style="border-radius:50%;width:90px;height:90px;object-fit:cover;position:relative;display:block;border:3px solid var(--bg3);">`;
-  }
-
-  renderStoryCard();
-
-  // Daily quests
-  const {warmup, core, exercise, rare} = getDailyQuests();
-  let totalQ = warmup.length + core.length + exercise.length + rare.length;
-  let doneQ = 0;
-
-  function renderQuestList(containerId, quests) {
-    const el = document.getElementById(containerId);
-    el.innerHTML = '';
-    quests.forEach(q => {
-      const status = getQuestStatusToday(q.id);
-      if (status === 'approved') doneQ++;
-      el.appendChild(makeQuestCard(q, status));
-    });
-  }
-
-  renderQuestList('warmupQuests', warmup);
-  renderQuestList('coreQuests', core);
-
-  const exSec = document.getElementById('exerciseSection');
-  if (exercise.length > 0) {
-    exSec.classList.remove('hidden');
-    renderQuestList('exerciseQuests', exercise);
-  } else {
-    exSec.classList.add('hidden');
-  }
-
-  const rareSec = document.getElementById('rareSection');
-  if (rare.length > 0) {
-    rareSec.classList.remove('hidden');
-    renderQuestList('rareQuests', rare);
-  } else {
-    rareSec.classList.add('hidden');
-  }
-
-  const pct = totalQ > 0 ? Math.round(doneQ/totalQ*100) : 0;
-  const todayCompleteEl = document.getElementById('todayComplete');
-  const todayTotalEl = document.getElementById('todayTotal');
-  if (todayCompleteEl) todayCompleteEl.textContent = doneQ;
-  if (todayTotalEl) todayTotalEl.textContent = totalQ;
-  document.getElementById('homeProgress').style.width = pct + '%';
-  document.getElementById('homeProgressLabel').textContent = `오늘의 진행률 ${pct}%`;
-
-  checkWeeklyCycle();
-  const banner = document.getElementById('weeklyBanner');
-  if (STATE.weekCycle.weeklyRewardPending && !STATE.weekCycle.weeklyRewardClaimed) {
-    banner.classList.remove('hidden');
-  } else {
-    banner.classList.add('hidden');
-  }
-}
-
-function makeQuestCard(q, status) {
-  const div = document.createElement('div');
-  let cls = 'quest-card';
-  if (q.cat === 'rare') cls += ' rare';
-  if (status === 'approved') cls += ' approved';
-  if (status === 'pending') cls += ' pending';
-
-  let badgeHtml = '';
-  if (status === 'pending') badgeHtml = '<span class="q-badge pending">대기중</span>';
-  if (status === 'approved') badgeHtml = '<span class="q-badge approved">✓ 승인</span>';
-
-  div.className = cls;
-  const rareBadge = q.cat==='rare' ? '<span class="q-rare-badge">RARE</span>' : '';
-  div.innerHTML = `
-    <div class="q-icon cat-${q.cat}">${q.icon}</div>
-    <div class="q-body">
-      <div style="display:flex;align-items:center;gap:5px;margin-bottom:2px;">
-        <span class="q-name">${q.name}</span>${rareBadge}
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-        <span class="q-stars">${starsStr(q.stars)}</span>
-        ${badgeHtml}
-      </div>
-      <div style="font-size:11px;color:var(--text4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${q.desc.split('\n\n')[0]}</div>
-    </div>
-    <div style="text-align:right;flex-shrink:0;"><div class="q-pts">+${q.pts}P</div></div>
-  `;
-  if (status === 'available') {
-    div.onclick = () => openQuestModal(q.id);
-  }
-  return div;
-}
-
-// ── GACHA SCREEN ──
-function renderGachaScreen() {
-  const count = STATE.gachaQueue || 0;
-  document.getElementById('gachaCount').textContent = count;
-  document.getElementById('gachaBtn').disabled = count === 0;
-
-  // Shop
-  const shopEl = document.getElementById('shopList');
-  shopEl.innerHTML = '';
-  SHOP_ITEMS.forEach(item => {
-    const can = (STATE.profile.points || 0) >= item.cost;
-    const div = document.createElement('div');
-    div.className = 'shop-card';
-    div.innerHTML = `
-      <div class="shop-icon">${item.icon}</div>
-      <div class="shop-body">
-        <div class="shop-name">${item.name}</div>
-        <div style="font-size:14px;color:var(--text3);margin-bottom:3px;">${item.desc}</div>
-        <div class="shop-cost">🪙 ${item.cost.toLocaleString()}P</div>
-      </div>
-      <button class="shop-btn" ${can?'':'disabled'} onclick="purchaseItem('${item.id}')">교환</button>
-    `;
-    shopEl.appendChild(div);
-  });
-
-  // Reward history
-  const histEl = document.getElementById('rewardHistory');
-  histEl.innerHTML = '';
-  const hist = [...(STATE.rewardHistory||[])].reverse().slice(0,10);
-  if (hist.length === 0) {
-    histEl.innerHTML = '<div style="text-align:center;color:var(--text4);font-size:16px;padding:12px;">아직 보상 기록이 없어요</div>';
-  }
-  hist.forEach(r => {
-    const div = document.createElement('div');
-    div.className = 'reward-row';
-    div.innerHTML = `<span style="font-size:22px;">${r.icon}</span><span style="flex:1;">${r.name}</span><span style="font-size:14px;color:var(--text3);">${r.date}</span><span class="pt">+${r.pts}P</span>`;
-    histEl.appendChild(div);
-  });
-}
-
-// ── REPORT SCREEN ──
-function renderReportScreen() {
-  const h = getCurrentHeight();
-  const w = getCurrentWeight();
-  const lvInfo = getLevelByPts(STATE.profile.points||0);
-
-  document.getElementById('reportEmoji').textContent = lvInfo.emoji;
-  document.getElementById('reportHeight').textContent = h ? `${h} cm` : '— cm';
-  document.getElementById('reportLevel').textContent = `Lv.${lvInfo.lv}`;
-  document.getElementById('reportStreak').textContent = `${STATE.profile.streak||0}일`;
-  document.getElementById('reportPoints').textContent = (STATE.profile.points||0).toLocaleString();
-
-  // Growth stats
-  if (STATE.heightHistory.length >= 2) {
-    const first = STATE.heightHistory[0].value;
-    const gain = (h - first).toFixed(1);
-    document.getElementById('reportGrowth').textContent = `처음보다 +${gain}cm 성장! 계속 가자!`;
-  } else {
-    document.getElementById('reportGrowth').textContent = h ? `현재 키 ${h}cm — 기록을 쌓아가자!` : '키를 입력해주세요';
-  }
-
-  drawCharts();
-  renderWeekBars();
-}
-
-function drawCharts() {
-  // Build chart data from history + activity points
-  const heightPoints = STATE.heightHistory.slice(-6);
-  const weightPoints = STATE.weightHistory.slice(-6);
-
-  // Compute activity by month
-  const actByMonth = {};
-  (STATE.questLog||[]).forEach(l => {
-    const mon = l.date.slice(0,7);
-    actByMonth[mon] = (actByMonth[mon]||0) + (l.pointsAwarded||0);
-  });
-
-  function buildData(histArr) {
-    return histArr.map(h => {
-      const mon = h.date.slice(0,7);
-      const label = `${parseInt(h.date.slice(5,7))}월`;
-      const act = Math.min(100, Math.round((actByMonth[mon]||0) / 10));
-      return [label, h.value, act];
-    });
-  }
-
-  const hData = buildData(heightPoints);
-  const wData = buildData(weightPoints);
-
-  if (hData.length >= 1) drawLineChart('heightChart', hData, '#ffd76a', true);
-  if (wData.length >= 1) drawLineChart('weightChart', wData, '#ff9d8a', false);
-}
-
-function drawLineChart(svgId, data, color, showActivity) {
-  const svg = document.getElementById(svgId);
-  if (!svg) return;
-  const W = svg.clientWidth || 300, H = 120;
-  const padL=36, padR=10, padT=14, padB=20;
-  const innerW = W-padL-padR, innerH = H-padT-padB;
-  const n = data.length;
-  if (n === 0) return;
-
-  const xs = n === 1 ? [padL + innerW/2] : data.map((_,i) => padL + innerW*i/(n-1));
-  const vals = data.map(d=>d[1]);
-  const vMin = Math.min(...vals), vMax = Math.max(...vals);
-  const vRange = vMax-vMin || 1;
-  const ys = vals.map(v => padT + innerH*(1-(v-vMin+vRange*.2)/(vRange*1.4)));
-
-  let s = `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="rgba(255,255,255,.12)" stroke-width="1"/>
-<line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="rgba(255,255,255,.12)" stroke-width="1"/>`;
-
-  if (showActivity && data[0][2] !== undefined) {
-    const pts2 = data.map(d=>d[2]);
-    const maxP = Math.max(...pts2, 1);
-    const ysP = pts2.map(p => padT + innerH*(1-p/maxP));
-    s += `<polyline points="${xs.map((x,i)=>`${x},${ysP[i]}`).join(' ')}" fill="none" stroke="#5ad1ff" stroke-width="1.5" stroke-dasharray="4 3" opacity=".8"/>`;
-    xs.forEach((x,i) => { s += `<circle cx="${x}" cy="${ysP[i]}" r="2" fill="#5ad1ff"/>`; });
-  }
-
-  if (n > 1) {
-    s += `<polyline points="${xs.map((x,i)=>`${x},${ys[i]}`).join(' ')}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
-  }
-  xs.forEach((x,i) => {
-    const r = i===n-1?4:3;
-    s += `<circle cx="${x}" cy="${ys[i]}" r="${r}" fill="${color}"/>`;
-    s += `<text x="${x}" y="${H-6}" font-size="8" fill="#9694b8" text-anchor="middle">${data[i][0]}</text>`;
-  });
-  const last = data[n-1];
-  s += `<text x="${xs[n-1]+4}" y="${ys[n-1]-7}" font-size="9" font-weight="700" fill="${color}" text-anchor="start">${last[1]}</text>`;
-
-  // Y axis labels
-  const yLabel1 = (vMin + vRange*.2).toFixed(n>1?1:0);
-  const yLabel2 = (vMax + vRange*.2*.2).toFixed(n>1?1:0);
-  s += `<text x="${padL-4}" y="${H-padB}" font-size="8" fill="#9694b8" text-anchor="end">${yLabel1}</text>`;
-  s += `<text x="${padL-4}" y="${padT+4}" font-size="8" fill="#9694b8" text-anchor="end">${yLabel2}</text>`;
-
-  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  svg.innerHTML = s;
-}
-
-function renderWeekBars() {
-  const barsEl = document.getElementById('weekBars');
-  barsEl.innerHTML = '';
-  const days = ['월','화','수','목','금','토','일'];
-  const now = new Date();
-  const dow = (now.getDay()+6)%7; // 0=Mon
-
-  // Get quest counts per day this week
-  const weekStart = new Date(now);
-  weekStart.setDate(now.getDate() - dow);
-
-  let maxCount = 1;
-  const counts = days.map((_,i) => {
-    const d = new Date(weekStart);
-    d.setDate(weekStart.getDate() + i);
-    const dStr = d.toISOString().slice(0,10);
-    const c = STATE.questLog.filter(l=>l.date===dStr).length;
-    if (c > maxCount) maxCount = c;
-    return {label: days[i], count: c, isToday: i === dow};
-  });
-
-  counts.forEach(({label, count, isToday}) => {
-    const pct = Math.round(count/maxCount*100);
-    const div = document.createElement('div');
-    div.className = 'week-bar-wrap';
-    div.innerHTML = `
-      <div class="week-bar${isToday?' today':''}" style="height:${Math.max(4,pct*0.5)}px;"></div>
-      <div class="week-bar-label">${label}${count>0?`<br><b style="color:var(--text2);">${count}</b>`:''}</div>
-    `;
-    barsEl.appendChild(div);
-  });
-
-  // Insight
-  const insightEl = document.getElementById('weekInsight');
-  const weekApproved = STATE.weekCycle.completedDays.length;
-  if (weekApproved >= 3) {
-    insightEl.classList.remove('hidden');
-    insightEl.innerHTML = `이번 주 <b>${weekApproved}일</b> 퀘스트 완료! ${weekApproved>=5?'<b>주간 보상 달성! 🎉</b>':'5일 달성하면 주간 보상을 받아요!'}`;
-  } else {
-    insightEl.classList.add('hidden');
-  }
-}
-
-// ── PARENT SCREEN ──
-function renderParentScreen() {
-  const el = document.getElementById('parentContent');
-  const pending = STATE.pendingApprovals || [];
-  const name = STATE.profile.name || '용사';
-  const lvInfo = getLevelByPts(STATE.profile.points||0);
-  const weekPct = Math.round((STATE.weekCycle.completedDays.length/7)*100);
-
-  let html = '';
-
-  // Pending approvals
-  html += `<div class="section-label" style="margin-top:12px;">✅ 승인 대기 (${pending.length}건)</div>`;
-  if (pending.length === 0) {
-    html += `<div style="text-align:center;color:var(--text4);font-size:16px;padding:16px;">승인 대기 중인 퀘스트가 없어요 🎉</div>`;
-  } else {
-    pending.forEach(p => {
-      const q = QUEST_POOL.find(q=>q.id===p.questId);
-      if (!q) return;
-      html += `
-        <div class="approve-row">
-          <div class="thumb">${p.photo ? `<img src="${p.photo}">` : q.icon}</div>
-          <div style="flex:1;">
-            <div style="font-size:16px;font-weight:700;">${q.name}</div>
-            <div style="font-size:14px;color:var(--text3);">${p.date} ${p.submittedAt}</div>
-          </div>
-          <button class="reject-btn" onclick="rejectQuest('${p.id}')">✕</button>
-          <button class="approve-btn" onclick="approveQuest('${p.id}')">승인 ✓</button>
-        </div>
-      `;
-    });
-  }
-
-  // Kid status
-  html += `
-    <div class="char-card" style="margin-top:18px;">
-      <div class="char-title">${lvInfo.rank} — ${lvInfo.title}</div>
-      <div class="char-nick">${getDynamicNick()}</div>
-      <div class="day-row"><span>이번주 이행일</span><span>${STATE.weekCycle.completedDays.length}일 / 7일</span></div>
-      <div class="progress-track"><div class="progress-fill" style="width:${weekPct}%"></div></div>
-      <div class="progress-label">${weekPct}% — 5일 이상이면 주간 보상!</div>
-    </div>
-  `;
-
-  // Recent history
-  const recentLog = [...(STATE.questLog||[])].reverse().slice(0,5);
-  if (recentLog.length > 0) {
-    html += `<div class="section-label">📋 최근 승인 기록</div>`;
-    recentLog.forEach(l => {
-      const q = QUEST_POOL.find(q=>q.id===l.questId);
-      if (!q) return;
-      html += `<div class="reward-row"><span style="font-size:22px;">${q.icon}</span><span style="flex:1;">${q.name}</span><span style="font-size:14px;color:var(--text3);">${l.date}</span><span class="pt">+${l.pointsAwarded}P</span></div>`;
-    });
-  }
-
-  // PIN settings
-  html += `
-    <div style="margin-top:20px;padding:14px;background:rgba(255,255,255,.05);border-radius:14px;">
-      <div style="font-size:16px;font-weight:700;margin-bottom:8px;">⚙️ 부모 설정</div>
-      <div style="font-size:15px;color:var(--text3);margin-bottom:8px;">현재 PIN: ${'*'.repeat((STATE.profile.pin||'').length)}</div>
-      <div style="display:flex;gap:8px;">
-        <input id="newPin" type="number" placeholder="새 PIN 4자리" style="flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:9px;padding:8px;color:#fff;font-size:16px;font-family:inherit;">
-        <button onclick="changePin()" style="background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;font-size:15px;font-weight:700;border:none;border-radius:10px;padding:8px 13px;cursor:pointer;">변경</button>
-      </div>
-    </div>
-  `;
-
-  el.innerHTML = html;
-}
-
-// ═══════════════════════════════════════
-// NAVIGATION
-// ═══════════════════════════════════════
-function switchScreen(name, navEl) {
-  if (name === 'parent' && !STATE.parentUnlocked) {
-    pendingScreen = name;
-    showPin();
-    return;
-  }
-  doSwitchScreen(name, navEl);
-}
-
-function doSwitchScreen(name, navEl) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById(`screen-${name}`).classList.add('active');
-  if (navEl) navEl.classList.add('active');
-  else {
-    const navItems = document.querySelectorAll('.nav-item');
-    navItems.forEach(n => { if (n.dataset.screen === name) n.classList.add('active'); });
-  }
-
-  if (name === 'home') renderHomeScreen();
-  if (name === 'gacha') renderGachaScreen();
-  if (name === 'report') renderReportScreen();
-  if (name === 'parent') { STATE.parentUnlocked = true; renderParentScreen(); }
-}
-
-// ═══════════════════════════════════════
-// PIN
-// ═══════════════════════════════════════
-function showPin() {
-  currentPinBuffer = '';
-  updatePinDots();
-  document.getElementById('pinErr').textContent = '';
-  document.getElementById('pinOverlay').classList.remove('hidden');
-}
-function cancelPin() {
-  document.getElementById('pinOverlay').classList.add('hidden');
-  pendingScreen = null;
-}
-function pinInput(key) {
-  if (key === 'del') {
-    currentPinBuffer = currentPinBuffer.slice(0,-1);
-  } else if (key === 'ok') {
-    checkPin();
-    return;
-  } else {
-    if (currentPinBuffer.length >= 4) return;
-    currentPinBuffer += key;
-    if (currentPinBuffer.length === 4) {
-      setTimeout(checkPin, 100);
-    }
-  }
-  updatePinDots();
-}
-function updatePinDots() {
-  const dots = document.querySelectorAll('.pin-dot');
-  dots.forEach((d,i) => {
-    d.classList.toggle('filled', i < currentPinBuffer.length);
-  });
-}
-function checkPin() {
-  if (currentPinBuffer === STATE.profile.pin) {
-    document.getElementById('pinOverlay').classList.add('hidden');
-    if (pendingScreen) {
-      doSwitchScreen(pendingScreen, null);
-      pendingScreen = null;
-    }
-  } else {
-    document.getElementById('pinErr').textContent = '잘못된 PIN이에요. 다시 입력해주세요.';
-    currentPinBuffer = '';
-    updatePinDots();
-  }
-}
-function changePin() {
-  const np = document.getElementById('newPin').value.trim();
-  if (np.length !== 4 || isNaN(np)) { showToast('PIN은 4자리 숫자여야 해요'); return; }
-  STATE.profile.pin = np;
-  saveState();
-  showToast('PIN이 변경됐어요! 🔐');
-  renderParentScreen();
-}
-
-// ═══════════════════════════════════════
-// QUEST MODAL
-// ═══════════════════════════════════════
-function openQuestModal(questId) {
-  const q = QUEST_POOL.find(q=>q.id===questId);
-  if (!q) return;
-  activeQuestId = questId;
-  pendingPhotoData = null;
-  document.getElementById('questModalTitle').textContent = `${q.icon} ${q.name}`;
-  document.getElementById('questModalDesc').textContent = q.desc + `\n\n보상: 🪙 ${q.pts}P`;
-  document.getElementById('photoPreview').style.display = 'none';
-  document.getElementById('photoPreview').src = '';
-  document.getElementById('questPhoto').value = '';
-  document.getElementById('questModal').classList.remove('hidden');
-}
-function closeQuestModal() {
-  document.getElementById('questModal').classList.add('hidden');
-  activeQuestId = null;
-  pendingPhotoData = null;
-}
-function previewPhoto(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    pendingPhotoData = e.target.result;
-    const prev = document.getElementById('photoPreview');
-    prev.src = pendingPhotoData;
-    prev.style.display = 'block';
-    document.getElementById('photoUploadBtn').textContent = '📷 사진 변경';
-  };
-  reader.readAsDataURL(file);
-}
-async function submitQuest() {
-  if (!activeQuestId) return;
-  const q = QUEST_POOL.find(q=>q.id===activeQuestId);
-  if (!q) return;
-  if (!pendingPhotoData) {
-    showToast('[시스템] 인증 사진을 첨부해야 보고서를 제출할 수 있습니다.');
-    return;
-  }
-
-  const approvalId = Date.now().toString();
-  showToast('[시스템] 사진 업로드 중...');
-
-  let photoUrl = pendingPhotoData; // 업로드 실패 시 base64 fallback
-  try {
-    photoUrl = await uploadPhoto(pendingPhotoData, approvalId);
-  } catch(e) {
-    console.error('[Firebase] 사진 업로드 실패, base64로 저장:', e);
-  }
-
-  const approvalEntry = {
-    id: approvalId,
-    questId: activeQuestId,
-    photo: photoUrl,
-    date: today(),
-    submittedAt: new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}),
-  };
-  STATE.pendingApprovals = STATE.pendingApprovals || [];
-  STATE.pendingApprovals.push(approvalEntry);
-  saveState();
-  closeQuestModal();
-  showToast(`[시스템] 과업 완수 보고서가 제출되었습니다. 상급자 검토를 대기하십시오.`);
-  renderHomeScreen();
-}
-
-// ═══════════════════════════════════════
-// APPROVAL
-// ═══════════════════════════════════════
-function approveQuest(approvalId) {
-  const idx = STATE.pendingApprovals.findIndex(p=>p.id===approvalId);
-  if (idx === -1) return;
-  const approval = STATE.pendingApprovals[idx];
-  const q = QUEST_POOL.find(q=>q.id===approval.questId);
-  if (!q) return;
-
-  const pts = randomPts(q);
-  STATE.questLog = STATE.questLog || [];
-  STATE.questLog.push({date: approval.date, questId: approval.questId, pointsAwarded: pts, timestamp: Date.now()});
-  STATE.profile.points = (STATE.profile.points||0) + pts;
-  STATE.profile.totalApproved = (STATE.profile.totalApproved||0) + 1;
-  STATE.gachaQueue = (STATE.gachaQueue||0) + 1;
-  STATE.pendingApprovals.splice(idx, 1);
-
-  updateStreak();
-  checkWeeklyCycle();
-  saveState();
-  showToast(`[시스템] 과업 완수가 확인되었습니다. 기여도 +${pts}P가 반영됩니다.`);
-  renderParentScreen();
-  renderTopbar();
-}
-
-function rejectQuest(approvalId) {
-  const idx = STATE.pendingApprovals.findIndex(p=>p.id===approvalId);
-  if (idx !== -1) {
-    STATE.pendingApprovals.splice(idx, 1);
-    saveState();
-    showToast('[시스템] 해당 과업 완수가 반려되었습니다. 재수행 후 재보고하십시오.');
-    renderParentScreen();
-  }
-}
-
-// ═══════════════════════════════════════
-// GACHA
-// ═══════════════════════════════════════
-
-function openGacha() {
-  if ((STATE.gachaQueue||0) === 0) return;
-
-  const box = document.getElementById('gachaBox');
-  box.classList.add('spin');
-  setTimeout(() => box.classList.remove('spin'), 600);
-
-  // Determine if rare
-  const isRare = Math.random() < 0.15;
-  const baseRange = isRare ? [300,800] : [50,250];
-  const pts = Math.round(baseRange[0] + Math.random()*(baseRange[1]-baseRange[0]));
-
-  STATE.gachaQueue = Math.max(0, (STATE.gachaQueue||0) - 1);
-  STATE.profile.points = (STATE.profile.points||0) + pts;
-  STATE.rewardHistory = STATE.rewardHistory || [];
-  const msg = rand(GACHA_MESSAGES);
-  STATE.rewardHistory.push({icon: msg[0], name: `가챠 보상 ${msg[1]}`, pts, date: todayLabel()});
-  saveState();
-
-  // Show modal
-  document.getElementById('gachaRevealIcon').textContent = isRare ? '🌟' : msg[0];
-  document.getElementById('gachaRevealPts').textContent = `+${pts}P`;
-  document.getElementById('gachaRevealMsg').textContent = isRare ? '레어 보상! 🎉' : msg[2];
-  document.getElementById('gachaRevealQuest').textContent = `총 포인트: 🪙 ${(STATE.profile.points).toLocaleString()}P`;
-  document.getElementById('gachaModal').classList.remove('hidden');
-
-  renderGachaScreen();
-  renderTopbar();
-}
-function closeGachaModal() {
-  document.getElementById('gachaModal').classList.add('hidden');
-}
-
-// Weekly reward
-function claimWeeklyReward() {
-  const pts = 500;
-  STATE.profile.points = (STATE.profile.points||0) + pts;
-  STATE.weekCycle.weeklyRewardClaimed = true;
-  STATE.weekCycle.weeklyRewardPending = false;
-  STATE.gachaQueue = (STATE.gachaQueue||0) + 3; // bonus 3 gachas
-  STATE.rewardHistory = STATE.rewardHistory||[];
-  STATE.rewardHistory.push({icon:'🏆', name:'주간 달성 보상', pts, date:todayLabel()});
-  saveState();
-  showToast('[시스템] 주간 과업 완수 확인. 특별 보급품 3개 및 기여도 +500P가 지급되었습니다.');
-  renderHomeScreen();
-  renderTopbar();
-}
-
-// Purchase
-function purchaseItem(itemId) {
-  const item = SHOP_ITEMS.find(i=>i.id===itemId);
-  if (!item) return;
-  if ((STATE.profile.points||0) < item.cost) { showToast('[시스템] 기여도가 부족합니다. 과업을 완수하여 기여도를 추가 확보하십시오.'); return; }
-  if (!confirm(`"${item.name}"을(를) ${item.cost.toLocaleString()}P로 교환할까요?`)) return;
-  STATE.profile.points -= item.cost;
-  STATE.purchasedItems = STATE.purchasedItems||[];
-  STATE.purchasedItems.push({itemId, date: today()});
-  STATE.rewardHistory = STATE.rewardHistory||[];
-  STATE.rewardHistory.push({icon:item.icon, name:item.name+' 교환', pts: -item.cost, date:todayLabel()});
-  saveState();
-  showToast(`[시스템] "${item.name}" 보급 신청이 완료되었습니다. 상급자에게 전달됩니다.`);
-  renderGachaScreen();
-  renderTopbar();
-}
-
-// ═══════════════════════════════════════
-// RECORD SAVE
-// ═══════════════════════════════════════
-function saveRecord() {
-  const date = document.getElementById('inDate').value;
-  const h = parseFloat(document.getElementById('inHeight').value);
-  const w = parseFloat(document.getElementById('inWeight').value);
-  const toast = document.getElementById('toast');
-
-  if (!date) { toast.style.color='var(--red)'; toast.textContent='날짜를 입력해주세요'; return; }
-  if (isNaN(h) && isNaN(w)) { toast.style.color='var(--red)'; toast.textContent='키 또는 몸무게를 입력해주세요'; return; }
-
-  if (!isNaN(h) && h > 0) {
-    STATE.heightHistory = STATE.heightHistory||[];
-    // Remove same-date entry
-    STATE.heightHistory = STATE.heightHistory.filter(e=>e.date!==date);
-    STATE.heightHistory.push({date, value:h});
-    STATE.heightHistory.sort((a,b)=>a.date.localeCompare(b.date));
-  }
-  if (!isNaN(w) && w > 0) {
-    STATE.weightHistory = STATE.weightHistory||[];
-    STATE.weightHistory = STATE.weightHistory.filter(e=>e.date!==date);
-    STATE.weightHistory.push({date, value:w});
-    STATE.weightHistory.sort((a,b)=>a.date.localeCompare(b.date));
-  }
-
-  // Bonus points for weekly first record
-  const weekKey = getWeekKey(date);
-  const hasThisWeek = (STATE.questLog||[]).some(l=>getWeekKey(l.date)===weekKey && l.questId==='__record__');
-  if (!hasThisWeek) {
-    const bonus = 300;
-    STATE.profile.points = (STATE.profile.points||0) + bonus;
-    STATE.questLog = STATE.questLog||[];
-    STATE.questLog.push({date, questId:'__record__', pointsAwarded:bonus, timestamp:Date.now()});
-    toast.style.color = 'var(--green)';
-    toast.textContent = `저장 완료! 이번 주 첫 기록 +${bonus}P 🎉`;
-  } else {
-    toast.style.color = 'var(--text2)';
-    toast.textContent = '저장 완료! (이번 주 기록 보상은 이미 받았어요)';
-  }
-
-  saveState();
-  document.getElementById('inHeight').value = '';
-  document.getElementById('inWeight').value = '';
-  renderReportScreen();
-  renderTopbar();
-}
-
-function getWeekKey(dateStr) {
-  const d = new Date(dateStr);
-  const jan1 = new Date(d.getFullYear(),0,1);
-  const week = Math.ceil(((d-jan1)/86400000 + jan1.getDay()+1)/7);
-  return `${d.getFullYear()}-W${week}`;
-}
-
-// ═══════════════════════════════════════
-// AVATAR
-// ═══════════════════════════════════════
-function changeAvatar(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    STATE.profile.avatar = e.target.result;
-    saveState();
-    // Reload avatar element
-    const el = document.getElementById('avatarEl');
-    if (el.tagName === 'DIV') {
-      el.outerHTML = `<img class="avatar-img" id="avatarEl" src="${e.target.result}" style="border-radius:50%;width:90px;height:90px;object-fit:cover;position:relative;display:block;border:3px solid var(--bg3);">`;
-    } else {
-      el.src = e.target.result;
-    }
-  };
-  reader.readAsDataURL(file);
-}
-
-// ═══════════════════════════════════════
-// TOAST
-// ═══════════════════════════════════════
-let toastTimer = null;
-function showToast(msg) {
-  const t = document.getElementById('toastPopup');
-  t.textContent = msg;
-  t.classList.add('show');
-  if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
-}
-
-function showCoinInfo() {
-  showToast(`[현황] 누적 기여도: ${(STATE.profile.points||0).toLocaleString()}P`);
-}
-
-// Lock parent view when navigating away
-document.querySelectorAll('.nav-item').forEach(n => {
-  n.addEventListener('click', () => {
-    if (n.dataset.screen !== 'parent') STATE.parentUnlocked = false;
-  });
-});
-
-// ── START ──
-init();
-</script>
+<script src="engine.js"></script>
 </body>
 </html>
