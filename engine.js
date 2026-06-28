@@ -11,6 +11,11 @@ let pendingScreen = null;
 let activeQuestId = null;
 let pendingPhotoData = null;
 
+// 이벤트 팝업 큐
+let eventQueue = [];
+let eventShowing = false;
+let dailyAllClearFiredDate = null;
+
 // ═══════════════════════════════════════
 // PERSISTENCE (Firebase)
 // ═══════════════════════════════════════
@@ -175,7 +180,8 @@ function checkWeeklyCycle() {
   const weekStart = monday.toISOString().slice(0,10);
 
   if (STATE.weekCycle.startDate !== weekStart) {
-    STATE.weekCycle = {startDate: weekStart, completedDays: [], weeklyRewardPending: false, weeklyRewardClaimed: false};
+    STATE.weekCycle = {startDate: weekStart, completedDays: [], weeklyRewardPending: false, weeklyRewardClaimed: false, weeklyBonusUsed: false};
+    STATE.profile.currentNickname = null;
   }
 
   const t = today();
@@ -193,27 +199,29 @@ function checkWeeklyCycle() {
 // DYNAMIC NICKNAME
 // ═══════════════════════════════════════
 function getDynamicNick() {
-  const recent = STATE.questLog.filter(l => {
-    const d = new Date(l.date);
-    const now = new Date();
-    return (now - d) < 7 * 86400000;
-  });
+  const now = new Date();
+  const weekAgo = now - 7 * 86400000;
+  const recent = STATE.questLog.filter(l => new Date(l.date) >= weekAgo);
   const catCount = {};
   recent.forEach(l => {
     const q = QUEST_POOL.find(q => q.id === l.questId);
     if (q) catCount[q.cat] = (catCount[q.cat] || 0) + 1;
-    if (q) catCount[q.id]  = (catCount[q.id]  || 0) + 1;
-  });
-
-  let bestPattern = null;
-  let bestCount = 0;
-  NICK_PATTERNS.forEach(p => {
-    const c = catCount[p.questCat] || 0;
-    if (c > bestCount) { bestCount = c; bestPattern = p; }
   });
 
   const name = STATE.profile.name || '용사';
-  if (bestPattern && bestCount >= 2) return `${bestPattern.text} ${name}`;
+
+  // 이번 주 칭호가 아직 없을 때만 새로 뽑아서 저장 (확정 후 고정)
+  if (!STATE.profile.currentNickname) {
+    const newNick = getWeeklyNickname(catCount);
+    if (newNick) {
+      pushEvent('newNickname', { nickname: newNick });
+      STATE.profile.currentNickname = newNick;
+      saveState();
+    }
+  }
+
+  const nick = STATE.profile.currentNickname;
+  if (nick) return `${nick} ${name}`;
   if (STATE.profile.streak >= 7) return `${name} — 7일 연속 달성자`;
   if (STATE.profile.totalApproved >= 20) return `성장에 진심인 ${name}`;
   return `성장을 시작한 ${name}`;
@@ -235,18 +243,21 @@ function renderTopbar() {
   const titleEl = document.getElementById('topbarTitle');
   if (titleEl) {
     const name = STATE.profile.name;
-    titleEl.textContent = name ? `${name}의 위대한 여정` : 'KEY QUEST';
+    titleEl.textContent = "Jake's Grand Journey";
   }
 }
 
 function renderStoryCard() {
-  const dow = new Date().getDay();
-  const streak = STATE.profile.streak || 0;
-  const idx = (dow + Math.floor(streak / 3)) % STORY_POOL.length;
-  const story = STORY_POOL[idx];
-  document.getElementById('storyIcon').textContent = story.icon;
-  document.getElementById('storyTitle').textContent = story.title;
-  document.getElementById('storyMsg').textContent = story.msg;
+  const t = today();
+  if (!STATE.profile.todayStory || STATE.profile.todayStory.date !== t) {
+    const story = getStoryByStreak(STATE.profile.streak || 0);
+    STATE.profile.todayStory = { date: t, icon: story.icon, title: story.title, msg: story.msg };
+    saveState();
+  }
+  const s = STATE.profile.todayStory;
+  document.getElementById('storyIcon').textContent = s.icon;
+  document.getElementById('storyTitle').textContent = s.title;
+  document.getElementById('storyMsg').textContent = s.msg;
 }
 
 function renderHomeScreen() {
@@ -259,12 +270,13 @@ function renderHomeScreen() {
 
   document.getElementById('charLvBadge').textContent = `LV.${lvInfo.lv}`;
   const charRankEl = document.getElementById('charRank');
-  if (charRankEl) charRankEl.textContent = `${lvInfo.rank} — ${lvInfo.title}`;
+  if (charRankEl) charRankEl.textContent = `${lvInfo.emoji} ${lvInfo.title}`;
   document.getElementById('charNick').textContent = getDynamicNick();
 
-  document.getElementById('statHeight').textContent = h ? h : '—';
-  document.getElementById('statWeight').textContent = w ? w : '—';
-  document.getElementById('statPoints').textContent = pts >= 1000 ? (pts/1000).toFixed(1)+'k' : pts;
+  document.getElementById('statHeight').innerHTML = (h ? h : '0') + '<span class="sv-unit">cm</span>';
+  document.getElementById('statWeight').innerHTML = (w ? w : '0') + '<span class="sv-unit">kg</span>';
+  const ptsVal = pts >= 1000 ? (pts/1000).toFixed(1)+'k' : pts;
+  document.getElementById('statPoints').innerHTML = ptsVal + '<span class="sv-unit">p</span>';
 
   // XP 바 (픽셀 세그먼트)
   const xpTrack = document.getElementById('xpTrack');
@@ -328,8 +340,15 @@ function renderHomeScreen() {
   }
 
   if (allDoneEl) {
-    if (totalQ > 0 && doneQ === totalQ) allDoneEl.classList.remove('hidden');
-    else allDoneEl.classList.add('hidden');
+    if (totalQ > 0 && doneQ === totalQ) {
+      allDoneEl.classList.remove('hidden');
+      if (dailyAllClearFiredDate !== today()) {
+        dailyAllClearFiredDate = today();
+        pushEvent('dailyAllClear');
+      }
+    } else {
+      allDoneEl.classList.add('hidden');
+    }
   }
 
   // 오늘 진행률
@@ -386,23 +405,25 @@ function renderGachaScreen() {
   const count = STATE.gachaQueue || 0;
   document.getElementById('gachaCount').textContent = count;
   document.getElementById('gachaBtn').disabled = count === 0;
+  document.getElementById('gachaSection').style.display = count > 0 ? '' : 'none';
 
   const shopEl = document.getElementById('shopList');
   shopEl.innerHTML = '';
-  SHOP_ITEMS.forEach(item => {
-    const can = (STATE.profile.points || 0) >= item.cost;
-    const div = document.createElement('div');
-    div.className = 'shop-card';
-    div.innerHTML = `
-      <div class="shop-icon">${item.icon}</div>
-      <div class="shop-body">
-        <div class="shop-name">${item.name}</div>
-        <div style="font-size:14px;color:var(--text3);margin-bottom:3px;">${item.desc}</div>
-        <div class="shop-cost">${COIN_SVG} ${item.cost.toLocaleString()}P</div>
-      </div>
-      <button class="shop-btn" ${can?'':'disabled'} onclick="purchaseItem('${item.id}')">교환</button>
-    `;
-    shopEl.appendChild(div);
+  const allShopItems = [...SHOP_ITEMS.final, ...SHOP_ITEMS.mid, ...SHOP_ITEMS.daily]
+    .sort((a, b) => b.cost - a.cost);
+  allShopItems.forEach(item => {
+      const can = (STATE.profile.points || 0) >= item.cost;
+      const div = document.createElement('div');
+      div.className = 'shop-card';
+      div.innerHTML = `
+        <div class="shop-icon">${item.icon}</div>
+        <div class="shop-body">
+          <div class="shop-name">${item.name}</div>
+          <div class="shop-cost">${COIN_SVG} ${item.cost.toLocaleString()}P</div>
+        </div>
+        <button class="shop-btn" ${can?'':'disabled'} onclick="purchaseItem('${item.id}')">교환</button>
+      `;
+      shopEl.appendChild(div);
   });
 
   const histEl = document.getElementById('rewardHistory');
@@ -414,7 +435,7 @@ function renderGachaScreen() {
   hist.forEach(r => {
     const div = document.createElement('div');
     div.className = 'reward-row';
-    div.innerHTML = `<span style="font-size:22px;">${r.icon}</span><span style="flex:1;">${r.name}</span><span style="font-size:14px;color:var(--text3);">${r.date}</span><span class="pt">+${r.pts}P</span>`;
+    div.innerHTML = `<span style="font-size:22px;">${r.icon}</span><span style="flex:1;">${r.name}</span><span style="font-size:14px;color:var(--text3);">${r.date}</span><span class="pt">${r.pts < 0 ? '' : '+'}${r.pts}P</span>`;
     histEl.appendChild(div);
   });
 }
@@ -568,7 +589,7 @@ function renderParentScreen() {
 
   html += `
     <div class="char-card" style="margin-top:18px;">
-      <div class="char-title">${lvInfo.rank} — ${lvInfo.title}</div>
+      <div class="char-title">${lvInfo.emoji} ${lvInfo.title}</div>
       <div class="char-nick">${getDynamicNick()}</div>
       <div class="day-row"><span>이번주 이행일</span><span>${STATE.weekCycle.completedDays.length}일 / 7일</span></div>
       <div class="progress-track"><div class="progress-fill" style="width:${weekPct}%"></div></div>
@@ -769,6 +790,7 @@ function approveQuest(approvalId) {
   STATE.questLog = STATE.questLog || [];
   STATE.questLog.push(logEntry);
   fbAddQuestLog(logEntry);
+  const prevPts = STATE.profile.totalEarnedPoints || 0;
   STATE.profile.points = (STATE.profile.points||0) + pts;
   STATE.profile.totalEarnedPoints = (STATE.profile.totalEarnedPoints||0) + pts;
   STATE.profile.totalApproved = (STATE.profile.totalApproved||0) + 1;
@@ -779,6 +801,14 @@ function approveQuest(approvalId) {
   updateStreak();
   checkWeeklyCycle();
   saveState();
+
+  const lvEvent = getLevelUpEventType(prevPts, STATE.profile.totalEarnedPoints);
+  if (lvEvent) {
+    if (lvEvent.type === 'levelUp') pushEvent('levelUp', { nextLevelTitle: lvEvent.nextLevelTitle });
+    else pushEvent('subLevelUp', { nextLv: lvEvent.nextLv });
+  }
+  if (q.cat === 'rare') pushEvent('rareQuestClear', { questName: q.name, points: pts, stars: q.stars });
+
   showToast(`[시스템] 과업 완수가 확인되었습니다. 기여도 +${pts}P가 반영됩니다.`);
   renderParentScreen();
   renderTopbar();
@@ -801,27 +831,60 @@ function rejectQuest(approvalId) {
 function openGacha() {
   if ((STATE.gachaQueue||0) === 0) return;
 
-  const box = document.getElementById('gachaBox');
-  box.classList.add('spin');
-  setTimeout(() => box.classList.remove('spin'), 600);
+  // 7일 풀클리어 당일 첫 번째 오픈 시 위클리 보너스 풀 사용
+  const isWeeklyBonus = (STATE.weekCycle.completedDays || []).length === 7
+    && !STATE.weekCycle.weeklyBonusUsed;
+  const pool = isWeeklyBonus ? GACHA_POOL_WEEKLY : GACHA_POOL_DAILY;
+  if (isWeeklyBonus) STATE.weekCycle.weeklyBonusUsed = true;
 
-  const isRare = Math.random() < 0.15;
-  const baseRange = isRare ? [300,800] : [50,250];
-  const pts = Math.round(baseRange[0] + Math.random()*(baseRange[1]-baseRange[0]));
+  const result = drawGacha(pool);
+  const tier = result?.tier || 'miss';
 
   STATE.gachaQueue = Math.max(0, (STATE.gachaQueue||0) - 1);
+
+  let pts = 0;
+  let icon = '✨';
+  let title = '';
+  let msg = '';
+  let physicalReward = null;
+
+  if (tier === 'jackpot') {
+    physicalReward = drawGachaReward();
+    const m = rand(GACHA_MESSAGES.jackpot);
+    icon = m.icon; title = m.title; msg = m.msg;
+    pts = physicalReward.type === 'points' ? (physicalReward.amount || 0) : 0;
+  } else if (tier === 'rare') {
+    pts = pool.rare.points;
+    const m = rand(GACHA_MESSAGES.rare);
+    icon = m.icon; title = m.title; msg = m.msg;
+  } else if (tier === 'common') {
+    const [min, max] = pool.common.pointsRange;
+    pts = Math.round(min + Math.random() * (max - min));
+    const m = rand(GACHA_MESSAGES.common);
+    icon = m.icon; title = m.title; msg = m.msg;
+  } else {
+    pts = pool.miss.points;
+    const m = rand(GACHA_MESSAGES.miss);
+    icon = m.icon; title = m.title; msg = m.msg;
+  }
+
   STATE.profile.points = (STATE.profile.points||0) + pts;
   STATE.profile.totalEarnedPoints = (STATE.profile.totalEarnedPoints||0) + pts;
   STATE.rewardHistory = STATE.rewardHistory || [];
-  const msg = rand(GACHA_MESSAGES);
-  const gachaReward = {icon: msg[0], name: `가챠 보상 ${msg[1]}`, pts, date: todayLabel()};
+  const rewardName = physicalReward ? physicalReward.name : `가챠 보상 — ${title}`;
+  const rewardIcon = physicalReward ? physicalReward.icon : icon;
+  const gachaReward = {icon: rewardIcon, name: rewardName, pts, date: todayLabel()};
   STATE.rewardHistory.push(gachaReward);
   fbAddReward(gachaReward);
   saveState();
 
-  document.getElementById('gachaRevealIcon').textContent = isRare ? '🌟' : msg[0];
-  document.getElementById('gachaRevealPts').textContent = `+${pts}P`;
-  document.getElementById('gachaRevealMsg').textContent = isRare ? '레어 보상! 🎉' : msg[2];
+  const box = document.getElementById('gachaBox');
+  box.classList.add('spin');
+  setTimeout(() => box.classList.remove('spin'), 600);
+
+  document.getElementById('gachaRevealIcon').textContent = physicalReward ? physicalReward.icon : icon;
+  document.getElementById('gachaRevealPts').textContent = pts > 0 ? `+${pts}P` : physicalReward?.name || '';
+  document.getElementById('gachaRevealMsg').textContent = physicalReward ? (physicalReward.note || msg) : msg;
   document.getElementById('gachaRevealQuest').innerHTML = `총 포인트: ${COIN_SVG} ${(STATE.profile.points).toLocaleString()}P`;
   document.getElementById('gachaModal').classList.remove('hidden');
 
@@ -850,7 +913,7 @@ function claimWeeklyReward() {
 }
 
 function purchaseItem(itemId) {
-  const item = SHOP_ITEMS.find(i=>i.id===itemId);
+  const item = [...SHOP_ITEMS.daily, ...SHOP_ITEMS.mid, ...SHOP_ITEMS.final].find(i=>i.id===itemId);
   if (!item) return;
   if ((STATE.profile.points||0) < item.cost) { showToast('[시스템] 기여도가 부족합니다.'); return; }
   if (!confirm(`"${item.name}"을(를) ${item.cost.toLocaleString()}P로 교환할까요?`)) return;
@@ -906,6 +969,7 @@ function saveRecord() {
     STATE.questLog.push({date, questId:'__record__', pointsAwarded:bonus, timestamp:Date.now()});
     toast.style.color = 'var(--green)';
     toast.textContent = `저장 완료! 이번 주 첫 기록 +${bonus}P 🎉`;
+    pushEvent('reportSubmitted', { points: bonus });
   } else {
     toast.style.color = 'var(--text2)';
     toast.textContent = '저장 완료! (이번 주 기록 보상은 이미 받았어요)';
@@ -940,6 +1004,43 @@ function changeAvatar(input) {
     if (el) el.src = e.target.result;
   };
   reader.readAsDataURL(file);
+}
+
+// ═══════════════════════════════════════
+// EVENT POPUP QUEUE
+// ═══════════════════════════════════════
+function fillEventVars(template, vars) {
+  return template.replace(/\{(\w+)\}/g, (_, k) => vars[k] !== undefined ? vars[k] : `{${k}}`);
+}
+
+function pushEvent(type, vars = {}) {
+  const def = EVENT_MESSAGES[type];
+  if (!def) return;
+  if (type === 'subLevelUp') {
+    showToast(`⬆️ Lv.${vars.nextLv} 달성! 계속 정진하십시오.`);
+    return;
+  }
+  eventQueue.push({
+    title: fillEventVars(def.title, vars),
+    msg: fillEventVars(def.msg, vars),
+  });
+  if (!eventShowing) showNextEvent();
+}
+
+function showNextEvent() {
+  if (eventQueue.length === 0) { eventShowing = false; return; }
+  eventShowing = true;
+  const ev = eventQueue.shift();
+  const iconMatch = ev.title.match(/^(\p{Emoji}[️]?)\s*/u);
+  document.getElementById('eventModalIcon').textContent = iconMatch ? iconMatch[1] : '🎯';
+  document.getElementById('eventModalTitle').textContent = ev.title.replace(/^(\p{Emoji}[️]?)\s*/u, '');
+  document.getElementById('eventModalMsg').textContent = ev.msg;
+  document.getElementById('eventModal').classList.remove('hidden');
+}
+
+function closeEventModal() {
+  document.getElementById('eventModal').classList.add('hidden');
+  showNextEvent();
 }
 
 // ═══════════════════════════════════════

@@ -32,7 +32,7 @@
 
   <!-- TOPBAR -->
   <div class="topbar" id="topbar">
-    <div class="topbar-title" id="topbarTitle">KEY QUEST</div>
+    <div class="topbar-title" id="topbarTitle">Jake's Grand Journey</div>
     <div class="coin-badge" onclick="showCoinInfo()">
       <svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#f6c945" stroke="#a86a00" stroke-width="2"/><circle cx="12" cy="12" r="4.5" fill="#ffe089"/></svg>
       <span id="coinDisplay">0</span>
@@ -51,24 +51,23 @@
             </div>
           </div>
           <div class="char-right" style="overflow:hidden;padding-left:13px;flex:1;min-width:0;">
-            <div class="char-rank" id="charRank">4급 · 성장 전사</div>
-            <div class="lv-badge" id="charLvBadge">LV.1</div>
+            <div class="char-lv-rank">
+              <div class="lv-badge" id="charLvBadge">LV.1</div>
+              <div class="char-rank" id="charRank">4급 · 성장 전사</div>
+            </div>
             <div class="char-nick-small" id="charNick">성장을 시작한 용사</div>
           </div>
         </div>
         <div class="stat-row" style="margin-top:13px;">
           <div class="stat-box">
-            <div class="si"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5cc6f2" stroke-width="2"><rect x="3" y="8" width="18" height="8"/><path d="M7 8v3M11 8v4M15 8v3M19 8v4"/></svg></div>
             <div class="sv" id="statHeight">—</div>
-            <div class="sl">키 cm</div>
+            <div class="sl">키</div>
           </div>
           <div class="stat-box">
-            <div class="si"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#46d6a0" stroke-width="2"><path d="M12 3v3M6 6h12M6 6l-3 7a3 3 0 0 0 6 0zM18 6l3 7a3 3 0 0 1-6 0z"/></svg></div>
             <div class="sv" id="statWeight">—</div>
-            <div class="sl">몸무게</div>
+            <div class="sl">체중</div>
           </div>
           <div class="stat-box">
-            <div class="si"><svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="none" stroke="#f6c945" stroke-width="2"/><path d="M12 8l1.2 2.5 2.8.3-2 2 .5 2.7L12 16.2 9.5 17.5 10 14.8l-2-2 2.8-.3z" fill="#f6c945"/></svg></div>
             <div class="sv" id="statPoints">0</div>
             <div class="sl">잔여 포인트</div>
           </div>
@@ -101,7 +100,7 @@
 
       <!-- 퀘스트 목록 -->
       <div class="quest-section-header" style="margin-top:4px;">
-        <svg width="14" height="14" viewBox="0 0 24 24"><path d="M12 2c3 4 5 6 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2.2-4.6C9.4 9.6 10.5 11 12.2 11 10.6 8 11.5 5 12 2z" fill="#f6c945"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 2c3 4 5 6 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2.2-4.6C9.4 9.6 10.5 11 12.2 11 10.6 8 11.5 5 12 2z" fill="#f6c945"/></svg>
         <span>오늘의 퀘스트</span>
       </div>
       <div id="warmupQuests"></div>
@@ -124,12 +123,14 @@
   <!-- 가챠 / 보상 화면 -->
   <div class="screen" id="screen-gacha">
     <div class="scrollarea">
+      <div id="gachaSection">
       <div class="section-label" style="margin-top:12px;">🎰 가챠 보상함</div>
       <div class="gacha-stage">
         <div class="gacha-box" id="gachaBox" onclick="openGacha()">🎁</div>
         <div class="gacha-count-badge">대기 중인 보상 <span id="gachaCount">0</span>개</div>
         <div id="gachaResult" class="gacha-result hidden"></div>
         <button class="gacha-cta" id="gachaBtn" onclick="openGacha()">보급품 수령!</button>
+      </div>
       </div>
       <div class="section-label">🛒 보상 상점</div>
       <div id="shopList"></div>
@@ -194,16 +195,16 @@
   <!-- 하단 네비게이션 -->
   <div class="bottom-nav" id="bottomNav">
     <div class="nav-item active" data-screen="home" onclick="switchScreen('home',this)">
-      <span class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" fill="currentColor"/></svg></span>홈
+      <span class="nav-icon"><svg width="30" height="30" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" fill="currentColor"/></svg></span>홈
     </div>
     <div class="nav-item" data-screen="gacha" onclick="switchScreen('gacha',this)">
-      <span class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M3 8h18v12H3z" fill="currentColor"/><path d="M3 8l2-3h14l2 3M11 8h2v4h-2z" fill="currentColor" opacity=".6"/></svg></span>보상함
+      <span class="nav-icon"><svg width="30" height="30" viewBox="0 0 24 24"><path d="M3 8h18v12H3z" fill="currentColor"/><path d="M3 8l2-3h14l2 3M11 8h2v4h-2z" fill="currentColor" opacity=".6"/></svg></span>보상함
     </div>
     <div class="nav-item" data-screen="report" onclick="switchScreen('report',this)">
-      <span class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4h9l3 3v13H6z"/><path d="M9 9h6M9 13h6"/></svg></span>리포트
+      <span class="nav-icon"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4h9l3 3v13H6z"/><path d="M9 9h6M9 13h6"/></svg></span>리포트
     </div>
     <div class="nav-item" data-screen="parent" onclick="switchScreen('parent',this)">
-      <span class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M3 8l4 3 5-6 5 6 4-3-2 11H5z" fill="currentColor"/></svg></span>부모뷰
+      <span class="nav-icon"><svg width="30" height="30" viewBox="0 0 24 24"><path d="M3 8l4 3 5-6 5 6 4-3-2 11H5z" fill="currentColor"/></svg></span>부모뷰
     </div>
   </div>
 
@@ -258,6 +259,16 @@
       <div style="font-size:18px;color:var(--text2);margin-bottom:4px;" id="gachaRevealMsg"></div>
       <div style="font-size:15px;color:var(--text3);margin-bottom:20px;" id="gachaRevealQuest"></div>
       <button class="modal-btn primary" onclick="closeGachaModal()">받기! 🎉</button>
+    </div>
+  </div>
+
+  <!-- 이벤트 팝업 모달 -->
+  <div class="modal-overlay center hidden" id="eventModal">
+    <div class="modal-box center-box" style="text-align:center;">
+      <div style="font-size:52px;margin-bottom:8px;" id="eventModalIcon">🎯</div>
+      <div style="font-size:18px;font-weight:900;color:var(--gold);margin-bottom:10px;" id="eventModalTitle"></div>
+      <div style="font-size:14px;color:var(--text2);white-space:normal;line-height:1.7;margin-bottom:20px;" id="eventModalMsg"></div>
+      <button class="modal-btn primary" onclick="closeEventModal()">확인!</button>
     </div>
   </div>
 

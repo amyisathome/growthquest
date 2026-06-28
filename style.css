@@ -49,8 +49,8 @@ body{
   flex-shrink:0;position:relative;z-index:20;
 }
 .topbar-title{
-  font-family:'Noto Sans KR',sans-serif;
-  font-size:18px;font-weight:900;color:var(--gold);letter-spacing:-.01em;
+  font-family:'Press Start 2P',monospace;
+  font-size:12px;font-weight:400;color:var(--gold);letter-spacing:.03em;
   text-shadow:2px 2px 0 #6b3a00;
 }
 .coin-badge{
@@ -72,7 +72,7 @@ body{
   background:#1a1838;border-top:2px solid var(--border);
   flex-shrink:0;position:relative;z-index:20;
 }
-.nav-item{flex:1;text-align:center;font-size:9px;font-weight:700;color:var(--text4);cursor:pointer;padding:2px 0;transition:color .2s;}
+.nav-item{flex:1;text-align:center;font-size:14px;font-weight:700;color:var(--text4);cursor:pointer;padding:2px 0;transition:color .2s;}
 .nav-item.active{color:var(--gold);}
 .nav-item:active{opacity:.7;}
 .nav-icon{font-size:22px;display:block;margin-bottom:2px;}
@@ -83,12 +83,12 @@ body{
 
 /* ── 섹션 라벨 ── */
 .section-label{
-  font-size:13px;font-weight:800;color:var(--text2);
+  font-size:14px;font-weight:800;color:var(--text2);
   margin:14px 2px 10px;display:flex;align-items:center;gap:7px;
 }
 .section-label::after{content:'';flex:1;height:2px;background:repeating-linear-gradient(90deg,#3a3766 0 4px,transparent 4px 8px);}
 .quest-section-header{display:flex;align-items:center;gap:7px;margin:14px 2px 10px;}
-.quest-section-header span{font:800 13px 'Noto Sans KR';color:var(--text2);}
+.quest-section-header span{font:800 14px 'Noto Sans KR';color:var(--text2);}
 .quest-section-header::after{content:'';flex:1;height:2px;background:repeating-linear-gradient(90deg,#3a3766 0 4px,transparent 4px 8px);}
 
 /* ── 캐릭터 카드 ── */
@@ -105,7 +105,7 @@ body{
 .day-row{display:flex;justify-content:space-between;font-size:14px;color:var(--text2);margin-bottom:5px;}
 .progress-track{width:100%;height:14px;background:#100e22;border:2px solid var(--border);box-shadow:inset 1px 1px 0 rgba(0,0,0,.6);padding:2px;margin-bottom:4px;}
 .progress-fill{height:100%;background:repeating-linear-gradient(90deg,var(--cyan) 0 5px,var(--purple) 5px 10px);transition:width .5s;}
-.progress-label{font-size:13px;color:var(--text3);text-align:right;}
+.progress-label{font-size:14px;color:var(--text3);text-align:right;}
 
 /* ── 스토리 카드 ── */
 .story-card{
@@ -123,14 +123,15 @@ body{
 .char-top{display:flex;gap:0;align-items:center;margin-bottom:12px;}
 .char-left{flex-shrink:0;}
 .char-right{flex:1;min-width:0;}
+.char-lv-rank{display:flex;align-items:center;gap:8px;margin-bottom:2px;}
 .lv-badge{
   font-family:'Press Start 2P',monospace;font-size:8px;
   background:linear-gradient(180deg,var(--purple),var(--violet));
   color:#fff;padding:4px 7px;border:2px solid var(--border);box-shadow:2px 2px 0 var(--border);
-  display:inline-block;margin-bottom:5px;
+  display:inline-block;flex-shrink:0;
 }
-.char-rank{font-size:12px;color:var(--gold);font-weight:800;margin-bottom:2px;}
-.char-nick-small{font-size:14px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.char-rank{font-size:14px;color:var(--gold);font-weight:800;}
+.char-nick-small{font-size:17px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .stat-row{display:flex;gap:6px;margin-bottom:10px;}
 .stat-box{
   flex:1;background:#1a1838;border:2px solid var(--border);
@@ -138,7 +139,8 @@ body{
   padding:8px 4px;text-align:center;
 }
 .stat-box .sv{font-size:17px;font-weight:900;color:#fff;line-height:1.1;margin-top:2px;}
-.stat-box .sl{font-size:9px;font-weight:700;color:var(--text3);margin-top:3px;}
+.sv-unit{font-size:12px;font-weight:600;color:var(--text3);margin-left:1px;}
+.stat-box .sl{font-size:12px;font-weight:700;color:var(--text3);margin-top:3px;}
 .stat-box .si{font-size:15px;margin-bottom:2px;}
 .xp-section{margin-top:14px;}
 .xp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
@@ -204,7 +206,7 @@ body{
 }
 .gacha-box:active{transform:scale(.95);}
 .gacha-box.spin{animation:gacha-spin .6s ease-out;}
-.gacha-count-badge{background:linear-gradient(var(--purple),var(--violet));border:2px solid var(--border);box-shadow:2px 2px 0 var(--border);color:#fff;font-weight:700;font-size:13px;padding:4px 14px;margin-bottom:12px;}
+.gacha-count-badge{background:linear-gradient(var(--purple),var(--violet));border:2px solid var(--border);box-shadow:2px 2px 0 var(--border);color:#fff;font-weight:700;font-size:14px;padding:4px 14px;margin-bottom:12px;}
 .gacha-cta{
   position:relative;background:linear-gradient(var(--purple),var(--violet));
   color:#fff;font-weight:700;font-size:14px;font-family:'Noto Sans KR',sans-serif;
@@ -216,7 +218,7 @@ body{
 .gacha-cta:active:not(:disabled){opacity:.7;}
 .gacha-result{text-align:center;animation:fadeIn .4s;margin-top:8px;}
 .gacha-result .pts{font-family:'Press Start 2P',monospace;font-size:30px;font-weight:900;color:var(--gold);}
-.gacha-result .msg{font-size:15px;color:var(--text2);margin-top:4px;}
+.gacha-result .msg{font-size:14px;color:var(--text2);margin-top:4px;}
 
 /* ── 보상 히스토리 & 상점 ── */
 .reward-list{width:100%;margin-top:14px;}
@@ -227,7 +229,7 @@ body{
 .shop-body{flex:1;}
 .shop-name{font-size:14px;font-weight:700;margin-bottom:3px;}
 .shop-cost{font-family:'Press Start 2P',monospace;font-size:9px;color:var(--gold);}
-.shop-btn{background:linear-gradient(var(--purple),var(--violet));color:#fff;font-size:12px;font-weight:700;border:2px solid var(--border);box-shadow:2px 2px 0 var(--border);padding:6px 12px;cursor:pointer;flex-shrink:0;font-family:'Noto Sans KR',sans-serif;}
+.shop-btn{background:linear-gradient(var(--purple),var(--violet));color:#fff;font-size:14px;font-weight:700;border:2px solid var(--border);box-shadow:2px 2px 0 var(--border);padding:6px 12px;cursor:pointer;flex-shrink:0;font-family:'Noto Sans KR',sans-serif;}
 .shop-btn:disabled{opacity:.35;cursor:not-allowed;}
 .shop-btn:active:not(:disabled){opacity:.7;}
 
@@ -243,20 +245,20 @@ body{
 .gr-mini .gl{font-size:10px;color:var(--text3);}
 .gr-mini .gu{font-size:10px;color:var(--green);font-weight:700;margin-top:2px;}
 .gr-chartcard{background:#1a1838;border:2px solid var(--border);box-shadow:inset 1px 1px 0 rgba(255,255,255,.06),2px 2px 0 var(--border);padding:12px;margin-bottom:10px;position:relative;}
-.gr-chartcard .gt{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;}
+.gr-chartcard .gt{font-size:14px;font-weight:700;color:var(--text2);margin-bottom:8px;}
 .gr-svg{width:100%;height:200px;}
 .gr-legend{display:flex;gap:10px;flex-wrap:wrap;position:absolute;top:10px;right:12px;}
 .gr-legend .li{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text3);}
 .gr-legend .dot{width:8px;height:8px;}
 .gr-legend .dash{width:10px;height:2px;}
 .gr-inputcard{background:var(--bg2);border:2px solid var(--border);box-shadow:var(--px-shadow);padding:13px;margin-bottom:10px;}
-.gr-inputcard .it{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:11px;}
+.gr-inputcard .it{font-size:14px;font-weight:700;color:var(--text2);margin-bottom:11px;}
 .gr-fieldrow{display:flex;gap:6px;margin-bottom:8px;}
 .gr-field{flex:1;}
-.gr-field label{display:block;font-size:10px;color:var(--text3);margin-bottom:4px;}
-.gr-field input,.gr-field select{width:100%;background:#1a1838;border:2px solid #3a3766;color:#fff;font-size:12px;font-family:inherit;padding:7px 9px;}
+.gr-field label{display:block;font-size:12px;color:var(--text3);margin-bottom:4px;}
+.gr-field input,.gr-field select{width:100%;background:#1a1838;border:2px solid #3a3766;color:#fff;font-size:14px;font-family:inherit;padding:7px 9px;}
 .gr-field input::-webkit-calendar-picker-indicator{filter:invert(.7);}
-.gr-savebtn{width:100%;background:linear-gradient(var(--purple),var(--violet));color:#fff;font-weight:700;font-size:13px;font-family:'Noto Sans KR',sans-serif;border:2px solid var(--border);box-shadow:inset 2px 2px 0 rgba(255,255,255,.2),3px 3px 0 var(--border);padding:10px;cursor:pointer;}
+.gr-savebtn{width:100%;background:linear-gradient(var(--purple),var(--violet));color:#fff;font-weight:700;font-size:14px;font-family:'Noto Sans KR',sans-serif;border:2px solid var(--border);box-shadow:inset 2px 2px 0 rgba(255,255,255,.2),3px 3px 0 var(--border);padding:10px;cursor:pointer;}
 .gr-savebtn:active{opacity:.7;}
 .gr-toast{text-align:center;font-size:11px;color:var(--green);font-weight:700;margin-top:6px;min-height:14px;}
 
@@ -268,16 +270,16 @@ body{
 .week-bar-label{font-size:10px;color:var(--text3);}
 
 /* ── 인사이트 카드 ── */
-.insight-card{position:relative;background:linear-gradient(135deg,#3a2c12,#2a2148);border:2px solid var(--gold);box-shadow:inset 2px 2px 0 rgba(255,255,255,.12),3px 3px 0 var(--border),0 0 12px rgba(246,201,69,.2);padding:11px 12px;font-size:12px;line-height:1.7;color:#fff0d0;margin-bottom:10px;}
+.insight-card{position:relative;background:linear-gradient(135deg,#3a2c12,#2a2148);border:2px solid var(--gold);box-shadow:inset 2px 2px 0 rgba(255,255,255,.12),3px 3px 0 var(--border),0 0 12px rgba(246,201,69,.2);padding:11px 12px;font-size:14px;line-height:1.7;color:#fff0d0;margin-bottom:10px;}
 .insight-card b{color:var(--gold);}
 
 /* ── 부모 화면 ── */
 .approve-row{background:var(--bg2);border:2px solid var(--border);box-shadow:var(--px-shadow);padding:10px 12px;display:flex;gap:10px;align-items:center;margin-bottom:9px;}
 .thumb{width:46px;height:46px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;overflow:hidden;background:linear-gradient(#1a3a5c,#16466e);border:2px solid var(--border);}
 .thumb img{width:100%;height:100%;object-fit:cover;}
-.approve-btn{background:linear-gradient(var(--green),#2fa87c);color:#0a0917;font-size:12px;font-weight:700;border:2px solid var(--border);box-shadow:2px 2px 0 var(--border);padding:6px 12px;cursor:pointer;flex-shrink:0;font-family:'Noto Sans KR',sans-serif;}
+.approve-btn{background:linear-gradient(var(--green),#2fa87c);color:#0a0917;font-size:14px;font-weight:700;border:2px solid var(--border);box-shadow:2px 2px 0 var(--border);padding:6px 12px;cursor:pointer;flex-shrink:0;font-family:'Noto Sans KR',sans-serif;}
 .approve-btn:active{opacity:.7;}
-.reject-btn{background:rgba(255,107,107,.1);color:var(--red);font-size:12px;font-weight:700;border:2px solid rgba(255,107,107,.4);padding:6px 10px;cursor:pointer;flex-shrink:0;font-family:'Noto Sans KR',sans-serif;}
+.reject-btn{background:rgba(255,107,107,.1);color:var(--red);font-size:14px;font-weight:700;border:2px solid rgba(255,107,107,.4);padding:6px 10px;cursor:pointer;flex-shrink:0;font-family:'Noto Sans KR',sans-serif;}
 .reject-btn:active{opacity:.7;}
 
 /* ── PIN 오버레이 ── */
@@ -288,14 +290,14 @@ body{
 }
 .pin-box{background:var(--bg2);border:2px solid var(--border);box-shadow:var(--px-shadow);padding:28px 24px;text-align:center;width:280px;}
 .pin-title{font-size:16px;font-weight:700;margin-bottom:6px;}
-.pin-sub{font-size:13px;color:var(--text3);margin-bottom:20px;}
+.pin-sub{font-size:14px;color:var(--text3);margin-bottom:20px;}
 .pin-dots{display:flex;justify-content:center;gap:12px;margin-bottom:20px;}
 .pin-dot{width:14px;height:14px;border:2px solid var(--text3);transition:all .15s;}
 .pin-dot.filled{background:var(--purple);border-color:var(--purple);}
 .pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;}
 .pin-key{background:#1a1838;border:2px solid var(--border);color:#fff;font-size:20px;font-weight:700;padding:14px;cursor:pointer;transition:background .15s;font-family:'Noto Sans KR',sans-serif;}
 .pin-key:active{background:var(--purple);}
-.pin-err{font-size:13px;color:var(--red);margin-top:4px;min-height:14px;}
+.pin-err{font-size:14px;color:var(--red);margin-top:4px;min-height:14px;}
 .pin-cancel{font-size:14px;color:var(--text3);margin-top:12px;cursor:pointer;display:inline-block;padding:4px;}
 .pin-cancel:active{opacity:.6;}
 
@@ -305,21 +307,21 @@ body{
 .modal-box{background:var(--bg2);border:2px solid var(--border);border-bottom:none;box-shadow:-3px -3px 0 var(--border);padding:24px 20px max(env(safe-area-inset-bottom),20px);width:100%;max-width:420px;}
 .modal-box.center-box{border:2px solid var(--border);border-bottom:2px solid var(--border);box-shadow:4px 4px 0 var(--border);padding:24px 20px;max-width:340px;margin:16px;}
 .modal-title{font-size:17px;font-weight:900;margin-bottom:8px;}
-.modal-sub{font-size:13px;color:var(--text3);margin-bottom:16px;line-height:1.6;white-space:pre-line;}
+.modal-sub{font-size:14px;color:var(--text3);margin-bottom:16px;line-height:1.6;white-space:pre-line;}
 .modal-btn{width:100%;border:2px solid var(--border);padding:12px;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:8px;font-family:'Noto Sans KR',sans-serif;}
 .modal-btn.primary{background:linear-gradient(var(--purple),var(--violet));color:#fff;box-shadow:inset 2px 2px 0 rgba(255,255,255,.2),3px 3px 0 var(--border);}
 .modal-btn.primary:active{opacity:.7;}
 .modal-btn.secondary{background:rgba(255,255,255,.06);color:var(--text2);box-shadow:2px 2px 0 var(--border);}
 .modal-btn.secondary:active{opacity:.7;}
 .photo-preview{width:100%;height:160px;object-fit:cover;margin-bottom:12px;display:none;border:2px solid var(--border);}
-.photo-upload-btn{width:100%;border:2px dashed rgba(255,255,255,.2);background:rgba(255,255,255,.04);color:var(--text3);font-size:15px;font-weight:700;padding:20px;cursor:pointer;margin-bottom:12px;text-align:center;font-family:'Noto Sans KR',sans-serif;}
+.photo-upload-btn{width:100%;border:2px dashed rgba(255,255,255,.2);background:rgba(255,255,255,.04);color:var(--text3);font-size:14px;font-weight:700;padding:20px;cursor:pointer;margin-bottom:12px;text-align:center;font-family:'Noto Sans KR',sans-serif;}
 .photo-upload-btn:active{opacity:.6;}
 
 /* ── 주간 보상 배너 ── */
 .weekly-banner{position:relative;background:linear-gradient(135deg,#3a2c12,#2a2148);border:2px solid var(--gold);box-shadow:inset 2px 2px 0 rgba(255,255,255,.12),3px 3px 0 var(--border),0 0 12px rgba(246,201,69,.2);padding:14px;text-align:center;margin-bottom:12px;overflow:hidden;}
 .weekly-banner .wb-icon{font-size:36px;margin-bottom:4px;}
 .weekly-banner .wb-title{font-size:16px;font-weight:900;color:var(--gold);margin-bottom:3px;}
-.weekly-banner .wb-sub{font-size:13px;color:var(--text2);}
+.weekly-banner .wb-sub{font-size:14px;color:var(--text2);}
 .weekly-banner-btn{margin-top:10px;background:var(--gold);color:#1a1228;font-size:14px;font-weight:900;border:2px solid var(--border);box-shadow:2px 2px 0 var(--border);padding:7px 20px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;}
 .weekly-banner-btn:active{opacity:.7;}
 
@@ -327,7 +329,7 @@ body{
 .toast{
   position:absolute;bottom:90px;left:50%;transform:translateX(-50%);
   background:var(--bg2);border:2px solid var(--border);box-shadow:3px 3px 0 var(--border);
-  color:#fff;font-size:13px;font-weight:700;
+  color:#fff;font-size:14px;font-weight:700;
   padding:9px 16px;white-space:nowrap;
   opacity:0;transition:opacity .3s;pointer-events:none;z-index:200;
 }

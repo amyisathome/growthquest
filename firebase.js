@@ -120,7 +120,7 @@ async function _migrateOldData(ref, old) {
     });
     (old.pendingApprovals || []).forEach(p => {
       batch.set(ref.collection('pendingApprovals').doc(), {
-        questId: p.questId, date: p.date, pts: p.pts,
+        questId: p.questId, date: p.date || '', pts: p.pts || 0,
         photo: p.photo || null, submittedAt: p.submittedAt || '',
       });
     });
