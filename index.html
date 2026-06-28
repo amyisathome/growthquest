@@ -116,7 +116,7 @@ body{
 .story-icon{font-size:32px;flex-shrink:0;filter:drop-shadow(0 0 6px rgba(246,201,69,.5));}
 .story-body{}
 .story-title{font-size:14px;font-weight:900;color:var(--gold);margin-bottom:4px;letter-spacing:.03em;}
-.story-msg{font-size:14px;color:var(--text2);line-height:1.7;white-space:pre-line;}
+.story-msg{font-size:14px;color:var(--text2);line-height:1.7;}
 
 /* RPG stat card */
 .char-top{display:flex;gap:0;align-items:center;margin-bottom:12px;}
@@ -388,11 +388,9 @@ body{
       <div class="char-card" style="margin-top:12px;" id="charCard">
         <div class="char-top">
           <div class="char-left">
-            <div class="avatar-wrap" onclick="document.getElementById('fileInput').click()">
+            <div class="avatar-wrap">
               <img id="avatarEl" class="avatar-img" src="avatar.png" alt="캐릭터">
-              <div class="avatar-edit">✏️</div>
             </div>
-            <input type="file" id="fileInput" accept="image/*" onchange="changeAvatar(this)" style="display:none">
           </div>
           <div class="char-right" style="overflow:hidden;padding-left:13px;flex:1;min-width:0;">
             <div class="char-rank" id="charRank">4급 · 성장 전사</div>
