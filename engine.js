@@ -26,6 +26,11 @@ async function loadState() {
   const remote = await fbLoadState();
   if (remote) {
     STATE = {...getDefaultState(), ...remote};
+    // 기존 유저 joinDate 소급 적용
+    if (!STATE.profile.joinDate && STATE.profile.name) {
+      STATE.profile.joinDate = today();
+      saveState();
+    }
   } else {
     try {
       const raw = localStorage.getItem('growthquest_v2');
@@ -87,6 +92,7 @@ function finishOnboard() {
   if (!pin || pin.length < 4) { alert('PIN 4자리를 입력해주세요!'); return; }
   STATE.profile.name = name;
   STATE.profile.pin = pin;
+  if (!STATE.profile.joinDate) STATE.profile.joinDate = today();
   if (!isNaN(h) && h > 0) { const d = today(); STATE.heightHistory.push({date: d, value: h}); fbSetHeight(d, h); }
   if (!isNaN(w) && w > 0) { const d = today(); STATE.weightHistory.push({date: d, value: w}); fbSetWeight(d, w); }
   saveState();
@@ -143,24 +149,35 @@ function getDailyQuests() {
   const rareChance = Math.min(0.5, 0.12 + missDays * 0.08);
   const dow = new Date().getDay();
 
+  // rare 출현 여부를 오늘 하루 고정 (렌더링마다 바뀌지 않도록)
+  const t = today();
+  if (!STATE.dailyRoll || STATE.dailyRoll.date !== t) {
+    const showRare = Math.random() < rareChance;
+    STATE.dailyRoll = { date: t, showRare, rareNotified: false };
+    saveState();
+  }
+
   const rarePool = QUEST_POOL.filter(q => q.cat === 'rare');
-  const showRare = Math.random() < rareChance;
-  const rareQuest = showRare ? [rarePool[dow % rarePool.length]] : [];
+  const rareQuest = STATE.dailyRoll.showRare ? [rarePool[dow % rarePool.length]] : [];
+
+  // rare 출현 시 최초 1회만 팝업 알림
+  if (STATE.dailyRoll.showRare && !STATE.dailyRoll.rareNotified && rareQuest[0]) {
+    STATE.dailyRoll.rareNotified = true;
+    saveState();
+    setTimeout(() => pushEvent('rareQuestAppear', { questName: rareQuest[0].name }), 800);
+  }
 
   const exPool = QUEST_POOL.filter(q => q.cat === 'exercise');
   const exerciseQuest = isWeekend() ? [exPool[dow % exPool.length]] : [];
 
-  const specialSlots = rareQuest.length + exerciseQuest.length;
-  const remaining = 3 - specialSlots;
-
+  // rare는 3개 제한과 무관하게 항상 추가, 나머지 슬롯으로 warmup/core 구성
   const warmup = [QUEST_POOL.find(q => q.id === 'w2')];
-
-  const coreSlots = Math.max(0, remaining - 1);
+  const remaining = Math.max(0, 3 - exerciseQuest.length - 1);
   const corePool = [
     QUEST_POOL.find(q => q.id === 'c1'),
     ...[QUEST_POOL.filter(q => q.cat === 'core' && q.id !== 'c1')[dow % 6]].filter(Boolean),
   ];
-  const core = corePool.slice(0, coreSlots);
+  const core = corePool.slice(0, remaining);
 
   return {
     warmup: warmup.filter(Boolean),
@@ -266,9 +283,18 @@ function renderTopbar() {
   const coinEl = document.getElementById('coinDisplay');
   if (coinEl) coinEl.textContent = (STATE.profile.totalEarnedPoints || 0).toLocaleString();
   const titleEl = document.getElementById('topbarTitle');
-  if (titleEl) {
-    const name = STATE.profile.name;
-    titleEl.textContent = "Jake's Grand Journey";
+  if (titleEl) titleEl.textContent = "Jake's Grand Journey";
+
+  // 가챠 대기 뱃지
+  const badge = document.getElementById('gachaBadge');
+  if (badge) {
+    const count = STATE.gachaQueue || 0;
+    if (count > 0) {
+      badge.textContent = count;
+      badge.style.display = 'inline-block';
+    } else {
+      badge.style.display = 'none';
+    }
   }
 }
 
@@ -286,6 +312,7 @@ function renderStoryCard() {
 }
 
 function flushPendingEvents() {
+  if (STATE.parentUnlocked) return;
   const events = STATE.pendingEvents || [];
   if (events.length === 0) return;
   STATE.pendingEvents = [];
@@ -293,8 +320,40 @@ function flushPendingEvents() {
   events.forEach(e => pushEvent(e.type, e.vars));
 }
 
+function getJoinCycleKey() {
+  // 가입일 기준 7일 단위 사이클 번호 반환
+  const joinDate = STATE.profile.joinDate || today();
+  const diff = Math.floor((new Date(today()) - new Date(joinDate)) / 86400000);
+  const cycle = Math.floor(diff / 7);
+  return `${joinDate}-c${cycle}`;
+}
+
+function checkBodyRecordReminder() {
+  const cycleKey = getJoinCycleKey();
+  // 이번 사이클에 기록이 있으면 skip
+  const cycleStart = new Date(STATE.profile.joinDate || today());
+  const diff = Math.floor((new Date(today()) - cycleStart) / 86400000);
+  const cycleStartOffset = Math.floor(diff / 7) * 7;
+  const cycleStartDate = new Date(cycleStart);
+  cycleStartDate.setDate(cycleStartDate.getDate() + cycleStartOffset);
+  const cycleStartStr = cycleStartDate.toISOString().slice(0, 10);
+  const cycleEndDate = new Date(cycleStartDate);
+  cycleEndDate.setDate(cycleEndDate.getDate() + 6);
+  const cycleEndStr = cycleEndDate.toISOString().slice(0, 10);
+
+  const hasRecord = (STATE.questLog||[]).some(l =>
+    l.questId === '__record__' && l.date >= cycleStartStr && l.date <= cycleEndStr
+  );
+  if (hasRecord) return;
+  if (STATE.bodyReminderCycle === cycleKey) return;
+  STATE.bodyReminderCycle = cycleKey;
+  saveState();
+  setTimeout(() => pushEvent('bodyRecordReminder'), 1200);
+}
+
 function renderHomeScreen() {
   flushPendingEvents();
+  checkBodyRecordReminder();
   const pts = STATE.profile.points || 0;
   const totalPts = STATE.profile.totalEarnedPoints || pts;
   const lvInfo = getLevelByPts(totalPts);
@@ -441,6 +500,9 @@ function renderGachaScreen() {
   document.getElementById('gachaBtn').disabled = count === 0;
   document.getElementById('gachaSection').style.display = count > 0 ? '' : 'none';
 
+  const shopPtsEl = document.getElementById('shopPointsDisplay');
+  if (shopPtsEl) shopPtsEl.textContent = ((STATE.profile.points || 0).toLocaleString()) + 'P';
+
   const shopEl = document.getElementById('shopList');
   shopEl.innerHTML = '';
   const allShopItems = [...SHOP_ITEMS.final, ...SHOP_ITEMS.mid, ...SHOP_ITEMS.daily]
@@ -479,72 +541,109 @@ function renderReportScreen() {
 }
 
 function drawCharts() {
-  const heightPoints = STATE.heightHistory.slice(-6);
-  const weightPoints = STATE.weightHistory.slice(-6);
+  const MAX_WEEKS = 13; // 3개월
+  const now = new Date(today());
 
-  const actByMonth = {};
-  (STATE.questLog||[]).forEach(l => {
-    const mon = l.date.slice(0,7);
-    actByMonth[mon] = (actByMonth[mon]||0) + (l.pointsAwarded||0);
-  });
-
-  function buildData(histArr) {
-    return histArr.map(h => {
-      const mon = h.date.slice(0,7);
-      const label = `${parseInt(h.date.slice(5,7))}월`;
-      const act = Math.min(100, Math.round((actByMonth[mon]||0) / 10));
-      return [label, h.value, act];
-    });
+  // 주간 단위 데이터: 각 주의 마지막 기록값 사용
+  function getWeeklyData(history) {
+    const result = [];
+    for (let i = MAX_WEEKS - 1; i >= 0; i--) {
+      const weekEnd = new Date(now);
+      weekEnd.setDate(now.getDate() - i * 7);
+      const weekStart = new Date(weekEnd);
+      weekStart.setDate(weekEnd.getDate() - 6);
+      const startStr = weekStart.toISOString().slice(0, 10);
+      const endStr = weekEnd.toISOString().slice(0, 10);
+      const entries = (history || []).filter(h => h.date >= startStr && h.date <= endStr);
+      if (entries.length > 0) {
+        const latest = entries[entries.length - 1];
+        const m = parseInt(weekEnd.toISOString().slice(5, 7));
+        const d = parseInt(weekEnd.toISOString().slice(8, 10));
+        result.push({ label: `${m}/${d}`, value: latest.value });
+      }
+    }
+    return result;
   }
 
-  const hData = buildData(heightPoints);
-  const wData = buildData(weightPoints);
+  // 주간 활동포인트 집계
+  function getWeeklyAct() {
+    const map = {};
+    (STATE.questLog || []).forEach(l => {
+      const d = new Date(l.date);
+      const weekEnd = new Date(d);
+      weekEnd.setDate(d.getDate() + (6 - ((d.getDay() + 6) % 7))); // 주 마지막일(일요일)
+      const key = weekEnd.toISOString().slice(0, 10);
+      map[key] = (map[key] || 0) + (l.pointsAwarded || 0);
+    });
+    return map;
+  }
+  const actMap = getWeeklyAct();
 
-  if (hData.length >= 1) drawLineChart('heightChart', hData, '#ffd76a', true);
-  if (wData.length >= 1) drawLineChart('weightChart', wData, '#ff9d8a', false);
+  const hData = getWeeklyData(STATE.heightHistory);
+  const wData = getWeeklyData(STATE.weightHistory);
+
+  if (hData.length >= 1) drawLineChart('heightChart', hData, '#ffd76a', actMap, true);
+  if (wData.length >= 1) drawLineChart('weightChart', wData, '#ff9d8a', actMap, false);
 }
 
-function drawLineChart(svgId, data, color, showActivity) {
+function drawLineChart(svgId, data, color, actMap, showActivity) {
   const svg = document.getElementById(svgId);
   if (!svg) return;
-  const W = svg.getBoundingClientRect().width || svg.clientWidth || 300, H = 200;
-  const padL=36, padR=10, padT=14, padB=20;
-  const innerW = W-padL-padR, innerH = H-padT-padB;
+  const W = svg.getBoundingClientRect().width || svg.clientWidth || 340, H = 200;
+  const padL = 38, padR = 12, padT = 14, padB = 22;
+  const innerW = W - padL - padR, innerH = H - padT - padB;
   const n = data.length;
   if (n === 0) return;
 
-  const xs = n === 1 ? [padL + innerW/2] : data.map((_,i) => padL + innerW*i/(n-1));
-  const vals = data.map(d=>d[1]);
-  const vMin = Math.min(...vals), vMax = Math.max(...vals);
-  const vRange = vMax-vMin || 1;
-  const ys = vals.map(v => padT + innerH*(1-(v-vMin+vRange*.2)/(vRange*1.4)));
+  // Y축: 5단위 고정 범위
+  const vals = data.map(d => d.value);
+  const minVal = Math.min(...vals), maxVal = Math.max(...vals);
+  const yMin = Math.floor(minVal / 5) * 5;
+  const yMax = Math.max(yMin + 5, Math.ceil(maxVal / 5) * 5);
+  const yRange = yMax - yMin;
 
-  let s = `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="rgba(255,255,255,.12)" stroke-width="1"/>
-<line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="rgba(255,255,255,.12)" stroke-width="1"/>`;
+  const toY = v => padT + innerH * (1 - (v - yMin) / yRange);
+  const xs = n === 1 ? [padL + innerW / 2] : data.map((_, i) => padL + innerW * i / (n - 1));
+  const ys = vals.map(toY);
 
-  if (showActivity && data[0][2] !== undefined) {
-    const pts2 = data.map(d=>d[2]);
-    const maxP = Math.max(...pts2, 1);
-    const ysP = pts2.map(p => padT + innerH*(1-p/maxP));
-    s += `<polyline points="${xs.map((x,i)=>`${x},${ysP[i]}`).join(' ')}" fill="none" stroke="#5ad1ff" stroke-width="1.5" stroke-dasharray="4 3" opacity=".8"/>`;
-    xs.forEach((x,i) => { s += `<circle cx="${x}" cy="${ysP[i]}" r="2" fill="#5ad1ff"/>`; });
-  }
+  let s = `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}" stroke="rgba(255,255,255,.12)" stroke-width="1"/>
+<line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" stroke="rgba(255,255,255,.12)" stroke-width="1"/>`;
 
-  if (n > 1) {
-    s += `<polyline points="${xs.map((x,i)=>`${x},${ys[i]}`).join(' ')}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
-  }
-  xs.forEach((x,i) => {
-    const r = i===n-1?4:3;
-    s += `<circle cx="${x}" cy="${ys[i]}" r="${r}" fill="${color}"/>`;
-    s += `<text x="${x}" y="${H-6}" font-size="8" fill="#9694b8" text-anchor="middle">${data[i][0]}</text>`;
+  // Y축 눈금선 (yMin, 중간, yMax)
+  [yMin, yMin + yRange / 2, yMax].forEach(v => {
+    const y = toY(v);
+    s += `<line x1="${padL}" x2="${W - padR}" y1="${y}" y2="${y}" stroke="rgba(255,255,255,.06)" stroke-width="1"/>`;
+    s += `<text x="${padL - 4}" y="${y + 3}" font-size="8" fill="#9694b8" text-anchor="end">${v % 1 === 0 ? v : v.toFixed(1)}</text>`;
   });
-  const last = data[n-1];
-  s += `<text x="${xs[n-1]+4}" y="${ys[n-1]-7}" font-size="9" font-weight="700" fill="${color}" text-anchor="start">${last[1]}</text>`;
 
-  const yLabel1 = (vMin + vRange*.2).toFixed(n>1?1:0);
-  const yLabel2 = (vMax + vRange*.2*.2).toFixed(n>1?1:0);
-  s += `<text x="${padL-4}" y="${H-padB}" font-size="8" fill="#9694b8" text-anchor="end">${yLabel1}</text>`;
-  s += `<text x="${padL-4}" y="${padT+4}" font-size="8" fill="#9694b8" text-anchor="end">${yLabel2}</text>`;
+  // 활동포인트 보조선
+  if (showActivity && n > 1) {
+    const actVals = data.map(d => actMap[d.label] || 0);
+    const maxAct = Math.max(...actVals, 1);
+    const ysA = actVals.map(p => padT + innerH * (1 - p / maxAct));
+    s += `<polyline points="${xs.map((x, i) => `${x},${ysA[i]}`).join(' ')}" fill="none" stroke="#5ad1ff" stroke-width="1.5" stroke-dasharray="4 3" opacity=".7"/>`;
+    xs.forEach((x, i) => { s += `<circle cx="${x}" cy="${ysA[i]}" r="2" fill="#5ad1ff"/>`; });
+  }
+
+  // 메인 라인
+  if (n > 1) {
+    s += `<polyline points="${xs.map((x, i) => `${x},${ys[i]}`).join(' ')}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+  }
+
+  // 데이터 포인트 & X축 레이블 (많으면 격주로)
+  const step = n > 8 ? 2 : 1;
+  xs.forEach((x, i) => {
+    const isLast = i === n - 1;
+    s += `<circle cx="${x}" cy="${ys[i]}" r="${isLast ? 4 : 3}" fill="${color}"/>`;
+    if (i % step === 0 || isLast) {
+      s += `<text x="${x}" y="${H - 6}" font-size="8" fill="#9694b8" text-anchor="middle">${data[i].label}</text>`;
+    }
+  });
+
+  // 마지막값 레이블
+  const lastY = ys[n - 1];
+  const labelY = lastY < padT + 14 ? lastY + 14 : lastY - 6;
+  s += `<text x="${xs[n - 1] + 5}" y="${labelY}" font-size="9" font-weight="700" fill="${color}" text-anchor="start">${vals[n - 1]}</text>`;
 
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   svg.innerHTML = s;
@@ -600,13 +699,25 @@ function renderParentScreen() {
 
   let html = '';
 
-  html += `<div class="section-label" style="margin-top:12px;">✅ 승인 대기 (${pending.length}건)</div>`;
-  if (pending.length === 0) {
-    html += `<div style="text-align:center;color:var(--text4);font-size:16px;padding:16px;">승인 대기 중인 퀘스트가 없어요 🎉</div>`;
+  // ① 기본 정보 (최상단)
+  html += `
+    <div class="char-card" style="margin-top:12px;">
+      <div class="char-title">${lvInfo.emoji} ${lvInfo.title}</div>
+      <div class="char-nick">${getDynamicNick()}</div>
+      <div class="day-row"><span>이번주 이행일</span><span>${STATE.weekCycle.completedDays.length}일 / 7일</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:${weekPct}%"></div></div>
+      <div class="progress-label">${weekPct}% — 5일 이상이면 주간 보상!</div>
+    </div>
+  `;
+
+  // ② 승인 대기 — QUEST_POOL에 있는 유효한 항목만 카운트
+  const validPending = pending.filter(p => QUEST_POOL.find(q => q.id === p.questId));
+  html += `<div class="section-label" style="margin-top:18px;">✅ 승인 대기 (${validPending.length}건)</div>`;
+  if (validPending.length === 0) {
+    html += `<div style="text-align:center;color:var(--text4);font-size:15px;padding:14px;">승인 대기 중인 퀘스트가 없습니다.</div>`;
   } else {
-    pending.forEach(p => {
+    validPending.forEach(p => {
       const q = QUEST_POOL.find(q=>q.id===p.questId);
-      if (!q) return;
       html += `
         <div class="approve-row" onclick="showPhotoModal('${p.id}')" style="cursor:pointer;">
           <div class="thumb">${p.photo ? `<img src="${p.photo}">` : q.icon}</div>
@@ -622,33 +733,44 @@ function renderParentScreen() {
     });
   }
 
-  html += `
-    <div class="char-card" style="margin-top:18px;">
-      <div class="char-title">${lvInfo.emoji} ${lvInfo.title}</div>
-      <div class="char-nick">${getDynamicNick()}</div>
-      <div class="day-row"><span>이번주 이행일</span><span>${STATE.weekCycle.completedDays.length}일 / 7일</span></div>
-      <div class="progress-track"><div class="progress-fill" style="width:${weekPct}%"></div></div>
-      <div class="progress-label">${weekPct}% — 5일 이상이면 주간 보상!</div>
-    </div>
-  `;
-
-  const recentLog = [...(STATE.questLog||[])].reverse().slice(0,5);
-  if (recentLog.length > 0) {
-    html += `<div class="section-label">📋 최근 승인 기록</div>`;
+  const seen = new Set();
+  const recentLog = [...(STATE.questLog||[])].reverse().filter(l => {
+    const key = `${l.date}-${l.questId}`;
+    if (seen.has(key)) return false;
+    seen.add(key); return true;
+  }).slice(0,5);
+  html += `<div class="section-label">📋 최근 승인 기록</div>`;
+  if (recentLog.length === 0) {
+    html += `<div style="text-align:center;color:var(--text4);font-size:15px;padding:14px;">승인된 퀘스트 기록이 없습니다.</div>`;
+  } else {
     recentLog.forEach(l => {
       const q = QUEST_POOL.find(q=>q.id===l.questId);
       if (!q) return;
-      html += `<div class="reward-row"><span style="font-size:22px;">${q.icon}</span><span style="flex:1;">${q.name}</span><span style="font-size:14px;color:var(--text3);">${l.date}</span><span class="pt">+${l.pointsAwarded}P</span></div>`;
+      html += `<div class="reward-row">
+        <span style="font-size:22px;">${q.icon}</span>
+        <span style="flex:1;">${q.name}</span>
+        <span style="font-size:14px;color:var(--text3);">${l.date}</span>
+        <span class="pt">+${l.pointsAwarded}P</span>
+        <button onclick="deleteQuestLog('${l.timestamp}')" style="margin-left:8px;background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.4);color:#f87171;font-size:12px;font-weight:700;border-radius:8px;padding:4px 8px;cursor:pointer;">삭제</button>
+      </div>`;
     });
   }
 
   const recentRewards = [...(STATE.rewardHistory||[])].reverse().slice(0,5);
-  if (recentRewards.length > 0) {
-    html += `<div class="section-label">🎁 최근 보상 사용 기록</div>`;
+  html += `<div class="section-label">🎁 최근 보상 사용 기록</div>`;
+  if (recentRewards.length === 0) {
+    html += `<div style="text-align:center;color:var(--text4);font-size:15px;padding:14px;">아직 사용된 보상이 없습니다.</div>`;
+  } else {
     recentRewards.forEach(r => {
       const ptColor = r.pts < 0 ? '#f87171' : 'var(--gold)';
       const ptText = r.pts < 0 ? `${r.pts}P` : `+${r.pts}P`;
-      html += `<div class="reward-row"><span style="font-size:22px;">${r.icon}</span><span style="flex:1;">${r.name}</span><span style="font-size:14px;color:var(--text3);">${r.date}</span><span class="pt" style="color:${ptColor};">${ptText}</span></div>`;
+      html += `<div class="reward-row">
+        <span style="font-size:22px;">${r.icon}</span>
+        <span style="flex:1;">${r.name}</span>
+        <span style="font-size:14px;color:var(--text3);">${r.date}</span>
+        <span class="pt" style="color:${ptColor};">${ptText}</span>
+        <button onclick="deleteRewardLog('${r.timestamp||r.date+r.name}')" style="margin-left:8px;background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.4);color:#f87171;font-size:12px;font-weight:700;border-radius:8px;padding:4px 8px;cursor:pointer;">삭제</button>
+      </div>`;
     });
   }
 
@@ -794,6 +916,29 @@ function previewPhoto(input) {
   };
   reader.readAsDataURL(file);
 }
+function compressImage(dataUrl, maxSize = 800, quality = 0.7) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let w = img.width, h = img.height;
+      if (w > maxSize || h > maxSize) {
+        if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; }
+        else { w = Math.round(w * maxSize / h); h = maxSize; }
+      }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
+function compressImageSmall(dataUrl) {
+  return compressImage(dataUrl, 400, 0.5);
+}
+
 async function submitQuest() {
   if (!activeQuestId) return;
   const q = QUEST_POOL.find(q=>q.id===activeQuestId);
@@ -811,12 +956,12 @@ async function submitQuest() {
     if (pendingPhotoData) {
       showToast('[시스템] 사진 업로드 중...');
       try {
-        // 8초 타임아웃 — Storage hang 방지
-        const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 8000));
-        photoUrl = await Promise.race([uploadPhoto(pendingPhotoData, approvalId), timeout]);
+        const compressed = await compressImage(pendingPhotoData);
+        const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000));
+        photoUrl = await Promise.race([uploadPhoto(compressed, approvalId), timeout]);
       } catch(e) {
-        console.error('[Firebase] 사진 업로드 실패:', e);
-        photoUrl = null; // base64는 Firestore 1MB 한도 초과 → null
+        console.warn('[Firebase] Storage 업로드 실패 — 압축 base64로 저장:', e.message);
+        try { photoUrl = await compressImageSmall(pendingPhotoData); } catch(_) {}
       }
     }
 
@@ -927,6 +1072,37 @@ function rejectQuest(approvalId) {
   }
 }
 
+function deleteQuestLog(timestamp) {
+  if (!confirm('이 퀘스트 기록을 삭제하면 포인트가 차감됩니다. 삭제하시겠습니까?')) return;
+  const ts = Number(timestamp);
+  const idx = (STATE.questLog||[]).findIndex(l => l.timestamp === ts);
+  if (idx === -1) return;
+  const entry = STATE.questLog[idx];
+  // 포인트 원복
+  STATE.profile.points = Math.max(0, (STATE.profile.points||0) - (entry.pointsAwarded||0));
+  STATE.profile.totalEarnedPoints = Math.max(0, (STATE.profile.totalEarnedPoints||0) - (entry.pointsAwarded||0));
+  STATE.questLog.splice(idx, 1);
+  saveState();
+  renderParentScreen();
+  renderTopbar();
+  showToast('[시스템] 기록이 삭제되고 포인트가 원복되었습니다.');
+}
+
+function deleteRewardLog(timestamp) {
+  if (!confirm('이 보상 사용 기록을 삭제하면 포인트가 원복됩니다. 삭제하시겠습니까?')) return;
+  const ts = Number(timestamp);
+  const idx = (STATE.rewardHistory||[]).findIndex(r => r.timestamp === ts || (r.date+r.name) === timestamp);
+  if (idx === -1) return;
+  const entry = STATE.rewardHistory[idx];
+  // 사용된 포인트 원복 (pts가 음수면 그만큼 복구)
+  STATE.profile.points = (STATE.profile.points||0) - (entry.pts||0);
+  STATE.rewardHistory.splice(idx, 1);
+  saveState();
+  renderParentScreen();
+  renderTopbar();
+  showToast('[시스템] 보상 기록이 삭제되고 포인트가 원복되었습니다.');
+}
+
 // ═══════════════════════════════════════
 // GACHA
 // ═══════════════════════════════════════
@@ -975,7 +1151,7 @@ function openGacha() {
   STATE.rewardHistory = STATE.rewardHistory || [];
   const rewardName = physicalReward ? physicalReward.name : `가챠 보상 — ${title}`;
   const rewardIcon = physicalReward ? physicalReward.icon : icon;
-  const gachaReward = {icon: rewardIcon, name: rewardName, pts, date: todayLabel()};
+  const gachaReward = {icon: rewardIcon, name: rewardName, pts, date: todayLabel(), timestamp: Date.now()};
   STATE.rewardHistory.push(gachaReward);
   fbAddReward(gachaReward);
   saveState();
@@ -1005,7 +1181,7 @@ function claimWeeklyReward() {
   STATE.weekCycle.weeklyRewardPending = false;
   STATE.gachaQueue = (STATE.gachaQueue||0) + 3;
   STATE.rewardHistory = STATE.rewardHistory||[];
-  const weekReward = {icon:'🏆', name:'주간 달성 보상', pts, date:todayLabel()};
+  const weekReward = {icon:'🏆', name:'주간 달성 보상', pts, date:todayLabel(), timestamp: Date.now()};
   STATE.rewardHistory.push(weekReward);
   fbAddReward(weekReward);
   saveState();
@@ -1023,7 +1199,7 @@ function purchaseItem(itemId) {
   STATE.purchasedItems = STATE.purchasedItems||[];
   STATE.purchasedItems.push({itemId, date: today()});
   STATE.rewardHistory = STATE.rewardHistory||[];
-  const purchaseReward = {icon:item.icon, name:item.name+' 교환', pts: -item.cost, date:todayLabel()};
+  const purchaseReward = {icon:item.icon, name:item.name+' 교환', pts: -item.cost, date:todayLabel(), timestamp: Date.now()};
   STATE.rewardHistory.push(purchaseReward);
   fbAddReward(purchaseReward);
   saveState();
@@ -1169,6 +1345,16 @@ document.querySelectorAll('.nav-item').forEach(n => {
     if (n.dataset.screen !== 'parent') STATE.parentUnlocked = false;
   });
 });
+
+// 모바일 :active 대체 — iOS Safari는 touchstart 없이 :active 미작동
+document.addEventListener('touchstart', function(e) {
+  const btn = e.target.closest('.pin-key');
+  if (!btn) return;
+  btn.classList.add('pressed');
+  const end = () => { btn.classList.remove('pressed'); btn.removeEventListener('touchend', end); btn.removeEventListener('touchcancel', end); };
+  btn.addEventListener('touchend', end);
+  btn.addEventListener('touchcancel', end);
+}, { passive: true });
 
 // ── START ──
 init();
