@@ -49,7 +49,7 @@
       <!-- 캐릭터 카드 -->
       <div class="char-card" style="margin-top:12px;" id="charCard">
         <div class="mailbox-wrap" id="mailboxWrap">
-          <button class="mailbox-btn" id="mailboxBtn" onclick="">💌</button>
+          <button class="mailbox-btn" id="mailboxBtn" onclick="openMailbox()">💌</button>
         </div>
         <div class="char-top">
           <div class="char-left">
@@ -281,6 +281,29 @@
       <div style="font-size:18px;font-weight:900;color:var(--gold);margin-bottom:10px;" id="eventModalTitle"></div>
       <div style="font-size:14px;color:var(--text2);white-space:normal;line-height:1.7;margin-bottom:20px;" id="eventModalMsg"></div>
       <button class="modal-btn primary" onclick="closeEventModal()">확인!</button>
+    </div>
+  </div>
+
+  <!-- 편지함 모달 -->
+  <div class="modal-overlay hidden" id="mailboxModal" onclick="closeMailboxModal()">
+    <div class="modal-box" onclick="event.stopPropagation()" style="width:92%;max-width:380px;max-height:80vh;display:flex;flex-direction:column;">
+      <!-- 목록 뷰 -->
+      <div id="mailboxListView">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div style="font-size:16px;font-weight:900;color:var(--gold);">💌 수신함</div>
+          <button onclick="closeMailboxModal()" style="background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;">✕</button>
+        </div>
+        <div id="mailboxList" style="overflow-y:auto;max-height:55vh;"></div>
+      </div>
+      <!-- 상세 뷰 -->
+      <div id="mailboxDetailView" class="hidden">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+          <button onclick="showMailboxList()" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;">←</button>
+          <div style="font-size:15px;font-weight:800;color:var(--gold);" id="mailboxDetailTitle"></div>
+        </div>
+        <div style="font-size:13px;color:var(--text2);white-space:pre-line;line-height:1.8;margin-bottom:20px;" id="mailboxDetailMsg"></div>
+        <div style="font-size:11px;color:var(--text4);" id="mailboxDetailDate"></div>
+      </div>
     </div>
   </div>
 

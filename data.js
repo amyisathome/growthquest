@@ -294,6 +294,7 @@ function getDefaultState() {
     gachaQueue:0,      // number of gachas ready to open
     purchasedItems:[],
     parentUnlocked:false,
+    mailbox:[],        // {id, title, msg, date, timestamp, read}
   };
 }
 

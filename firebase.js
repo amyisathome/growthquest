@@ -101,6 +101,7 @@ function _serializeCore(state) {
     todayStory:        p.todayStory          || null,
     purchasedItems:    state.purchasedItems  || [],
     parentUnlocked:    state.parentUnlocked  || false,
+    mailbox:           state.mailbox         || [],
   };
   return { _v: SCHEMA_VERSION, profile, gameState };
 }
@@ -134,6 +135,7 @@ function _deserializeCore(core) {
     bodyReminderCycle: src.bodyReminderCycle || (isLegacy ? (core.bodyReminderCycle||'') : ''),
     purchasedItems:    src.purchasedItems    || (isLegacy ? (core.purchasedItems||[]) : []),
     parentUnlocked:    src.parentUnlocked    || (isLegacy ? (core.parentUnlocked||false) : false),
+    mailbox:           src.mailbox           || [],
     _meta:             core._meta            || { migrations: [] },
   };
 }

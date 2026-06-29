@@ -102,6 +102,14 @@ body{
 .mailbox-wrap{position:absolute;top:10px;right:10px;}
 .mailbox-btn{background:none;border:none;font-size:28px;cursor:pointer;padding:2px;line-height:1;display:block;}
 .mailbox-badge{position:absolute;top:-6px;right:-6px;background:var(--red,#f87171);color:#fff;font-size:11px;font-weight:800;border-radius:999px;min-width:20px;height:20px;line-height:20px;text-align:center;padding:0 4px;border:2px solid var(--bg2,#1a1040);z-index:2;}
+.mailbox-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;margin-bottom:6px;background:var(--bg3,#2a1a5a);transition:background .15s;}
+.mailbox-item:hover{background:var(--bg4,#3a2a6a);}
+.mailbox-item-icon{font-size:24px;flex-shrink:0;}
+.mailbox-item-body{flex:1;min-width:0;}
+.mailbox-item-title{font-size:13px;font-weight:800;color:var(--text1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mailbox-item-date{font-size:11px;color:var(--text4);margin-top:2px;}
+.mailbox-item-unread{width:8px;height:8px;border-radius:50%;background:var(--red,#f87171);flex-shrink:0;}
+.mailbox-empty{text-align:center;color:var(--text4);font-size:14px;padding:32px 0;}
 .char-title{
   font-family:'Press Start 2P',monospace;font-size:10px;
   color:var(--gold);margin-bottom:3px;letter-spacing:.02em;text-shadow:2px 2px 0 #6b3a00;

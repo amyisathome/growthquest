@@ -279,6 +279,7 @@ function render() {
   renderHomeScreen();
   fbSyncGachaQueue().then(() => renderGachaScreen());
   renderReportScreen();
+  renderMailboxBadge();
 }
 
 function renderTopbar() {
@@ -1352,11 +1353,24 @@ function pushEvent(type, vars = {}) {
     showToast(`⬆️ Lv.${vars.nextLv} 달성! 계속 정진하십시오.`);
     return;
   }
-  eventQueue.push({
-    title: fillEventVars(def.title, vars),
-    msg: fillEventVars(def.msg, vars),
-  });
+  const title = fillEventVars(def.title, vars);
+  const msg   = fillEventVars(def.msg, vars);
+  eventQueue.push({ title, msg });
   if (!eventShowing) showNextEvent();
+
+  // 편지함 저장 (subLevelUp 제외, 7일 초과 항목 자동 정리)
+  if (!STATE.mailbox) STATE.mailbox = [];
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 7);
+  STATE.mailbox = STATE.mailbox.filter(m => new Date(m.date) >= cutoff);
+  STATE.mailbox.unshift({
+    id: Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+    title, msg,
+    date: today(),
+    timestamp: Date.now(),
+    read: false,
+  });
+  saveState();
+  renderMailboxBadge();
 }
 
 function showNextEvent() {
@@ -1373,6 +1387,84 @@ function showNextEvent() {
 function closeEventModal() {
   document.getElementById('eventModal').classList.add('hidden');
   showNextEvent();
+}
+
+// ═══════════════════════════════════════
+// MAILBOX
+// ═══════════════════════════════════════
+function renderMailboxBadge() {
+  const unread = (STATE.mailbox || []).filter(m => !m.read).length;
+  let badge = document.getElementById('mailboxBadge');
+  if (!badge) {
+    const wrap = document.getElementById('mailboxWrap');
+    if (!wrap) return;
+    badge = document.createElement('span');
+    badge.id = 'mailboxBadge';
+    badge.className = 'mailbox-badge';
+    wrap.appendChild(badge);
+  }
+  badge.textContent = unread;
+  badge.classList.toggle('hidden', unread === 0);
+}
+
+function openMailbox() {
+  document.getElementById('mailboxModal').classList.remove('hidden');
+  showMailboxList();
+}
+
+function closeMailboxModal() {
+  document.getElementById('mailboxModal').classList.add('hidden');
+}
+
+function showMailboxList() {
+  document.getElementById('mailboxListView').classList.remove('hidden');
+  document.getElementById('mailboxDetailView').classList.add('hidden');
+
+  const list = document.getElementById('mailboxList');
+  const items = STATE.mailbox || [];
+
+  if (items.length === 0) {
+    list.innerHTML = '<div class="mailbox-empty">수신된 메시지가 없습니다</div>';
+    return;
+  }
+
+  list.innerHTML = items.map(m => {
+    const iconMatch = m.title.match(/^(\p{Emoji}[️]?)\s*/u);
+    const icon  = iconMatch ? iconMatch[1] : '📋';
+    const label = m.title.replace(/^(\p{Emoji}[️]?)\s*/u, '');
+    return `
+      <div class="mailbox-item" onclick="openMailboxItem('${m.id}')">
+        <div class="mailbox-item-icon">${icon}</div>
+        <div class="mailbox-item-body">
+          <div class="mailbox-item-title" style="color:${m.read ? 'var(--text3)' : 'var(--text1)'}">${label}</div>
+          <div class="mailbox-item-date">${m.date}</div>
+        </div>
+        ${m.read ? '' : '<div class="mailbox-item-unread"></div>'}
+      </div>`;
+  }).join('');
+}
+
+function openMailboxItem(id) {
+  const item = (STATE.mailbox || []).find(m => m.id === id);
+  if (!item) return;
+
+  // 읽음 처리
+  if (!item.read) {
+    item.read = true;
+    saveState();
+    renderMailboxBadge();
+  }
+
+  const iconMatch = item.title.match(/^(\p{Emoji}[️]?)\s*/u);
+  const icon  = iconMatch ? iconMatch[1] : '📋';
+  const label = item.title.replace(/^(\p{Emoji}[️]?)\s*/u, '');
+
+  document.getElementById('mailboxDetailTitle').textContent = icon + ' ' + label;
+  document.getElementById('mailboxDetailMsg').textContent   = item.msg;
+  document.getElementById('mailboxDetailDate').textContent  = item.date + ' 수신';
+
+  document.getElementById('mailboxListView').classList.add('hidden');
+  document.getElementById('mailboxDetailView').classList.remove('hidden');
 }
 
 // ═══════════════════════════════════════
