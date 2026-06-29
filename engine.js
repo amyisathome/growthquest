@@ -31,6 +31,14 @@ async function loadState() {
       STATE.profile.joinDate = today();
       saveState();
     }
+    // 2026-06-29 삭제 버그로 차감된 200P 1회 복구
+    STATE._meta = STATE._meta || { migrations: [] };
+    if (!STATE._meta.migrations.includes('repair_20260629')) {
+      STATE.profile.points = (STATE.profile.points||0) + 200;
+      STATE.profile.totalEarnedPoints = (STATE.profile.totalEarnedPoints||0) + 200;
+      STATE._meta.migrations.push('repair_20260629');
+      saveState();
+    }
   } else {
     try {
       const raw = localStorage.getItem('growthquest_v2');
@@ -275,7 +283,7 @@ function getDynamicNick() {
 function render() {
   renderTopbar();
   renderHomeScreen();
-  renderGachaScreen();
+  fbSyncGachaQueue().then(() => renderGachaScreen());
   renderReportScreen();
 }
 
@@ -345,15 +353,33 @@ function checkBodyRecordReminder() {
     l.questId === '__record__' && l.date >= cycleStartStr && l.date <= cycleEndStr
   );
   if (hasRecord) return;
+  // 매주 토요일에만 알림
+  if (new Date(today()).getDay() !== 6) return;
   if (STATE.bodyReminderCycle === cycleKey) return;
   STATE.bodyReminderCycle = cycleKey;
   saveState();
   setTimeout(() => pushEvent('bodyRecordReminder'), 1200);
 }
 
+function checkAndGrantDailyGacha() {
+  const t = today();
+  if (STATE.profile.gachaGivenDate === t) return;
+  const {warmup, core, exercise, rare} = getDailyQuests();
+  const todayQuests = [...warmup, ...core, ...exercise, ...rare];
+  if (todayQuests.length === 0) return;
+  const allApproved = todayQuests.every(q => (STATE.questLog||[]).find(l => l.questId === q.id && l.date === t));
+  if (allApproved) {
+    STATE.gachaQueue = (STATE.gachaQueue||0) + 1;
+    STATE.profile.gachaGivenDate = t;
+    saveState();
+    renderTopbar();
+  }
+}
+
 function renderHomeScreen() {
   flushPendingEvents();
   checkBodyRecordReminder();
+  checkAndGrantDailyGacha();
   const pts = STATE.profile.points || 0;
   const totalPts = STATE.profile.totalEarnedPoints || pts;
   const lvInfo = getLevelByPts(totalPts);
@@ -496,9 +522,22 @@ function makeQuestCard(q, status) {
 // ── 가챠 화면 ──
 function renderGachaScreen() {
   const count = STATE.gachaQueue || 0;
-  document.getElementById('gachaCount').textContent = count;
+
+  // 빨간 배지 (선물상자 오른쪽 위)
+  const dot = document.getElementById('gachaCountDot');
+  if (dot) {
+    dot.textContent = count;
+    dot.classList.toggle('hidden', count === 0);
+  }
+
+  // 상자+버튼 vs 빈 메시지 전환
+  const stageEl = document.getElementById('gachaStageWithBox');
+  const emptyEl = document.getElementById('gachaEmptyMsg');
+  if (stageEl) stageEl.classList.toggle('hidden', count === 0);
+  if (emptyEl) emptyEl.classList.toggle('hidden', count > 0);
+
   document.getElementById('gachaBtn').disabled = count === 0;
-  document.getElementById('gachaSection').style.display = count > 0 ? '' : 'none';
+  document.getElementById('gachaSection').style.display = '';
 
   const shopPtsEl = document.getElementById('shopPointsDisplay');
   if (shopPtsEl) shopPtsEl.textContent = ((STATE.profile.points || 0).toLocaleString()) + 'P';
@@ -816,7 +855,7 @@ function doSwitchScreen(name, navEl) {
   }
 
   if (name === 'home') renderHomeScreen();
-  if (name === 'gacha') renderGachaScreen();
+  if (name === 'gacha') { fbSyncGachaQueue().then(() => renderGachaScreen()); }
   if (name === 'report') { renderReportScreen(); setTimeout(drawCharts, 50); }
   if (name === 'parent') { STATE.parentUnlocked = true; renderParentScreen(); }
 }
@@ -1059,6 +1098,7 @@ function approveQuest(approvalId) {
   showToast(`[시스템] 과업 완수가 확인되었습니다. 기여도 +${pts}P가 반영됩니다.`);
   renderParentScreen();
   renderTopbar();
+  renderGachaScreen();
 }
 
 function rejectQuest(approvalId) {
@@ -1082,9 +1122,24 @@ function deleteQuestLog(timestamp) {
   STATE.profile.points = Math.max(0, (STATE.profile.points||0) - (entry.pointsAwarded||0));
   STATE.profile.totalEarnedPoints = Math.max(0, (STATE.profile.totalEarnedPoints||0) - (entry.pointsAwarded||0));
   STATE.questLog.splice(idx, 1);
+  if (entry._fid) fbRemoveQuestLog(entry._fid);
+  else fbRemoveQuestLogByTimestamp(entry.timestamp);
+
+  // 삭제된 퀘스트가 오늘 것이고, 올클리어 보상이 이미 지급됐으면 회수
+  if (entry.date === today() && STATE.profile.gachaGivenDate === today()) {
+    const {warmup, core, exercise, rare} = getDailyQuests();
+    const todayQuests = [...warmup, ...core, ...exercise, ...rare];
+    const stillAllClear = todayQuests.every(q => (STATE.questLog||[]).find(l => l.questId === q.id && l.date === today()));
+    if (!stillAllClear) {
+      STATE.gachaQueue = Math.max(0, (STATE.gachaQueue||0) - 1);
+      STATE.profile.gachaGivenDate = '';
+    }
+  }
+
   saveState();
   renderParentScreen();
   renderTopbar();
+  renderGachaScreen();
   showToast('[시스템] 기록이 삭제되고 포인트가 원복되었습니다.');
 }
 
@@ -1097,6 +1152,7 @@ function deleteRewardLog(timestamp) {
   // 사용된 포인트 원복 (pts가 음수면 그만큼 복구)
   STATE.profile.points = (STATE.profile.points||0) - (entry.pts||0);
   STATE.rewardHistory.splice(idx, 1);
+  if (entry._fid) fbRemoveReward(entry._fid);
   saveState();
   renderParentScreen();
   renderTopbar();

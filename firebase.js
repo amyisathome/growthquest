@@ -1,25 +1,35 @@
 // ==========================================
-// firebase.js — Firebase 연결 및 저장/불러오기
+// firebase.js — Firebase 연결 및 데이터 관리
+// 스키마 버전: 2
 //
-// Firestore 구조:
-//   users/{uid}                         ← 핵심 문서 (bounded)
-//     profile, weekCycle, gachaQueue, purchasedItems, parentUnlocked
-//
-//   users/{uid}/questLog/{auto}         ← 퀘스트 완료 기록 (무한 성장)
-//     questId, date, pointsAwarded, timestamp, photoUrl?
-//
-//   users/{uid}/heights/{date}          ← 키 기록 (날짜 키, upsert)
-//     value, recordedAt
-//
-//   users/{uid}/weights/{date}          ← 몸무게 기록 (날짜 키, upsert)
-//     value, recordedAt
-//
-//   users/{uid}/pendingApprovals/{auto} ← 승인 대기 항목
-//     questId, date, pts, photo, submittedAt
-//
-//   users/{uid}/rewards/{auto}          ← 보상 이력 (무한 성장)
-//     icon, name, pts, date, timestamp
+// ┌─ Firestore 구조 ──────────────────────────────────────────────────┐
+// │  users/{uid}                       ← 핵심 문서                   │
+// │    _v          : number            스키마 버전                    │
+// │    profile     : { name, joinDate, pin }                          │
+// │    gameState   : { points, totalEarnedPoints, totalApproved,      │
+// │                    streak, lastActiveDate, gachaQueue,            │
+// │                    gachaGivenDate, weekCycle, dailyRoll,          │
+// │                    bodyReminderCycle, currentNickname,            │
+// │                    todayStory, purchasedItems, parentUnlocked }   │
+// │    _meta       : { migrations: string[] }  패치 플래그 보관      │
+// │                                                                   │
+// │  users/{uid}/questLog/{auto}                                      │
+// │    questId, date, pointsAwarded, timestamp, photoUrl?             │
+// │                                                                   │
+// │  users/{uid}/bodyMeasurements/{date}   ← 키+몸무게 통합          │
+// │    date, height?, weight?, recordedAt                             │
+// │                                                                   │
+// │  users/{uid}/pendingApprovals/{auto}                              │
+// │    questId, date, photo?, submittedAt                             │
+// │                                                                   │
+// │  users/{uid}/rewards/{auto}           ← 가챠 지급 기록           │
+// │    icon, name, pts, date, timestamp                               │
+// └───────────────────────────────────────────────────────────────────┘
 // ==========================================
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
 
 const firebaseConfig = {
   apiKey: "AIzaSyBnzNIwNZWST0LQr3ujcwdUtbtPwdm_lt0",
@@ -35,19 +45,26 @@ firebase.initializeApp(firebaseConfig);
 const db      = firebase.firestore();
 const storage = firebase.storage();
 
+const SCHEMA_VERSION = 2;
+
+// ═══════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════
+
 function getUid() {
   return localStorage.getItem('gq_user_name') || '';
 }
-
 function setUid(name) {
   localStorage.setItem('gq_user_name', name);
 }
-
 function userRef() {
   return db.collection('users').doc(getUid());
 }
 
-// ── 이름으로 유저 존재 여부 확인 ──
+// ═══════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════
+
 async function fbCheckUserExists(name) {
   try {
     const doc = await db.collection('users').doc(name).get();
@@ -55,176 +72,335 @@ async function fbCheckUserExists(name) {
   } catch(e) { return false; }
 }
 
-// ── 핵심 상태 저장 (profile, weekCycle 등 bounded 데이터만) ──
+// ═══════════════════════════════════════
+// CORE STATE — 저장 / 불러오기
+// ═══════════════════════════════════════
+
+// STATE → 핵심 문서 직렬화
+function _serializeCore(state) {
+  const p = state.profile || {};
+  // profile: 유저 기본정보만
+  const profile = {
+    name:             p.name             || '',
+    joinDate:         p.joinDate         || '',
+    pin:              p.pin              || '',
+  };
+  // gameState: 게임 진행 상태 전체
+  const gameState = {
+    points:            p.points            || 0,
+    totalEarnedPoints: p.totalEarnedPoints  || 0,
+    totalApproved:     p.totalApproved      || 0,
+    streak:            p.streak             || 0,
+    lastActiveDate:    p.lastActiveDate      || '',
+    gachaQueue:        state.gachaQueue      || 0,
+    gachaGivenDate:    p.gachaGivenDate      || '',
+    weekCycle:         state.weekCycle       || {},
+    dailyRoll:         state.dailyRoll       || null,
+    bodyReminderCycle: state.bodyReminderCycle || '',
+    currentNickname:   p.currentNickname     || null,
+    todayStory:        p.todayStory          || null,
+    purchasedItems:    state.purchasedItems  || [],
+    parentUnlocked:    state.parentUnlocked  || false,
+  };
+  return { _v: SCHEMA_VERSION, profile, gameState };
+}
+
+// 핵심 문서 → STATE 역직렬화 (구버전 호환 포함)
+function _deserializeCore(core) {
+  const gs = core.gameState || {};
+  const p  = core.profile   || {};
+
+  // 구버전(v1): profile에 게임 상태가 섞여있던 형태
+  const isLegacy = !core.gameState;
+  const src = isLegacy ? (core.profile || core) : gs;
+
+  return {
+    profile: {
+      name:              p.name              || core.name              || '',
+      joinDate:          p.joinDate          || core.joinDate          || '',
+      pin:               p.pin               || core.pin               || '',
+      points:            src.points            || 0,
+      totalEarnedPoints: src.totalEarnedPoints  || 0,
+      totalApproved:     src.totalApproved      || 0,
+      streak:            src.streak             || 0,
+      lastActiveDate:    src.lastActiveDate      || '',
+      gachaGivenDate:    src.gachaGivenDate      || '',
+      currentNickname:   src.currentNickname     || null,
+      todayStory:        src.todayStory          || null,
+    },
+    gachaQueue:        src.gachaQueue        || (isLegacy ? (core.gachaQueue||0) : 0),
+    weekCycle:         src.weekCycle         || (isLegacy ? (core.weekCycle||{}) : {}),
+    dailyRoll:         src.dailyRoll         || (isLegacy ? (core.dailyRoll||null) : null),
+    bodyReminderCycle: src.bodyReminderCycle || (isLegacy ? (core.bodyReminderCycle||'') : ''),
+    purchasedItems:    src.purchasedItems    || (isLegacy ? (core.purchasedItems||[]) : []),
+    parentUnlocked:    src.parentUnlocked    || (isLegacy ? (core.parentUnlocked||false) : false),
+    _meta:             core._meta            || { migrations: [] },
+  };
+}
+
 async function fbSaveState(state) {
   try {
-    const core = {
-      profile:        state.profile        || {},
-      weekCycle:      state.weekCycle      || {},
-      gachaQueue:     state.gachaQueue     || 0,
-      purchasedItems: state.purchasedItems || [],
-      parentUnlocked: state.parentUnlocked || false,
-    };
+    const core = _serializeCore(state);
+    // _meta 병합 (migrations 플래그 보존)
+    core._meta = state._meta || { migrations: [] };
     await userRef().set(core);
-  } catch (e) {
+  } catch(e) {
     console.error('[Firebase] 저장 실패:', e);
   }
 }
 
-// ── 전체 상태 불러오기 (서브컬렉션 포함) ──
+// gachaQueue만 재확인 (기기 간 동기화 — 높은 값 우선)
+async function fbSyncGachaQueue() {
+  try {
+    const doc = await userRef().get();
+    if (doc.exists) {
+      const core = doc.data();
+      const q = (core.gameState ? core.gameState.gachaQueue : core.gachaQueue) || 0;
+      if (q > (STATE.gachaQueue || 0)) STATE.gachaQueue = q;
+    }
+  } catch(e) {}
+}
+
 async function fbLoadState() {
   try {
     const ref = userRef();
-    const [coreDoc, questSnap, heightSnap, weightSnap, pendingSnap, rewardSnap] = await Promise.all([
+    const [coreDoc, questSnap, measureSnap, pendingSnap, rewardSnap,
+           heightSnapLegacy, weightSnapLegacy] = await Promise.all([
       ref.get(),
       ref.collection('questLog').orderBy('timestamp').get(),
-      ref.collection('heights').orderBy('date').get(),
-      ref.collection('weights').orderBy('date').get(),
+      ref.collection('bodyMeasurements').orderBy('date').get(),
       ref.collection('pendingApprovals').orderBy('submittedAt').get(),
       ref.collection('rewards').orderBy('timestamp', 'desc').limit(100).get(),
+      // 구버전 컬렉션 — 남아있으면 마이그레이션
+      ref.collection('heights').orderBy('date').get(),
+      ref.collection('weights').orderBy('date').get(),
     ]);
 
     if (!coreDoc.exists) return null;
 
     const core = coreDoc.data();
 
-    // 구버전 마이그레이션: 루트 문서에 배열이 있으면 서브컬렉션으로 이전
-    if (Array.isArray(core.questLog) && core.questLog.length > 0) {
-      await _migrateOldData(ref, core);
-      return fbLoadState(); // 마이그레이션 후 재로드
+    // 구버전 v1 마이그레이션 (루트 배열 or heights/weights 컬렉션 분리)
+    const needsMigration =
+      (Array.isArray(core.questLog) && core.questLog.length > 0) ||
+      heightSnapLegacy.docs.length > 0 ||
+      weightSnapLegacy.docs.length > 0;
+    if (needsMigration) {
+      await _migrate(ref, core, heightSnapLegacy, weightSnapLegacy);
+      return fbLoadState();
     }
 
+    // bodyMeasurements: { date → { height, weight } }
+    const bodyMeasurements = {};
+    measureSnap.docs.forEach(d => { bodyMeasurements[d.id] = d.data(); });
+
+    // height/weight 히스토리를 기존 구조로 변환 (engine.js 호환)
+    const heightHistory = Object.values(bodyMeasurements)
+      .filter(m => m.height != null)
+      .map(m => ({ date: m.date, value: m.height }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+    const weightHistory = Object.values(bodyMeasurements)
+      .filter(m => m.weight != null)
+      .map(m => ({ date: m.date, value: m.weight }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    const deserialized = _deserializeCore(core);
+
     return {
-      ...core,
+      ...deserialized,
       questLog:         questSnap.docs.map(d => ({ ...d.data(), _fid: d.id })),
-      heightHistory:    heightSnap.docs.map(d => d.data()),
-      weightHistory:    weightSnap.docs.map(d => d.data()),
+      heightHistory,
+      weightHistory,
       pendingApprovals: pendingSnap.docs.map(d => ({ ...d.data(), id: d.id })),
-      rewardHistory:    rewardSnap.docs.map(d => d.data()).reverse(),
+      rewardHistory:    rewardSnap.docs.map(d => ({ ...d.data(), _fid: d.id })).reverse(),
     };
-  } catch (e) {
+  } catch(e) {
     console.error('[Firebase] 불러오기 실패:', e);
     return null;
   }
 }
 
-// ── 구버전 → 신버전 마이그레이션 ──
-async function _migrateOldData(ref, old) {
+// ═══════════════════════════════════════
+// MIGRATIONS
+// ═══════════════════════════════════════
+
+async function _migrate(ref, core, heightSnap, weightSnap) {
   try {
     const batch = db.batch();
 
-    (old.questLog || []).forEach(entry => {
+    // 루트 배열 → 서브컬렉션 (v0 → v1)
+    (core.questLog || []).forEach(e => {
       batch.set(ref.collection('questLog').doc(), {
-        questId: entry.questId, date: entry.date,
-        pointsAwarded: entry.pointsAwarded, timestamp: entry.timestamp || Date.now(),
+        questId: e.questId, date: e.date,
+        pointsAwarded: e.pointsAwarded, timestamp: e.timestamp || Date.now(),
       });
     });
-    (old.heightHistory || []).forEach(h => {
-      batch.set(ref.collection('heights').doc(h.date), { value: h.value, date: h.date, recordedAt: Date.now() });
-    });
-    (old.weightHistory || []).forEach(w => {
-      batch.set(ref.collection('weights').doc(w.date), { value: w.value, date: w.date, recordedAt: Date.now() });
-    });
-    (old.pendingApprovals || []).forEach(p => {
+    (core.pendingApprovals || []).forEach(p => {
       batch.set(ref.collection('pendingApprovals').doc(), {
         questId: p.questId, date: p.date || '', pts: p.pts || 0,
         photo: p.photo || null, submittedAt: p.submittedAt || '',
       });
     });
-    (old.rewardHistory || []).forEach(r => {
+    (core.rewardHistory || []).forEach(r => {
       batch.set(ref.collection('rewards').doc(), {
         icon: r.icon, name: r.name, pts: r.pts, date: r.date, timestamp: Date.now(),
       });
     });
 
-    // 구버전 배열 필드 루트 문서에서 제거
-    batch.update(ref, {
-      questLog: firebase.firestore.FieldValue.delete(),
-      heightHistory: firebase.firestore.FieldValue.delete(),
-      weightHistory: firebase.firestore.FieldValue.delete(),
-      pendingApprovals: firebase.firestore.FieldValue.delete(),
-      rewardHistory: firebase.firestore.FieldValue.delete(),
+    // heights + weights → bodyMeasurements (v1 → v2)
+    const merged = {};
+    heightSnap.docs.forEach(d => {
+      const data = d.data();
+      merged[data.date] = { ...(merged[data.date]||{}), date: data.date, height: data.value, recordedAt: data.recordedAt || Date.now() };
+    });
+    weightSnap.docs.forEach(d => {
+      const data = d.data();
+      merged[data.date] = { ...(merged[data.date]||{}), date: data.date, weight: data.value, recordedAt: data.recordedAt || Date.now() };
+    });
+    Object.entries(merged).forEach(([date, m]) => {
+      batch.set(ref.collection('bodyMeasurements').doc(date), m);
     });
 
+    // 구버전 heights/weights 컬렉션 삭제
+    heightSnap.docs.forEach(d => batch.delete(d.ref));
+    weightSnap.docs.forEach(d => batch.delete(d.ref));
+
+    // 루트 문서 구버전 배열 필드 제거
+    const legacyFields = ['questLog','heightHistory','weightHistory','pendingApprovals','rewardHistory'];
+    const toDelete = {};
+    legacyFields.forEach(f => { if (core[f]) toDelete[f] = firebase.firestore.FieldValue.delete(); });
+    if (Object.keys(toDelete).length > 0) batch.update(ref, toDelete);
+
     await batch.commit();
-    console.log('[Firebase] 구버전 데이터 마이그레이션 완료');
-  } catch (e) {
+    console.log('[Firebase] 마이그레이션 완료 (v2)');
+  } catch(e) {
     console.error('[Firebase] 마이그레이션 실패:', e);
   }
 }
 
-// ── 퀘스트 완료 기록 추가 ──
+// ═══════════════════════════════════════
+// QUEST LOG
+// ═══════════════════════════════════════
+
 async function fbAddQuestLog(entry) {
   try {
     await userRef().collection('questLog').add({
-      questId: entry.questId, date: entry.date,
-      pointsAwarded: entry.pointsAwarded, timestamp: entry.timestamp,
-      photoUrl: entry.photoUrl || null,
+      questId:       entry.questId,
+      date:          entry.date,
+      pointsAwarded: entry.pointsAwarded,
+      timestamp:     entry.timestamp,
+      photoUrl:      entry.photoUrl || null,
     });
-  } catch (e) { console.error('[Firebase] questLog 저장 실패:', e); }
+  } catch(e) { console.error('[Firebase] questLog 추가 실패:', e); }
 }
 
-// ── 키 기록 저장 (날짜 키 upsert) ──
+async function fbRemoveQuestLog(fid) {
+  try {
+    await userRef().collection('questLog').doc(fid).delete();
+  } catch(e) { console.error('[Firebase] questLog 삭제 실패:', e); }
+}
+
+async function fbRemoveQuestLogByTimestamp(ts) {
+  try {
+    const snap = await userRef().collection('questLog').where('timestamp', '==', ts).get();
+    const batch = db.batch();
+    snap.docs.forEach(d => batch.delete(d.ref));
+    if (snap.docs.length > 0) await batch.commit();
+  } catch(e) { console.error('[Firebase] questLog timestamp 삭제 실패:', e); }
+}
+
+// ═══════════════════════════════════════
+// BODY MEASUREMENTS (키/몸무게 통합)
+// ═══════════════════════════════════════
+
 async function fbSetHeight(date, value) {
   try {
-    await userRef().collection('heights').doc(date).set({ value, date, recordedAt: Date.now() });
-  } catch (e) { console.error('[Firebase] height 저장 실패:', e); }
+    await userRef().collection('bodyMeasurements').doc(date).set(
+      { date, height: value, recordedAt: Date.now() },
+      { merge: true }
+    );
+  } catch(e) { console.error('[Firebase] height 저장 실패:', e); }
 }
 
-// ── 몸무게 기록 저장 (날짜 키 upsert) ──
 async function fbSetWeight(date, value) {
   try {
-    await userRef().collection('weights').doc(date).set({ value, date, recordedAt: Date.now() });
-  } catch (e) { console.error('[Firebase] weight 저장 실패:', e); }
+    await userRef().collection('bodyMeasurements').doc(date).set(
+      { date, weight: value, recordedAt: Date.now() },
+      { merge: true }
+    );
+  } catch(e) { console.error('[Firebase] weight 저장 실패:', e); }
 }
 
-// ── 승인 대기 항목 추가 → Firestore 문서 ID 반환 ──
+// ═══════════════════════════════════════
+// PENDING APPROVALS
+// ═══════════════════════════════════════
+
 async function fbAddPendingApproval(entry) {
   try {
     const doc = await userRef().collection('pendingApprovals').add({
-      questId: entry.questId, date: entry.date,
-      pts: entry.pts || 0, photo: entry.photo || null,
+      questId:     entry.questId,
+      date:        entry.date,
+      pts:         entry.pts     || 0,
+      photo:       entry.photo   || null,
       submittedAt: entry.submittedAt || '',
     });
     return doc.id;
-  } catch (e) {
-    console.error('[Firebase] pendingApproval 저장 실패:', e);
+  } catch(e) {
+    console.error('[Firebase] pendingApproval 추가 실패:', e);
     return null;
   }
 }
 
-// ── 승인 대기 항목 삭제 ──
 async function fbRemovePendingApproval(firestoreId) {
   try {
     await userRef().collection('pendingApprovals').doc(firestoreId).delete();
-  } catch (e) { console.error('[Firebase] pendingApproval 삭제 실패:', e); }
+  } catch(e) { console.error('[Firebase] pendingApproval 삭제 실패:', e); }
 }
 
-// ── 보상 이력 추가 ──
+// ═══════════════════════════════════════
+// REWARDS (가챠 지급 기록)
+// ═══════════════════════════════════════
+
 async function fbAddReward(entry) {
   try {
     await userRef().collection('rewards').add({
-      icon: entry.icon, name: entry.name,
-      pts: entry.pts, date: entry.date,
+      icon:      entry.icon,
+      name:      entry.name,
+      pts:       entry.pts,
+      date:      entry.date,
       timestamp: Date.now(),
     });
-  } catch (e) { console.error('[Firebase] reward 저장 실패:', e); }
+  } catch(e) { console.error('[Firebase] reward 추가 실패:', e); }
 }
 
-// ── 유저 데이터 전체 초기화 ──
+async function fbRemoveReward(fid) {
+  try {
+    await userRef().collection('rewards').doc(fid).delete();
+  } catch(e) { console.error('[Firebase] reward 삭제 실패:', e); }
+}
+
+// ═══════════════════════════════════════
+// ADMIN — 전체 초기화
+// ═══════════════════════════════════════
+
 async function fbResetUser() {
   const ref = userRef();
-  const collections = ['questLog', 'heights', 'weights', 'pendingApprovals', 'rewards'];
+  const collections = ['questLog', 'bodyMeasurements', 'pendingApprovals', 'rewards',
+                       'heights', 'weights']; // heights/weights: 구버전 잔존 대비
   for (const col of collections) {
     const snap = await ref.collection(col).get();
+    if (snap.docs.length === 0) continue;
     const batch = db.batch();
-    snap.docs.forEach(doc => batch.delete(doc.ref));
-    if (snap.docs.length > 0) await batch.commit();
+    snap.docs.forEach(d => batch.delete(d.ref));
+    await batch.commit();
   }
   await ref.delete();
 }
 
-// ── 인증 사진 Storage 업로드 ──
+// ═══════════════════════════════════════
+// PHOTO UPLOAD
+// ═══════════════════════════════════════
+
 async function uploadPhoto(dataUrl, approvalId) {
   const ref = storage.ref(`photos/${getUid()}/${approvalId}`);
   await ref.putString(dataUrl, 'data_url');

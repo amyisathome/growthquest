@@ -206,7 +206,10 @@ body{
 }
 .gacha-box:active{transform:scale(.95);}
 .gacha-box.spin{animation:gacha-spin .6s ease-out;}
-.gacha-count-badge{background:linear-gradient(var(--purple),var(--violet));border:2px solid var(--border);box-shadow:2px 2px 0 var(--border);color:#fff;font-weight:700;font-size:14px;padding:4px 14px;margin-bottom:12px;}
+.gacha-box-wrap{position:relative;display:inline-block;margin-bottom:18px;}
+.gacha-box-wrap .gacha-box{margin-bottom:0;}
+.gacha-count-dot{position:absolute;top:-10px;right:-10px;background:var(--red,#f87171);color:#fff;font-size:13px;font-weight:800;border-radius:999px;min-width:26px;height:26px;line-height:26px;text-align:center;padding:0 6px;border:2.5px solid var(--bg2,#1a1040);z-index:2;}
+.gacha-empty-msg{text-align:center;color:var(--text4);font-size:15px;padding:28px 0;}
 .gacha-cta{
   position:relative;background:linear-gradient(var(--purple),var(--violet));
   color:#fff;font-weight:700;font-size:14px;font-family:'Noto Sans KR',sans-serif;

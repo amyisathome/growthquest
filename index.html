@@ -127,15 +127,18 @@
   <div class="screen" id="screen-gacha">
     <div class="scrollarea">
       <div id="gachaSection">
-      <div class="section-label" style="margin-top:12px;">🎰 가챠 보상함</div>
-      <div class="gacha-stage">
-        <div class="gacha-box" id="gachaBox" onclick="openGacha()">🎁</div>
-        <div class="gacha-count-badge">대기 중인 보상 <span id="gachaCount">0</span>개</div>
+      <div class="section-label" style="margin-top:12px;">🎁 보상함</div>
+      <div class="gacha-stage" id="gachaStageWithBox">
+        <div class="gacha-box-wrap">
+          <div class="gacha-box" id="gachaBox" onclick="openGacha()">🎁</div>
+          <span class="gacha-count-dot hidden" id="gachaCountDot">0</span>
+        </div>
         <div id="gachaResult" class="gacha-result hidden"></div>
         <button class="gacha-cta" id="gachaBtn" onclick="openGacha()">보급품 수령!</button>
       </div>
+      <div class="gacha-empty-msg hidden" id="gachaEmptyMsg">보상함이 비어있습니다</div>
       </div>
-      <div class="section-label">🛒 보상 상점</div>
+      <div class="section-label">🛒 PX 상점</div>
       <div style="font-size:13px;color:var(--text3);margin:-6px 0 10px 2px;text-align:right;">잔여 포인트: <span id="shopPointsDisplay" style="color:var(--gold);font-weight:700;"></span></div>
       <div id="shopList"></div>
       <div class="section-label" style="margin-top:40px;">📋 최근 보상 기록</div>
@@ -202,10 +205,8 @@
       <span class="nav-icon"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" fill="currentColor"/></svg></span>홈
     </div>
     <div class="nav-item" data-screen="gacha" onclick="switchScreen('gacha',this)" style="position:relative;">
-      <span class="nav-icon" style="position:relative;">
-        <svg width="24" height="24" viewBox="0 0 24 24"><path d="M3 8h18v12H3z" fill="currentColor"/><path d="M3 8l2-3h14l2 3M11 8h2v4h-2z" fill="currentColor" opacity=".6"/></svg>
-        <span id="gachaBadge" style="display:none;position:absolute;top:-4px;right:-6px;background:var(--red,#f87171);color:#fff;font-size:10px;font-weight:800;border-radius:999px;min-width:16px;height:16px;line-height:16px;text-align:center;padding:0 3px;"></span>
-      </span>보상함
+      <span class="nav-icon"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M3 8h18v12H3z" fill="currentColor"/><path d="M3 8l2-3h14l2 3M11 8h2v4h-2z" fill="currentColor" opacity=".6"/></svg></span>보상함
+      <span id="gachaBadge" style="display:none;position:absolute;top:0px;right:50%;transform:translateX(22px);background:var(--red,#f87171);color:#fff;font-size:10px;font-weight:800;border-radius:999px;min-width:16px;height:16px;line-height:16px;text-align:center;padding:0 3px;"></span>
     </div>
     <div class="nav-item" data-screen="report" onclick="switchScreen('report',this)">
       <span class="nav-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4h9l3 3v13H6z"/><path d="M9 9h6M9 13h6"/></svg></span>리포트
