@@ -258,16 +258,23 @@ const NICK_PATTERNS = {
 
 // 주간 카테고리별 완료 횟수(예: {warmup:2, core:5, exercise:1, rare:0})를 받아
 // 닉네임 1개를 결정. 주간 총 활동이 3회 미만이면 null(칭호 부여 보류, 기본 칭호로 대체)
-function getWeeklyNickname(categoryCounts) {
+// 주 시작일을 시드로 사용 — 같은 주는 항상 같은 닉네임
+function _seededInt(seed, max) {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = Math.imul(31, h) + seed.charCodeAt(i) | 0;
+  return Math.abs(h) % max;
+}
+function getWeeklyNickname(categoryCounts, weekSeed) {
   const total = Object.values(categoryCounts).reduce((a,b)=>a+b, 0);
   if (total < 3) return null;
   const maxCount = Math.max(...Object.values(categoryCounts));
   const topCats = Object.entries(categoryCounts)
     .filter(([,count]) => count === maxCount)
     .map(([cat]) => cat);
-  const chosenCat = topCats[Math.floor(Math.random() * topCats.length)]; // 동률 시 랜덤
+  const seed = weekSeed || 'default';
+  const chosenCat = topCats[_seededInt(seed, topCats.length)];
   const pool = NICK_PATTERNS[chosenCat];
-  return pool[Math.floor(Math.random() * pool.length)];
+  return pool[_seededInt(seed + chosenCat, pool.length)];
 }
 
 // 이전 주 칭호와 비교해 변경됐을 때만 true 반환 (true일 때 EVENT_MESSAGES.newNickname 팝업 트리거)

@@ -255,7 +255,8 @@ function getDynamicNick() {
 
   // 이번 주 칭호가 아직 없을 때만 새로 뽑아서 저장 (확정 후 고정)
   if (!STATE.profile.currentNickname) {
-    const newNick = getWeeklyNickname(catCount);
+    const weekSeed = STATE.weekCycle?.startDate || today();
+    const newNick = getWeeklyNickname(catCount, weekSeed);
     if (newNick) {
       pushEvent('newNickname', { nickname: newNick });
       STATE.profile.currentNickname = newNick;
