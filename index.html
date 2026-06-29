@@ -276,6 +276,19 @@
   </div>
 
   <!-- 토스트 -->
+  <!-- 사진 확인 모달 -->
+  <div class="modal-overlay center hidden" id="photoModal" onclick="closePhotoModal()">
+    <div class="modal-box" onclick="event.stopPropagation()" style="width:90%;max-width:360px;">
+      <div style="font-size:16px;font-weight:800;color:var(--gold);margin-bottom:12px;" id="photoModalTitle"></div>
+      <img id="photoModalImg" src="" style="width:100%;border-radius:10px;margin-bottom:12px;display:none;">
+      <div id="photoModalNoImg" style="text-align:center;font-size:40px;padding:24px;display:none;">📷<br><span style="font-size:14px;color:var(--text3);">등록된 사진 없음</span></div>
+      <div style="display:flex;gap:8px;">
+        <button id="photoModalReject" style="flex:1;background:#c0392b;color:#fff;font-size:15px;font-weight:700;border:none;border-radius:10px;padding:10px;cursor:pointer;">✕ 거절</button>
+        <button id="photoModalApprove" style="flex:2;background:linear-gradient(135deg,var(--purple),var(--violet));color:#fff;font-size:15px;font-weight:700;border:none;border-radius:10px;padding:10px;cursor:pointer;">✓ 승인</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toastPopup"></div>
 </div>
 

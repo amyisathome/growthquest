@@ -158,9 +158,10 @@ const SHOP_ITEMS = {
   daily: [ // 즉시소비형 — 자주, 소액으로 구매
     {id:'s1', icon:'🎮', name:'게임 추가 1시간', cost:1000, desc:'오늘 하루 게임 1시간 추가'},
     {id:'s2', icon:'📺', name:'TV 추가 1시간', cost:800, desc:'오늘 하루 TV 시청 1시간 추가'},
+    {id:'s5', icon:'🤸', name:'엄마와 놀기 1시간', cost:1000, desc:'엄마와 함께 1시간 놀기 찬스'},
   ],
   mid: [ // 중기목표형 — 모아서 구매
-    {id:'s3', icon:'💸', name:'게임 현질 5,000원', cost:5000, desc:'한 달 최대 30,000원'},
+    {id:'s3', icon:'💸', name:'게임 현질 2,500원', cost:5000, desc:'한 달 최대 30,000원'},
   ],
   final: [ // 최종목표형 — 장기 목표
     {id:'s4', icon:'🐹', name:'햄스터', cost:50000, desc:'🏆 최종 목표 보상! 함께 키우자!'},
@@ -172,41 +173,41 @@ const SHOP_ITEMS = {
 // 구간 폭이 뒤로 갈수록 넓어지는 곡선(초반엔 자주 레벨업, 후반엔 꾸준함 요구)
 const LEVEL_TABLE = [
   // 성장 훈련병 (1~5)
-  {lv:1,  minPts:0,     maxPts:299,    title:'성장 훈련병', emoji:'🌱'},
-  {lv:2,  minPts:300,   maxPts:599,    title:'성장 훈련병', emoji:'🌱'},
-  {lv:3,  minPts:600,   maxPts:899,    title:'성장 훈련병', emoji:'🌱'},
-  {lv:4,  minPts:900,   maxPts:1199,   title:'성장 훈련병', emoji:'🌱'},
-  {lv:5,  minPts:1200,  maxPts:1499,   title:'성장 훈련병', emoji:'🌱'},
+  {lv:1,  minPts:0,      maxPts:999,    title:'성장 훈련병', emoji:'🌱'},
+  {lv:2,  minPts:1000,   maxPts:2499,   title:'성장 훈련병', emoji:'🌱'},
+  {lv:3,  minPts:2500,   maxPts:4499,   title:'성장 훈련병', emoji:'🌱'},
+  {lv:4,  minPts:4500,   maxPts:6999,   title:'성장 훈련병', emoji:'🌱'},
+  {lv:5,  minPts:7000,   maxPts:9999,   title:'성장 훈련병', emoji:'🌱'},
   // 성장 이병 (6~10)
-  {lv:6,  minPts:1500,  maxPts:2199,   title:'성장 이병',   emoji:'🌿'},
-  {lv:7,  minPts:2200,  maxPts:2899,   title:'성장 이병',   emoji:'🌿'},
-  {lv:8,  minPts:2900,  maxPts:3599,   title:'성장 이병',   emoji:'🌿'},
-  {lv:9,  minPts:3600,  maxPts:4299,   title:'성장 이병',   emoji:'🌿'},
-  {lv:10, minPts:4300,  maxPts:4999,   title:'성장 이병',   emoji:'🌿'},
+  {lv:6,  minPts:10000,  maxPts:13499,  title:'성장 이병',   emoji:'🌿'},
+  {lv:7,  minPts:13500,  maxPts:17499,  title:'성장 이병',   emoji:'🌿'},
+  {lv:8,  minPts:17500,  maxPts:21999,  title:'성장 이병',   emoji:'🌿'},
+  {lv:9,  minPts:22000,  maxPts:26999,  title:'성장 이병',   emoji:'🌿'},
+  {lv:10, minPts:27000,  maxPts:32499,  title:'성장 이병',   emoji:'🌿'},
   // 성장 일병 (11~15)
-  {lv:11, minPts:5000,  maxPts:6399,   title:'성장 일병',   emoji:'⚡'},
-  {lv:12, minPts:6400,  maxPts:7799,   title:'성장 일병',   emoji:'⚡'},
-  {lv:13, minPts:7800,  maxPts:9199,   title:'성장 일병',   emoji:'⚡'},
-  {lv:14, minPts:9200,  maxPts:10599,  title:'성장 일병',   emoji:'⚡'},
-  {lv:15, minPts:10600, maxPts:11999,  title:'성장 일병',   emoji:'⚡'},
+  {lv:11, minPts:32500,  maxPts:38499,  title:'성장 일병',   emoji:'⚡'},
+  {lv:12, minPts:38500,  maxPts:44999,  title:'성장 일병',   emoji:'⚡'},
+  {lv:13, minPts:45000,  maxPts:51999,  title:'성장 일병',   emoji:'⚡'},
+  {lv:14, minPts:52000,  maxPts:59499,  title:'성장 일병',   emoji:'⚡'},
+  {lv:15, minPts:59500,  maxPts:67499,  title:'성장 일병',   emoji:'⚡'},
   // 성장 상병 (16~20)
-  {lv:16, minPts:12000, maxPts:14599,  title:'성장 상병',   emoji:'🌙'},
-  {lv:17, minPts:14600, maxPts:17199,  title:'성장 상병',   emoji:'🌙'},
-  {lv:18, minPts:17200, maxPts:19799,  title:'성장 상병',   emoji:'🌙'},
-  {lv:19, minPts:19800, maxPts:22399,  title:'성장 상병',   emoji:'🌙'},
-  {lv:20, minPts:22400, maxPts:24999,  title:'성장 상병',   emoji:'🌙'},
+  {lv:16, minPts:67500,  maxPts:75999,  title:'성장 상병',   emoji:'🌙'},
+  {lv:17, minPts:76000,  maxPts:84999,  title:'성장 상병',   emoji:'🌙'},
+  {lv:18, minPts:85000,  maxPts:94499,  title:'성장 상병',   emoji:'🌙'},
+  {lv:19, minPts:94500,  maxPts:104499, title:'성장 상병',   emoji:'🌙'},
+  {lv:20, minPts:104500, maxPts:114999, title:'성장 상병',   emoji:'🌙'},
   // 성장 병장 (21~25)
-  {lv:21, minPts:25000, maxPts:29999,  title:'성장 병장',   emoji:'🌟'},
-  {lv:22, minPts:30000, maxPts:34999,  title:'성장 병장',   emoji:'🌟'},
-  {lv:23, minPts:35000, maxPts:39999,  title:'성장 병장',   emoji:'🌟'},
-  {lv:24, minPts:40000, maxPts:44999,  title:'성장 병장',   emoji:'🌟'},
-  {lv:25, minPts:45000, maxPts:49999,  title:'성장 병장',   emoji:'🌟'},
+  {lv:21, minPts:115000, maxPts:125999, title:'성장 병장',   emoji:'🌟'},
+  {lv:22, minPts:126000, maxPts:137499, title:'성장 병장',   emoji:'🌟'},
+  {lv:23, minPts:137500, maxPts:149499, title:'성장 병장',   emoji:'🌟'},
+  {lv:24, minPts:149500, maxPts:161999, title:'성장 병장',   emoji:'🌟'},
+  {lv:25, minPts:162000, maxPts:174999, title:'성장 병장',   emoji:'🌟'},
   // 전설의 정예병 (26~30, 마지막 구간은 상한 없음)
-  {lv:26, minPts:50000, maxPts:59999,  title:'전설의 정예병', emoji:'👑'},
-  {lv:27, minPts:60000, maxPts:69999,  title:'전설의 정예병', emoji:'👑'},
-  {lv:28, minPts:70000, maxPts:79999,  title:'전설의 정예병', emoji:'👑'},
-  {lv:29, minPts:80000, maxPts:89999,  title:'전설의 정예병', emoji:'👑'},
-  {lv:30, minPts:90000, maxPts:Infinity, title:'전설의 정예병', emoji:'👑'},
+  {lv:26, minPts:175000, maxPts:188499, title:'전설의 정예병', emoji:'👑'},
+  {lv:27, minPts:188500, maxPts:202499, title:'전설의 정예병', emoji:'👑'},
+  {lv:28, minPts:202500, maxPts:216999, title:'전설의 정예병', emoji:'👑'},
+  {lv:29, minPts:217000, maxPts:231999, title:'전설의 정예병', emoji:'👑'},
+  {lv:30, minPts:232000, maxPts:Infinity, title:'전설의 정예병', emoji:'👑'},
 ];
 function getLevelByPts(pts) {
   for (let i = LEVEL_TABLE.length-1; i >= 0; i--) {

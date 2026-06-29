@@ -285,7 +285,16 @@ function renderStoryCard() {
   document.getElementById('storyMsg').textContent = s.msg;
 }
 
+function flushPendingEvents() {
+  const events = STATE.pendingEvents || [];
+  if (events.length === 0) return;
+  STATE.pendingEvents = [];
+  saveState();
+  events.forEach(e => pushEvent(e.type, e.vars));
+}
+
 function renderHomeScreen() {
+  flushPendingEvents();
   const pts = STATE.profile.points || 0;
   const totalPts = STATE.profile.totalEarnedPoints || pts;
   const lvInfo = getLevelByPts(totalPts);
@@ -599,14 +608,15 @@ function renderParentScreen() {
       const q = QUEST_POOL.find(q=>q.id===p.questId);
       if (!q) return;
       html += `
-        <div class="approve-row">
+        <div class="approve-row" onclick="showPhotoModal('${p.id}')" style="cursor:pointer;">
           <div class="thumb">${p.photo ? `<img src="${p.photo}">` : q.icon}</div>
           <div style="flex:1;">
             <div style="font-size:16px;font-weight:700;">${q.name}</div>
             <div style="font-size:14px;color:var(--text3);">${p.date} ${p.submittedAt}</div>
+            ${p.photo ? `<div style="font-size:12px;color:var(--gold);margin-top:2px;">📷 사진 있음 — 탭하여 확인</div>` : `<div style="font-size:12px;color:var(--text4);margin-top:2px;">사진 없음</div>`}
           </div>
-          <button class="reject-btn" onclick="rejectQuest('${p.id}')">✕</button>
-          <button class="approve-btn" onclick="approveQuest('${p.id}')">승인 ✓</button>
+          <button class="reject-btn" onclick="event.stopPropagation();rejectQuest('${p.id}')">✕</button>
+          <button class="approve-btn" onclick="event.stopPropagation();approveQuest('${p.id}')">승인 ✓</button>
         </div>
       `;
     });
@@ -629,6 +639,16 @@ function renderParentScreen() {
       const q = QUEST_POOL.find(q=>q.id===l.questId);
       if (!q) return;
       html += `<div class="reward-row"><span style="font-size:22px;">${q.icon}</span><span style="flex:1;">${q.name}</span><span style="font-size:14px;color:var(--text3);">${l.date}</span><span class="pt">+${l.pointsAwarded}P</span></div>`;
+    });
+  }
+
+  const recentRewards = [...(STATE.rewardHistory||[])].reverse().slice(0,5);
+  if (recentRewards.length > 0) {
+    html += `<div class="section-label">🎁 최근 보상 사용 기록</div>`;
+    recentRewards.forEach(r => {
+      const ptColor = r.pts < 0 ? '#f87171' : 'var(--gold)';
+      const ptText = r.pts < 0 ? `${r.pts}P` : `+${r.pts}P`;
+      html += `<div class="reward-row"><span style="font-size:22px;">${r.icon}</span><span style="flex:1;">${r.name}</span><span style="font-size:14px;color:var(--text3);">${r.date}</span><span class="pt" style="color:${ptColor};">${ptText}</span></div>`;
     });
   }
 
@@ -824,6 +844,23 @@ async function submitQuest() {
 // ═══════════════════════════════════════
 // APPROVAL
 // ═══════════════════════════════════════
+function showPhotoModal(approvalId) {
+  const p = STATE.pendingApprovals.find(p => p.id === approvalId);
+  if (!p) return;
+  const q = QUEST_POOL.find(q => q.id === p.questId);
+  const modal = document.getElementById('photoModal');
+  document.getElementById('photoModalImg').src = p.photo || '';
+  document.getElementById('photoModalImg').style.display = p.photo ? 'block' : 'none';
+  document.getElementById('photoModalNoImg').style.display = p.photo ? 'none' : 'block';
+  document.getElementById('photoModalTitle').textContent = q ? q.name : '';
+  document.getElementById('photoModalApprove').onclick = () => { closePhotoModal(); approveQuest(approvalId); };
+  document.getElementById('photoModalReject').onclick = () => { closePhotoModal(); rejectQuest(approvalId); };
+  modal.classList.remove('hidden');
+}
+function closePhotoModal() {
+  document.getElementById('photoModal').classList.add('hidden');
+}
+
 function approveQuest(approvalId) {
   const idx = STATE.pendingApprovals.findIndex(p=>p.id===approvalId);
   if (idx === -1) return;
@@ -858,14 +895,21 @@ function approveQuest(approvalId) {
     }
   }
 
-  saveState();
-
   const lvEvent = getLevelUpEventType(prevPts, STATE.profile.totalEarnedPoints);
   if (lvEvent) {
-    if (lvEvent.type === 'levelUp') pushEvent('levelUp', { nextLevelTitle: lvEvent.nextLevelTitle });
-    else pushEvent('subLevelUp', { nextLv: lvEvent.nextLv });
+    STATE.pendingEvents = STATE.pendingEvents || [];
+    if (lvEvent.type === 'levelUp') {
+      STATE.pendingEvents.push({ type: 'levelUp', vars: { nextLevelTitle: lvEvent.nextLevelTitle } });
+    } else {
+      STATE.pendingEvents.push({ type: 'subLevelUp', vars: { nextLv: lvEvent.nextLv } });
+    }
   }
-  if (q.cat === 'rare') pushEvent('rareQuestClear', { questName: q.name, points: pts, stars: q.stars });
+  if (q.cat === 'rare') {
+    STATE.pendingEvents = STATE.pendingEvents || [];
+    STATE.pendingEvents.push({ type: 'rareQuestClear', vars: { questName: q.name, points: pts, stars: q.stars } });
+  }
+
+  saveState();
 
   showToast(`[시스템] 과업 완수가 확인되었습니다. 기여도 +${pts}P가 반영됩니다.`);
   renderParentScreen();
