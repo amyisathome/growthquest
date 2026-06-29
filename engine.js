@@ -517,11 +517,21 @@ function makeQuestCard(q, status) {
 function renderGachaScreen() {
   const count = STATE.gachaQueue || 0;
 
-  // 빨간 배지 (선물상자 오른쪽 위)
-  const dot = document.getElementById('gachaCountDot');
-  if (dot) {
-    dot.textContent = count;
-    dot.classList.toggle('hidden', count === 0);
+  // 도착 메시지 (선물상자 아래)
+  const arrivalEl = document.getElementById('gachaArrivalMsg');
+  if (arrivalEl) {
+    if (count > 0) {
+      const msgs = [
+        `보급품 ${count}개가 도착했어! 어서 열어봐! 🎖️`,
+        `오늘도 정말 잘했어! 보급품 ${count}개가 기다리고 있어 🌟`,
+        `대단한데? 보급품 ${count}개 수령 대기 중! 💪`,
+      ];
+      const seed = count % msgs.length;
+      arrivalEl.textContent = msgs[seed];
+      arrivalEl.classList.remove('hidden');
+    } else {
+      arrivalEl.classList.add('hidden');
+    }
   }
 
   // 상자+버튼 vs 빈 메시지 전환
