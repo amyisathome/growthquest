@@ -1440,7 +1440,7 @@ function showMailboxList() {
           <div class="mailbox-item-title" style="color:${m.read ? 'var(--text3)' : 'var(--text1)'}">${label}</div>
           <div class="mailbox-item-date">${m.date}</div>
         </div>
-        ${m.read ? '' : '<div class="mailbox-item-unread"></div>'}
+        <span class="mailbox-item-status ${m.read ? 'read' : 'unread'}">${m.read ? '읽음' : '안읽음'}</span>
       </div>`;
   }).join('');
 }

@@ -108,7 +108,9 @@ body{
 .mailbox-item-body{flex:1;min-width:0;}
 .mailbox-item-title{font-size:13px;font-weight:800;color:var(--text1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .mailbox-item-date{font-size:11px;color:var(--text4);margin-top:2px;}
-.mailbox-item-unread{width:8px;height:8px;border-radius:50%;background:var(--red,#f87171);flex-shrink:0;}
+.mailbox-item-status{font-size:11px;font-weight:700;flex-shrink:0;border-radius:4px;padding:2px 6px;}
+.mailbox-item-status.unread{background:var(--red,#f87171);color:#fff;}
+.mailbox-item-status.read{background:transparent;color:var(--text4);border:1px solid var(--text4);}
 .mailbox-empty{text-align:center;color:var(--text4);font-size:14px;padding:32px 0;}
 .char-title{
   font-family:'Press Start 2P',monospace;font-size:10px;
