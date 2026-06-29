@@ -1358,10 +1358,12 @@ function pushEvent(type, vars = {}) {
   eventQueue.push({ title, msg });
   if (!eventShowing) showNextEvent();
 
-  // 편지함 저장 (subLevelUp 제외, 7일 초과 항목 자동 정리)
+  // 편지함 저장 (subLevelUp 제외, 7일 초과 항목 자동 정리, 당일 동일 제목 중복 방지)
   if (!STATE.mailbox) STATE.mailbox = [];
   const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 7);
   STATE.mailbox = STATE.mailbox.filter(m => new Date(m.date) >= cutoff);
+  const alreadyExists = STATE.mailbox.some(m => m.title === title && m.date === today());
+  if (alreadyExists) return;
   STATE.mailbox.unshift({
     id: Date.now() + '_' + Math.random().toString(36).slice(2, 6),
     title, msg,
@@ -1403,7 +1405,6 @@ function renderMailboxBadge() {
     badge.className = 'mailbox-badge';
     wrap.appendChild(badge);
   }
-  badge.textContent = unread;
   badge.classList.toggle('hidden', unread === 0);
 }
 
