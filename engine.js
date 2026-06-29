@@ -31,14 +31,7 @@ async function loadState() {
       STATE.profile.joinDate = today();
       saveState();
     }
-    // 2026-06-29 삭제 버그로 차감된 200P 1회 복구
     STATE._meta = STATE._meta || { migrations: [] };
-    if (!STATE._meta.migrations.includes('repair_20260629')) {
-      STATE.profile.points = (STATE.profile.points||0) + 200;
-      STATE.profile.totalEarnedPoints = (STATE.profile.totalEarnedPoints||0) + 200;
-      STATE._meta.migrations.push('repair_20260629');
-      saveState();
-    }
   } else {
     try {
       const raw = localStorage.getItem('growthquest_v2');
