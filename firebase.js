@@ -164,42 +164,48 @@ async function fbSyncGachaQueue() {
 async function fbLoadState() {
   try {
     const ref = userRef();
-    const [coreDoc, questSnap, measureSnap, pendingSnap, rewardSnap,
-           heightSnapLegacy, weightSnapLegacy] = await Promise.all([
+    const [coreDoc, questSnap, measureSnap, heightSnap, weightSnap,
+           pendingSnap, rewardSnap] = await Promise.all([
       ref.get(),
       ref.collection('questLog').orderBy('timestamp').get(),
       ref.collection('bodyMeasurements').orderBy('date').get(),
+      ref.collection('heights').orderBy('date').get(),    // 구버전 — 삭제 안 함, 그냥 읽음
+      ref.collection('weights').orderBy('date').get(),    // 구버전 — 삭제 안 함, 그냥 읽음
       ref.collection('pendingApprovals').orderBy('submittedAt').get(),
       ref.collection('rewards').orderBy('timestamp', 'desc').limit(100).get(),
-      // 구버전 컬렉션 — 남아있으면 마이그레이션
-      ref.collection('heights').orderBy('date').get(),
-      ref.collection('weights').orderBy('date').get(),
     ]);
 
     if (!coreDoc.exists) return null;
 
     const core = coreDoc.data();
 
-    // 구버전 v1 마이그레이션 (루트 배열 or heights/weights 컬렉션 분리)
-    const needsMigration =
-      (Array.isArray(core.questLog) && core.questLog.length > 0) ||
-      heightSnapLegacy.docs.length > 0 ||
-      weightSnapLegacy.docs.length > 0;
-    if (needsMigration) {
-      await _migrate(ref, core, heightSnapLegacy, weightSnapLegacy);
+    // 루트 배열 구버전만 마이그레이션 (heights/weights 컬렉션은 건드리지 않음)
+    if (Array.isArray(core.questLog) && core.questLog.length > 0) {
+      await _migrateRootArrays(ref, core);
       return fbLoadState();
     }
 
-    // bodyMeasurements: { date → { height, weight } }
-    const bodyMeasurements = {};
-    measureSnap.docs.forEach(d => { bodyMeasurements[d.id] = d.data(); });
+    // bodyMeasurements(신버전) + heights/weights(구버전) 통합 읽기
+    // 구버전 데이터를 먼저 깔고, 신버전이 있으면 덮어씀
+    const byDate = {};
+    heightSnap.docs.forEach(d => {
+      const data = d.data();
+      byDate[data.date] = { ...(byDate[data.date]||{}), height: data.value, date: data.date };
+    });
+    weightSnap.docs.forEach(d => {
+      const data = d.data();
+      byDate[data.date] = { ...(byDate[data.date]||{}), weight: data.value, date: data.date };
+    });
+    measureSnap.docs.forEach(d => {
+      const data = d.data();
+      byDate[data.date] = { ...(byDate[data.date]||{}), ...data };
+    });
 
-    // height/weight 히스토리를 기존 구조로 변환 (engine.js 호환)
-    const heightHistory = Object.values(bodyMeasurements)
+    const heightHistory = Object.values(byDate)
       .filter(m => m.height != null)
       .map(m => ({ date: m.date, value: m.height }))
       .sort((a, b) => a.date.localeCompare(b.date));
-    const weightHistory = Object.values(bodyMeasurements)
+    const weightHistory = Object.values(byDate)
       .filter(m => m.weight != null)
       .map(m => ({ date: m.date, value: m.weight }))
       .sort((a, b) => a.date.localeCompare(b.date));
@@ -224,11 +230,11 @@ async function fbLoadState() {
 // MIGRATIONS
 // ═══════════════════════════════════════
 
-async function _migrate(ref, core, heightSnap, weightSnap) {
+// 루트 배열 → 서브컬렉션 마이그레이션만 (heights/weights는 건드리지 않음)
+async function _migrateRootArrays(ref, core) {
   try {
     const batch = db.batch();
 
-    // 루트 배열 → 서브컬렉션 (v0 → v1)
     (core.questLog || []).forEach(e => {
       batch.set(ref.collection('questLog').doc(), {
         questId: e.questId, date: e.date,
@@ -247,32 +253,13 @@ async function _migrate(ref, core, heightSnap, weightSnap) {
       });
     });
 
-    // heights + weights → bodyMeasurements (v1 → v2)
-    const merged = {};
-    heightSnap.docs.forEach(d => {
-      const data = d.data();
-      merged[data.date] = { ...(merged[data.date]||{}), date: data.date, height: data.value, recordedAt: data.recordedAt || Date.now() };
-    });
-    weightSnap.docs.forEach(d => {
-      const data = d.data();
-      merged[data.date] = { ...(merged[data.date]||{}), date: data.date, weight: data.value, recordedAt: data.recordedAt || Date.now() };
-    });
-    Object.entries(merged).forEach(([date, m]) => {
-      batch.set(ref.collection('bodyMeasurements').doc(date), m);
-    });
-
-    // 구버전 heights/weights 컬렉션 삭제
-    heightSnap.docs.forEach(d => batch.delete(d.ref));
-    weightSnap.docs.forEach(d => batch.delete(d.ref));
-
-    // 루트 문서 구버전 배열 필드 제거
     const legacyFields = ['questLog','heightHistory','weightHistory','pendingApprovals','rewardHistory'];
     const toDelete = {};
     legacyFields.forEach(f => { if (core[f]) toDelete[f] = firebase.firestore.FieldValue.delete(); });
     if (Object.keys(toDelete).length > 0) batch.update(ref, toDelete);
 
     await batch.commit();
-    console.log('[Firebase] 마이그레이션 완료 (v2)');
+    console.log('[Firebase] 루트 배열 마이그레이션 완료');
   } catch(e) {
     console.error('[Firebase] 마이그레이션 실패:', e);
   }
