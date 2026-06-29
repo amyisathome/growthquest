@@ -101,7 +101,7 @@ body{
 }
 .mailbox-wrap{position:absolute;top:10px;right:10px;}
 .mailbox-btn{background:none;border:none;font-size:28px;cursor:pointer;padding:2px;line-height:1;display:block;}
-.mailbox-badge{position:absolute;top:-6px;right:-6px;background:var(--red,#f87171);color:#fff;font-size:11px;font-weight:800;border-radius:999px;min-width:20px;height:20px;line-height:20px;text-align:center;padding:0 4px;border:2px solid var(--bg2,#1a1040);z-index:2;}
+.mailbox-badge{position:absolute;top:0px;right:0px;width:10px;height:10px;border-radius:50%;background:var(--red,#f87171);border:2px solid var(--bg2,#1a1040);z-index:2;}
 .mailbox-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;margin-bottom:6px;background:var(--bg3,#2a1a5a);transition:background .15s;}
 .mailbox-item:hover{background:var(--bg4,#3a2a6a);}
 .mailbox-item-icon{font-size:24px;flex-shrink:0;}
