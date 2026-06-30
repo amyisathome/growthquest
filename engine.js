@@ -417,10 +417,10 @@ function renderHomeScreen() {
     return `<div class="${cls}"></div>`;
   }).join('');
   if (xp.nextLv) {
-    document.getElementById('xpLabel').textContent = `LV.${xp.nextLv.lv} [${xp.nextLv.title}] 진급까지`;
+    document.getElementById('xpLabel').textContent = '다음 진급까지 남은 경험치';
     document.getElementById('xpNext').textContent = `${xp.current.toLocaleString()} / ${xp.needed.toLocaleString()}P`;
   } else {
-    document.getElementById('xpLabel').textContent = '👑 전설의 취사병 — 최고 계급';
+    document.getElementById('xpLabel').textContent = '👑 전설의 정예병 — 최고 계급';
     document.getElementById('xpNext').textContent = `${pts.toLocaleString()}P`;
   }
 
