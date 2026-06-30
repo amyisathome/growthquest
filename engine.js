@@ -617,7 +617,7 @@ function drawLineChart(svgId, data, color, actMap, showActivity) {
   const svg = document.getElementById(svgId);
   if (!svg) return;
   const W = svg.getBoundingClientRect().width || svg.clientWidth || 340, H = 200;
-  const padL = 38, padR = 12, padT = 14, padB = 22;
+  const padL = 38, padR = 34, padT = 14, padB = 22;
   const innerW = W - padL - padR, innerH = H - padT - padB;
   const n = data.length;
   if (n === 0) return;
