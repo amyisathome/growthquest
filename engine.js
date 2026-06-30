@@ -286,7 +286,7 @@ function renderTopbar() {
   const coinEl = document.getElementById('coinDisplay');
   if (coinEl) coinEl.textContent = (STATE.profile.totalEarnedPoints || 0).toLocaleString();
   const titleEl = document.getElementById('topbarTitle');
-  if (titleEl) titleEl.textContent = "Jake's Grand Journey";
+  if (titleEl) titleEl.textContent = "Jake's Epic Journey";
 
   // 가챠 대기 뱃지
   const badge = document.getElementById('gachaBadge');
