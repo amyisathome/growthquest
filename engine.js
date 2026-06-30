@@ -593,49 +593,87 @@ function renderGachaScreen() {
 function renderReportScreen() {
 }
 
-function drawCharts() {
-  const MAX_WEEKS = 13; // 3개월
-  const now = new Date(today());
-
-  // 최근 MAX_WEEKS주 이내의 모든 기록을 날짜별로 표시 (한 주에 여러 건이어도 모두 표시)
-  function getWeeklyData(history) {
-    const cutoff = new Date(now);
-    cutoff.setDate(now.getDate() - MAX_WEEKS * 7);
-    const cutoffStr = cutoff.toISOString().slice(0, 10);
-    return (history || [])
-      .filter(h => h.date >= cutoffStr)
-      .map(h => {
-        const m = parseInt(h.date.slice(5, 7));
-        const d = parseInt(h.date.slice(8, 10));
-        return { label: `${m}/${d}`, value: h.value, date: h.date };
-      });
-  }
-
-  // 날짜별 활동포인트 집계
-  function getDailyAct() {
-    const map = {};
-    (STATE.questLog || []).forEach(l => {
-      map[l.date] = (map[l.date] || 0) + (l.pointsAwarded || 0);
-    });
-    return map;
-  }
-  const actMap = getDailyAct();
-
-  const hData = getWeeklyData(STATE.heightHistory);
-  const wData = getWeeklyData(STATE.weightHistory);
-
-  if (hData.length >= 1) drawLineChart('heightChart', hData, '#ffd76a', actMap, true);
-  if (wData.length >= 1) drawLineChart('weightChart', wData, '#ff9d8a', actMap, false);
+function getWeekStartStr(dateStr) {
+  const d = new Date(dateStr);
+  const dow = (d.getDay() + 6) % 7; // 0=월요일
+  d.setDate(d.getDate() - dow);
+  return d.toISOString().slice(0, 10);
 }
 
-function drawLineChart(svgId, data, color, actMap, showActivity) {
+function drawCharts() {
+  // 주간 단위로 묶어서 평균값 표시 (한 주에 여러 기록이 있으면 평균)
+  function getWeeklyAvgData(history) {
+    const groups = {};
+    (history || []).forEach(h => {
+      const wk = getWeekStartStr(h.date);
+      (groups[wk] = groups[wk] || []).push(h.value);
+    });
+    return Object.keys(groups).sort().map(wk => {
+      const vals = groups[wk];
+      const avg = Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10;
+      const m = parseInt(wk.slice(5, 7)), d = parseInt(wk.slice(8, 10));
+      return { label: `${m}/${d}`, value: avg, date: wk };
+    });
+  }
+
+  // 누적 활동포인트 타임라인 (날짜순 누적합)
+  function buildCumulativeTimeline() {
+    const sorted = [...(STATE.questLog || [])].sort((a, b) => a.date.localeCompare(b.date));
+    let running = 0;
+    return sorted.map(l => { running += (l.pointsAwarded || 0); return { date: l.date, cum: running }; });
+  }
+  function cumulativeAt(timeline, date) {
+    let result = 0;
+    for (const t of timeline) {
+      if (t.date <= date) result = t.cum; else break;
+    }
+    return result;
+  }
+
+  const timeline = buildCumulativeTimeline();
+  const hData = getWeeklyAvgData(STATE.heightHistory).map(d => ({ ...d, act: cumulativeAt(timeline, d.date) }));
+  const wData = getWeeklyAvgData(STATE.weightHistory);
+
+  if (hData.length >= 1) drawLineChart('heightChart', hData, '#ffd76a', true, 'cm');
+  if (wData.length >= 1) drawLineChart('weightChart', wData, '#ff9d8a', false, 'kg');
+}
+
+function showChartTooltip(el, text) {
+  let tip = document.getElementById('chartTooltip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.id = 'chartTooltip';
+    tip.className = 'chart-tooltip';
+    document.body.appendChild(tip);
+  }
+  const rect = el.getBoundingClientRect();
+  tip.textContent = text;
+  tip.style.left = (rect.left + rect.width / 2) + 'px';
+  tip.style.top = (rect.top - 8) + 'px';
+  tip.classList.add('show');
+  clearTimeout(tip._hideTimer);
+  tip._hideTimer = setTimeout(() => tip.classList.remove('show'), 2000);
+}
+
+function drawLineChart(svgId, data, color, showActivity, unit) {
   const svg = document.getElementById(svgId);
   if (!svg) return;
-  const W = svg.getBoundingClientRect().width || svg.clientWidth || 340, H = 200;
-  const padL = 38, padR = 34, padT = 14, padB = 22;
-  const innerW = W - padL - padR, innerH = H - padT - padB;
+  const scrollEl = svg.parentElement;
+  const containerW = scrollEl.getBoundingClientRect().width || 340;
+  const H = 200;
+  const padL = 38, padR = showActivity ? 44 : 34, padT = 14, padB = 22;
   const n = data.length;
   if (n === 0) return;
+
+  // 주간 단위 간격: 한 주당 픽셀 폭을 좁게 고정
+  const PX_PER_WEEK = 46;
+  const dayMs = 86400000;
+  const minDate = new Date(data[0].date).getTime();
+  const maxDate = new Date(data[n - 1].date).getTime();
+  const spanWeeks = Math.max(1, Math.round((maxDate - minDate) / (dayMs * 7)));
+  const innerWNeeded = spanWeeks * PX_PER_WEEK;
+  const W = Math.max(containerW, padL + padR + innerWNeeded);
+  const innerW = W - padL - padR, innerH = H - padT - padB;
 
   // Y축: 5단위 고정 범위
   const vals = data.map(d => d.value);
@@ -645,7 +683,9 @@ function drawLineChart(svgId, data, color, actMap, showActivity) {
   const yRange = yMax - yMin;
 
   const toY = v => padT + innerH * (1 - (v - yMin) / yRange);
-  const xs = n === 1 ? [padL + innerW / 2] : data.map((_, i) => padL + innerW * i / (n - 1));
+  const xs = n === 1
+    ? [padL + innerW / 2]
+    : data.map(d => padL + innerW * ((new Date(d.date).getTime() - minDate) / Math.max(1, maxDate - minDate)));
   const ys = vals.map(toY);
 
   let s = `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}" stroke="rgba(255,255,255,.12)" stroke-width="1"/>
@@ -658,13 +698,21 @@ function drawLineChart(svgId, data, color, actMap, showActivity) {
     s += `<text x="${padL - 4}" y="${y + 3}" font-size="8" fill="#9694b8" text-anchor="end">${v % 1 === 0 ? v : v.toFixed(1)}</text>`;
   });
 
-  // 활동포인트 보조선
+  // 누적 활동포인트 보조선 (보조축 0~5000 고정)
   if (showActivity && n > 1) {
-    const actVals = data.map(d => actMap[d.date] || 0);
-    const maxAct = Math.max(...actVals, 1);
-    const ysA = actVals.map(p => padT + innerH * (1 - p / maxAct));
+    const ACT_MIN = 0, ACT_MAX = 5000;
+    const actVals = data.map(d => Math.min(d.act || 0, ACT_MAX));
+    const ysA = actVals.map(p => padT + innerH * (1 - (p - ACT_MIN) / (ACT_MAX - ACT_MIN)));
     s += `<polyline points="${xs.map((x, i) => `${x},${ysA[i]}`).join(' ')}" fill="none" stroke="#5ad1ff" stroke-width="1.5" stroke-dasharray="4 3" opacity=".7"/>`;
-    xs.forEach((x, i) => { s += `<circle cx="${x}" cy="${ysA[i]}" r="2" fill="#5ad1ff"/>`; });
+    xs.forEach((x, i) => {
+      s += `<circle cx="${x}" cy="${ysA[i]}" r="5" fill="#5ad1ff" opacity="0" style="cursor:pointer;" onclick="showChartTooltip(this,'누적 ${data[i].act||0}P (${data[i].label})')"/>`;
+      s += `<circle cx="${x}" cy="${ysA[i]}" r="2" fill="#5ad1ff" style="pointer-events:none;"/>`;
+    });
+    // 보조축 눈금 (오른쪽)
+    [ACT_MIN, (ACT_MIN+ACT_MAX)/2, ACT_MAX].forEach(v => {
+      const y = padT + innerH * (1 - (v - ACT_MIN) / (ACT_MAX - ACT_MIN));
+      s += `<text x="${W - padR + 4}" y="${y + 3}" font-size="8" fill="#5ad1ff" text-anchor="start">${v}</text>`;
+    });
   }
 
   // 메인 라인
@@ -672,13 +720,16 @@ function drawLineChart(svgId, data, color, actMap, showActivity) {
     s += `<polyline points="${xs.map((x, i) => `${x},${ys[i]}`).join(' ')}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
   }
 
-  // 데이터 포인트 & X축 레이블 (많으면 격주로)
-  const step = n > 8 ? 2 : 1;
+  // 데이터 포인트(클릭하면 값 표시) & X축 레이블 (너무 가까우면 겹치지 않도록 건너뜀)
+  const MIN_LABEL_GAP = 26;
+  let lastLabelX = -Infinity;
   xs.forEach((x, i) => {
     const isLast = i === n - 1;
-    s += `<circle cx="${x}" cy="${ys[i]}" r="${isLast ? 4 : 3}" fill="${color}"/>`;
-    if (i % step === 0 || isLast) {
+    s += `<circle cx="${x}" cy="${ys[i]}" r="9" fill="transparent" style="cursor:pointer;" onclick="showChartTooltip(this,'${data[i].value}${unit||''} (${data[i].label})')"/>`;
+    s += `<circle cx="${x}" cy="${ys[i]}" r="${isLast ? 4 : 3}" fill="${color}" style="pointer-events:none;"/>`;
+    if (isLast || x - lastLabelX >= MIN_LABEL_GAP) {
       s += `<text x="${x}" y="${H - 6}" font-size="8" fill="#9694b8" text-anchor="middle">${data[i].label}</text>`;
+      lastLabelX = x;
     }
   });
 
@@ -687,8 +738,14 @@ function drawLineChart(svgId, data, color, actMap, showActivity) {
   const labelY = lastY < padT + 14 ? lastY + 14 : lastY - 6;
   s += `<text x="${xs[n - 1] + 5}" y="${labelY}" font-size="9" font-weight="700" fill="${color}" text-anchor="start">${vals[n - 1]}</text>`;
 
+  svg.setAttribute('width', W);
+  svg.style.width = W + 'px';
+
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   svg.innerHTML = s;
+
+  // 최신 데이터(오른쪽 끝)가 기본으로 보이도록 스크롤
+  requestAnimationFrame(() => { scrollEl.scrollLeft = scrollEl.scrollWidth; });
 }
 
 function renderWeekBars() {
