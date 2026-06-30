@@ -661,12 +661,12 @@ function drawLineChart(svgId, data, color, showActivity, unit) {
   const scrollEl = svg.parentElement;
   const containerW = scrollEl.getBoundingClientRect().width || 340;
   const H = 200;
-  const padL = 38, padR = 34, padT = 14, padB = 22;
+  const padL = 14, padR = 14, padT = 26, padB = 26;
   const n = data.length;
   if (n === 0) return;
 
   // 주간 단위 간격: 한 주당 픽셀 폭을 좁게 고정
-  const PX_PER_WEEK = 23;
+  const PX_PER_WEEK = 9;
   const dayMs = 86400000;
   const minDate = new Date(data[0].date).getTime();
   const maxDate = new Date(data[n - 1].date).getTime();
@@ -675,11 +675,13 @@ function drawLineChart(svgId, data, color, showActivity, unit) {
   const W = Math.max(containerW, padL + padR + innerWNeeded);
   const innerW = W - padL - padR, innerH = H - padT - padB;
 
-  // Y축: 5단위 고정 범위
+  // Y축: 실제 데이터 범위에 맞춰 위아래 여백을 최소화
   const vals = data.map(d => d.value);
   const minVal = Math.min(...vals), maxVal = Math.max(...vals);
-  const yMin = Math.floor(minVal / 5) * 5;
-  const yMax = Math.max(yMin + 5, Math.ceil(maxVal / 5) * 5);
+  const valSpan = Math.max(maxVal - minVal, 1);
+  const yPad = valSpan * 0.18;
+  const yMin = minVal - yPad;
+  const yMax = maxVal + yPad;
   const yRange = yMax - yMin;
 
   const toY = v => padT + innerH * (1 - (v - yMin) / yRange);
@@ -688,14 +690,12 @@ function drawLineChart(svgId, data, color, showActivity, unit) {
     : data.map(d => padL + innerW * ((new Date(d.date).getTime() - minDate) / Math.max(1, maxDate - minDate)));
   const ys = vals.map(toY);
 
-  let s = `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}" stroke="rgba(255,255,255,.12)" stroke-width="1"/>
-<line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" stroke="rgba(255,255,255,.12)" stroke-width="1"/>`;
+  let s = '';
 
-  // Y축 눈금선 (yMin, 중간, yMax)
+  // 가로 보조선 (세로축 라인/숫자는 없음)
   [yMin, yMin + yRange / 2, yMax].forEach(v => {
     const y = toY(v);
-    s += `<line x1="${padL}" x2="${W - padR}" y1="${y}" y2="${y}" stroke="rgba(255,255,255,.06)" stroke-width="1"/>`;
-    s += `<text x="${padL - 4}" y="${y + 3}" font-size="8" fill="#9694b8" text-anchor="end">${v % 1 === 0 ? v : v.toFixed(1)}</text>`;
+    s += `<line x1="${padL}" x2="${W - padR}" y1="${y}" y2="${y}" stroke="rgba(255,255,255,.08)" stroke-width="1"/>`;
   });
 
   // 누적 활동포인트 보조선 (보조축 0~5000 고정)
@@ -715,23 +715,22 @@ function drawLineChart(svgId, data, color, showActivity, unit) {
     s += `<polyline points="${xs.map((x, i) => `${x},${ys[i]}`).join(' ')}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
   }
 
-  // 데이터 포인트(클릭하면 값 표시) & X축 레이블 (너무 가까우면 겹치지 않도록 건너뜀)
+  // 데이터 포인트(클릭하면 값 표시) — 값은 점 위에, 날짜는 점 아래(너무 가까우면 생략)
   const MIN_LABEL_GAP = 26;
   let lastLabelX = -Infinity;
   xs.forEach((x, i) => {
+    const isFirst = i === 0;
     const isLast = i === n - 1;
+    const anchor = isFirst ? 'start' : isLast ? 'end' : 'middle';
+    const valY = ys[i] < padT + 14 ? ys[i] + 16 : ys[i] - 8;
     s += `<circle cx="${x}" cy="${ys[i]}" r="9" fill="transparent" style="cursor:pointer;" onclick="showChartTooltip(this,'${data[i].value}${unit||''} (${data[i].label})')"/>`;
     s += `<circle cx="${x}" cy="${ys[i]}" r="${isLast ? 4 : 3}" fill="${color}" style="pointer-events:none;"/>`;
+    s += `<text x="${x}" y="${valY}" font-size="9" font-weight="700" fill="${color}" text-anchor="${anchor}">${data[i].value}</text>`;
     if (isLast || x - lastLabelX >= MIN_LABEL_GAP) {
-      s += `<text x="${x}" y="${H - 6}" font-size="8" fill="#9694b8" text-anchor="middle">${data[i].label}</text>`;
+      s += `<text x="${x}" y="${H - 6}" font-size="8" fill="#9694b8" text-anchor="${anchor}">${data[i].label}</text>`;
       lastLabelX = x;
     }
   });
-
-  // 마지막값 레이블
-  const lastY = ys[n - 1];
-  const labelY = lastY < padT + 14 ? lastY + 14 : lastY - 6;
-  s += `<text x="${xs[n - 1] + 5}" y="${labelY}" font-size="9" font-weight="700" fill="${color}" text-anchor="start">${vals[n - 1]}</text>`;
 
   svg.setAttribute('width', W);
   svg.style.width = W + 'px';
