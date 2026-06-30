@@ -147,23 +147,38 @@ function getQuestStatusToday(questId) {
 // ═══════════════════════════════════════
 function getDailyQuests() {
   const missDays = calcMissDays();
-  const rareChance = Math.min(0.35, 0.08 + missDays * 0.08);
+  const rareChance = Math.min(0.5, 0.12 + missDays * 0.08);
   const dow = new Date().getDay();
-
-  // rare 출현 여부를 오늘 하루 고정 (렌더링마다 바뀌지 않도록)
   const t = today();
-  if (!STATE.dailyRoll || STATE.dailyRoll.date !== t) {
-    const showRare = Math.random() < rareChance;
-    STATE.dailyRoll = { date: t, showRare, rareNotified: false };
+  const rarePool = QUEST_POOL.filter(q => q.cat === 'rare');
+
+  // 진행 중인 레어 캠페인이 있으면 완료/5일 경과 여부 체크 후 만료 처리
+  if (STATE.rareCampaign) {
+    const daysSinceStart = Math.floor((new Date(t) - new Date(STATE.rareCampaign.startDate)) / 86400000);
+    const completed = (STATE.questLog||[]).some(l => l.questId === STATE.rareCampaign.questId && l.date >= STATE.rareCampaign.startDate);
+    if (completed || daysSinceStart >= 5) {
+      STATE.rareCampaign = null;
+      saveState();
+    }
+  }
+
+  // 캠페인이 없을 때만 하루 1회 새 레어 출현 여부 판정 (당첨 시 최대 5일 유지)
+  if (!STATE.rareCampaign && (!STATE.dailyRoll || STATE.dailyRoll.date !== t)) {
+    STATE.dailyRoll = { date: t };
+    if (Math.random() < rareChance) {
+      const picked = rarePool[Math.floor(Math.random() * rarePool.length)];
+      STATE.rareCampaign = { questId: picked.id, startDate: t, notified: false };
+    }
     saveState();
   }
 
-  const rarePool = QUEST_POOL.filter(q => q.cat === 'rare');
-  const rareQuest = STATE.dailyRoll.showRare ? [rarePool[dow % rarePool.length]] : [];
+  const rareQuest = STATE.rareCampaign
+    ? [QUEST_POOL.find(q => q.id === STATE.rareCampaign.questId)].filter(Boolean)
+    : [];
 
-  // rare 출현 시 최초 1회만 팝업 알림
-  if (STATE.dailyRoll.showRare && !STATE.dailyRoll.rareNotified && rareQuest[0]) {
-    STATE.dailyRoll.rareNotified = true;
+  // rare 출현 시 캠페인 시작일에 최초 1회만 팝업 알림
+  if (STATE.rareCampaign && !STATE.rareCampaign.notified && rareQuest[0]) {
+    STATE.rareCampaign.notified = true;
     saveState();
     setTimeout(() => pushEvent('rareQuestAppear', { questName: rareQuest[0].name }), 800);
   }

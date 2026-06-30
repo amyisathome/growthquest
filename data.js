@@ -295,6 +295,7 @@ function getDefaultState() {
     purchasedItems:[],
     parentUnlocked:false,
     mailbox:[],        // {id, title, msg, date, timestamp, read}
+    rareCampaign:null, // {questId, startDate, notified} — 출현 시 최대 5일 유지
   };
 }
 
