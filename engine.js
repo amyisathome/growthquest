@@ -582,40 +582,29 @@ function drawCharts() {
   const MAX_WEEKS = 13; // 3개월
   const now = new Date(today());
 
-  // 주간 단위 데이터: 각 주의 마지막 기록값 사용
+  // 최근 MAX_WEEKS주 이내의 모든 기록을 날짜별로 표시 (한 주에 여러 건이어도 모두 표시)
   function getWeeklyData(history) {
-    const result = [];
-    for (let i = MAX_WEEKS - 1; i >= 0; i--) {
-      const weekEnd = new Date(now);
-      weekEnd.setDate(now.getDate() - i * 7);
-      const weekStart = new Date(weekEnd);
-      weekStart.setDate(weekEnd.getDate() - 6);
-      const startStr = weekStart.toISOString().slice(0, 10);
-      const endStr = weekEnd.toISOString().slice(0, 10);
-      const entries = (history || []).filter(h => h.date >= startStr && h.date <= endStr);
-      if (entries.length > 0) {
-        const latest = entries[entries.length - 1];
-        const m = parseInt(weekEnd.toISOString().slice(5, 7));
-        const d = parseInt(weekEnd.toISOString().slice(8, 10));
-        result.push({ label: `${m}/${d}`, value: latest.value });
-      }
-    }
-    return result;
+    const cutoff = new Date(now);
+    cutoff.setDate(now.getDate() - MAX_WEEKS * 7);
+    const cutoffStr = cutoff.toISOString().slice(0, 10);
+    return (history || [])
+      .filter(h => h.date >= cutoffStr)
+      .map(h => {
+        const m = parseInt(h.date.slice(5, 7));
+        const d = parseInt(h.date.slice(8, 10));
+        return { label: `${m}/${d}`, value: h.value, date: h.date };
+      });
   }
 
-  // 주간 활동포인트 집계
-  function getWeeklyAct() {
+  // 날짜별 활동포인트 집계
+  function getDailyAct() {
     const map = {};
     (STATE.questLog || []).forEach(l => {
-      const d = new Date(l.date);
-      const weekEnd = new Date(d);
-      weekEnd.setDate(d.getDate() + (6 - ((d.getDay() + 6) % 7))); // 주 마지막일(일요일)
-      const key = weekEnd.toISOString().slice(0, 10);
-      map[key] = (map[key] || 0) + (l.pointsAwarded || 0);
+      map[l.date] = (map[l.date] || 0) + (l.pointsAwarded || 0);
     });
     return map;
   }
-  const actMap = getWeeklyAct();
+  const actMap = getDailyAct();
 
   const hData = getWeeklyData(STATE.heightHistory);
   const wData = getWeeklyData(STATE.weightHistory);
@@ -656,7 +645,7 @@ function drawLineChart(svgId, data, color, actMap, showActivity) {
 
   // 활동포인트 보조선
   if (showActivity && n > 1) {
-    const actVals = data.map(d => actMap[d.label] || 0);
+    const actVals = data.map(d => actMap[d.date] || 0);
     const maxAct = Math.max(...actVals, 1);
     const ysA = actVals.map(p => padT + innerH * (1 - p / maxAct));
     s += `<polyline points="${xs.map((x, i) => `${x},${ysA[i]}`).join(' ')}" fill="none" stroke="#5ad1ff" stroke-width="1.5" stroke-dasharray="4 3" opacity=".7"/>`;
@@ -1299,7 +1288,9 @@ function saveRecord() {
     STATE.profile.points = (STATE.profile.points||0) + bonus;
     STATE.profile.totalEarnedPoints = (STATE.profile.totalEarnedPoints||0) + bonus;
     STATE.questLog = STATE.questLog||[];
-    STATE.questLog.push({date, questId:'__record__', pointsAwarded:bonus, timestamp:Date.now()});
+    const recordEntry = {date, questId:'__record__', pointsAwarded:bonus, timestamp:Date.now()};
+    STATE.questLog.push(recordEntry);
+    fbAddQuestLog(recordEntry);
     toast.style.color = 'var(--green)';
     toast.textContent = `저장 완료! 이번 주 첫 기록 +${bonus}P 🎉`;
     pushEvent('reportSubmitted', { points: bonus });
