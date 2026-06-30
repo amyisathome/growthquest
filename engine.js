@@ -147,7 +147,7 @@ function getQuestStatusToday(questId) {
 // ═══════════════════════════════════════
 function getDailyQuests() {
   const missDays = calcMissDays();
-  const rareChance = Math.min(0.5, 0.12 + missDays * 0.08);
+  const rareChance = Math.min(0.35, 0.08 + missDays * 0.08);
   const dow = new Date().getDay();
 
   // rare 출현 여부를 오늘 하루 고정 (렌더링마다 바뀌지 않도록)
