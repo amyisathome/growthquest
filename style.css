@@ -185,7 +185,7 @@ body{
   padding:11px 12px;display:flex;align-items:center;gap:11px;margin-bottom:9px;
   cursor:pointer;transition:all .15s;position:relative;overflow:hidden;
 }
-.quest-card:active{opacity:.8;}
+.quest-card:active,.quest-card.pressed{opacity:.8;transform:scale(.97);}
 .quest-card.rare{border:2px solid var(--gold);background:linear-gradient(135deg,#3a2c12,#2a2148);box-shadow:inset 2px 2px 0 rgba(255,255,255,.12),3px 3px 0 var(--border),0 0 16px rgba(246,201,69,.25);}
 .quest-card.rare::before{content:'';position:absolute;top:0;left:0;width:30px;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);animation:shineSweep 3.5s ease-in-out infinite;}
 .quest-card.done{opacity:.5;pointer-events:none;}

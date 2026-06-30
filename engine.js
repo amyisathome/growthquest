@@ -1556,7 +1556,7 @@ document.querySelectorAll('.nav-item').forEach(n => {
 
 // 모바일 :active 대체 — iOS Safari는 touchstart 없이 :active 미작동
 document.addEventListener('touchstart', function(e) {
-  const btn = e.target.closest('.pin-key');
+  const btn = e.target.closest('.pin-key, .quest-card');
   if (!btn) return;
   btn.classList.add('pressed');
   const end = () => { btn.classList.remove('pressed'); btn.removeEventListener('touchend', end); btn.removeEventListener('touchcancel', end); };
