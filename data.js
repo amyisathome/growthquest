@@ -296,6 +296,7 @@ function getDefaultState() {
     parentUnlocked:false,
     mailbox:[],        // {id, title, msg, date, timestamp, read}
     rareCampaign:null, // {questId, startDate, notified} — 출현 시 최대 5일 유지
+    pendingEvents:[],  // {type, vars} — 부모 화면에서 발생한 레벨업 등 이벤트, 홈 이동 시 표시
   };
 }
 

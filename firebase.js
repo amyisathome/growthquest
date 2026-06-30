@@ -103,6 +103,7 @@ function _serializeCore(state) {
     parentUnlocked:    state.parentUnlocked  || false,
     mailbox:           state.mailbox         || [],
     rareCampaign:      state.rareCampaign    || null,
+    pendingEvents:     state.pendingEvents   || [],
   };
   return { _v: SCHEMA_VERSION, profile, gameState };
 }
@@ -138,6 +139,7 @@ function _deserializeCore(core) {
     parentUnlocked:    src.parentUnlocked    || (isLegacy ? (core.parentUnlocked||false) : false),
     mailbox:           src.mailbox           || [],
     rareCampaign:      src.rareCampaign      || null,
+    pendingEvents:     src.pendingEvents     || [],
     _meta:             core._meta            || { migrations: [] },
   };
 }

@@ -923,6 +923,7 @@ function switchScreen(name, navEl) {
 }
 
 function doSwitchScreen(name, navEl) {
+  if (name !== 'parent') STATE.parentUnlocked = false;
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById(`screen-${name}`).classList.add('active');
@@ -1613,12 +1614,6 @@ function showCoinInfo() {
   showToast(`누적 ${earned}P · 잔여 ${remain}P`);
 }
 
-// 다른 화면으로 이동 시 부모 잠금
-document.querySelectorAll('.nav-item').forEach(n => {
-  n.addEventListener('click', () => {
-    if (n.dataset.screen !== 'parent') STATE.parentUnlocked = false;
-  });
-});
 
 // 모바일 :active 대체 — iOS Safari는 touchstart 없이 :active 미작동
 document.addEventListener('touchstart', function(e) {
