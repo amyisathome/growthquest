@@ -327,10 +327,13 @@ async function fbSetWeight(date, value) {
 async function fbAddPendingApproval(entry) {
   try {
     const doc = await userRef().collection('pendingApprovals').add({
-      questId:     entry.questId,
+      type:        entry.type      || 'quest',
+      questId:     entry.questId   || null,
       date:        entry.date,
-      pts:         entry.pts     || 0,
-      photo:       entry.photo   || null,
+      pts:         entry.pts       || 0,
+      photo:       entry.photo     || null,
+      height:      entry.height    ?? null,
+      weight:      entry.weight    ?? null,
       submittedAt: entry.submittedAt || '',
     });
     return doc.id;

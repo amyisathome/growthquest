@@ -760,6 +760,31 @@ function renderParentScreen() {
     });
   }
 
+  // ②-2 신체 기록 보상 승인 대기
+  const recordPending = pending.filter(p => p.type === 'record');
+  html += `<div class="section-label" style="margin-top:18px;">📏 신체 기록 보상 승인 대기 (${recordPending.length}건)</div>`;
+  if (recordPending.length === 0) {
+    html += `<div style="text-align:center;color:var(--text4);font-size:15px;padding:14px;">승인 대기 중인 신체 기록이 없습니다.</div>`;
+  } else {
+    recordPending.forEach(p => {
+      const parts = [];
+      if (p.height != null) parts.push(`키 ${p.height}cm`);
+      if (p.weight != null) parts.push(`몸무게 ${p.weight}kg`);
+      html += `
+        <div class="approve-row">
+          <div class="thumb">📏</div>
+          <div style="flex:1;">
+            <div style="font-size:16px;font-weight:700;">${parts.join(' · ')}</div>
+            <div style="font-size:14px;color:var(--text3);">${p.date} ${p.submittedAt}</div>
+            <div style="font-size:12px;color:var(--gold);margin-top:2px;">보상 +${p.pts}P</div>
+          </div>
+          <button class="reject-btn" onclick="rejectRecord('${p.id}')">✕</button>
+          <button class="approve-btn" onclick="approveRecord('${p.id}')">승인 ✓</button>
+        </div>
+      `;
+    });
+  }
+
   const seen = new Set();
   const recentLog = [...(STATE.questLog||[])].reverse().filter(l => {
     const key = `${l.date}-${l.questId}`;
@@ -1100,6 +1125,40 @@ function rejectQuest(approvalId) {
   }
 }
 
+function approveRecord(approvalId) {
+  const idx = STATE.pendingApprovals.findIndex(p=>p.id===approvalId);
+  if (idx === -1) return;
+  const approval = STATE.pendingApprovals[idx];
+  const pts = approval.pts || 0;
+
+  const recordEntry = {date: approval.date, questId:'__record__', pointsAwarded:pts, timestamp:Date.now()};
+  STATE.questLog = STATE.questLog || [];
+  STATE.questLog.push(recordEntry);
+  fbAddQuestLog(recordEntry);
+
+  STATE.profile.points = (STATE.profile.points||0) + pts;
+  STATE.profile.totalEarnedPoints = (STATE.profile.totalEarnedPoints||0) + pts;
+  fbRemovePendingApproval(approval.id);
+  STATE.pendingApprovals.splice(idx, 1);
+
+  saveState();
+  pushEvent('reportSubmitted', { points: pts });
+  showToast(`[시스템] 신체 기록 보상이 승인되었습니다. +${pts}P가 반영됩니다.`);
+  renderParentScreen();
+  renderTopbar();
+}
+
+function rejectRecord(approvalId) {
+  const idx = STATE.pendingApprovals.findIndex(p=>p.id===approvalId);
+  if (idx !== -1) {
+    fbRemovePendingApproval(approvalId);
+    STATE.pendingApprovals.splice(idx, 1);
+    saveState();
+    showToast('[시스템] 신체 기록 보상이 반려되었습니다.');
+    renderParentScreen();
+  }
+}
+
 function deleteQuestLog(timestamp) {
   if (!confirm('이 퀘스트 기록을 삭제하면 포인트가 차감됩니다. 삭제하시겠습니까?')) return;
   const ts = Number(timestamp);
@@ -1255,7 +1314,7 @@ function purchaseItem(itemId) {
 // ═══════════════════════════════════════
 // RECORD SAVE
 // ═══════════════════════════════════════
-function saveRecord() {
+async function saveRecord() {
   const date = document.getElementById('inDate').value;
   const h = parseFloat(document.getElementById('inHeight').value);
   const w = parseFloat(document.getElementById('inWeight').value);
@@ -1282,21 +1341,32 @@ function saveRecord() {
   }
 
   const weekKey = getWeekKey(date);
-  const hasThisWeek = (STATE.questLog||[]).some(l=>getWeekKey(l.date)===weekKey && l.questId==='__record__');
-  if (!hasThisWeek) {
-    const bonus = 300;
-    STATE.profile.points = (STATE.profile.points||0) + bonus;
-    STATE.profile.totalEarnedPoints = (STATE.profile.totalEarnedPoints||0) + bonus;
-    STATE.questLog = STATE.questLog||[];
-    const recordEntry = {date, questId:'__record__', pointsAwarded:bonus, timestamp:Date.now()};
-    STATE.questLog.push(recordEntry);
-    fbAddQuestLog(recordEntry);
-    toast.style.color = 'var(--green)';
-    toast.textContent = `저장 완료! 이번 주 첫 기록 +${bonus}P 🎉`;
-    pushEvent('reportSubmitted', { points: bonus });
-  } else {
+  const hasApprovedThisWeek = (STATE.questLog||[]).some(l=>getWeekKey(l.date)===weekKey && l.questId==='__record__');
+  const hasPendingThisWeek = (STATE.pendingApprovals||[]).some(p=>p.type==='record' && getWeekKey(p.date)===weekKey);
+
+  if (hasApprovedThisWeek) {
     toast.style.color = 'var(--text2)';
     toast.textContent = '저장 완료! (이번 주 기록 보상은 이미 받았어요)';
+  } else if (hasPendingThisWeek) {
+    toast.style.color = 'var(--text2)';
+    toast.textContent = '저장 완료! (이번 주 기록 보상은 승인 대기 중이에요)';
+  } else {
+    const bonus = 300;
+    const approvalEntry = {
+      id: Date.now().toString(),
+      type: 'record',
+      date,
+      height: !isNaN(h) ? h : null,
+      weight: !isNaN(w) ? w : null,
+      pts: bonus,
+      submittedAt: new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}),
+    };
+    const fid = await fbAddPendingApproval(approvalEntry);
+    if (fid) approvalEntry.id = fid;
+    STATE.pendingApprovals = STATE.pendingApprovals || [];
+    STATE.pendingApprovals.push(approvalEntry);
+    toast.style.color = 'var(--green)';
+    toast.textContent = `저장 완료! 이번 주 기록 보상(+${bonus}P)이 승인 대기 중이에요 📋`;
   }
 
   saveState();
