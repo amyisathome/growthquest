@@ -661,12 +661,12 @@ function drawLineChart(svgId, data, color, showActivity, unit) {
   const scrollEl = svg.parentElement;
   const containerW = scrollEl.getBoundingClientRect().width || 340;
   const H = 200;
-  const padL = 38, padR = showActivity ? 44 : 34, padT = 14, padB = 22;
+  const padL = 38, padR = 34, padT = 14, padB = 22;
   const n = data.length;
   if (n === 0) return;
 
   // 주간 단위 간격: 한 주당 픽셀 폭을 좁게 고정
-  const PX_PER_WEEK = 46;
+  const PX_PER_WEEK = 23;
   const dayMs = 86400000;
   const minDate = new Date(data[0].date).getTime();
   const maxDate = new Date(data[n - 1].date).getTime();
@@ -707,11 +707,6 @@ function drawLineChart(svgId, data, color, showActivity, unit) {
     xs.forEach((x, i) => {
       s += `<circle cx="${x}" cy="${ysA[i]}" r="5" fill="#5ad1ff" opacity="0" style="cursor:pointer;" onclick="showChartTooltip(this,'누적 ${data[i].act||0}P (${data[i].label})')"/>`;
       s += `<circle cx="${x}" cy="${ysA[i]}" r="2" fill="#5ad1ff" style="pointer-events:none;"/>`;
-    });
-    // 보조축 눈금 (오른쪽)
-    [ACT_MIN, (ACT_MIN+ACT_MAX)/2, ACT_MAX].forEach(v => {
-      const y = padT + innerH * (1 - (v - ACT_MIN) / (ACT_MAX - ACT_MIN));
-      s += `<text x="${W - padR + 4}" y="${y + 3}" font-size="8" fill="#5ad1ff" text-anchor="start">${v}</text>`;
     });
   }
 
