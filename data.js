@@ -165,18 +165,45 @@ const EVENT_MESSAGES = {
 
 };
 
+// 티어 전환(타이틀 변경) 시 풀스크린 모달에 쓰이는 전용 메시지 — {nextLevelTitle}, {nextLevelRank}
+const TIER_LEVELUP_MESSAGES = {
+  tier1: {
+    title: "🎉 진급 명령 하달!",
+    msg: "현장 지휘관의 1차 검증을 통과했습니다.\n이 시간부로 [{nextLevelTitle}({nextLevelRank})] 진급을 명합니다!\n신규 보급품을 수령하십시오.\n\n충성!"
+  },
+  tier2: {
+    title: "🎉 진급 명령 하달!",
+    msg: "지속적인 과업 수행 능력이 입증되었습니다.\n이 시간부로 [{nextLevelTitle}({nextLevelRank})] 진급을 명합니다!\n작전 수행 권한이 확대 부여됩니다.\n\n충성!"
+  },
+  tier3: {
+    title: "🎉 특별 진급 명령 하달!",
+    msg: "사령부가 당신의 기여도를 직접 검토했습니다.\n이 시간부로 [{nextLevelTitle}({nextLevelRank})] 진급을 명합니다!\n정예 전용 장비 및 칭호 사용 권한이 발효됩니다.\n\n충성!"
+  },
+  tier4: {
+    title: "🎉 사령부 직속 진급 명령!",
+    msg: "당신의 전적이 전 부대 기록에 등재되었습니다.\n이 시간부로 [{nextLevelTitle}({nextLevelRank})] 진급을 명합니다!\n후임 전원에게 모범 사례로 하달됩니다.\n\n충성!"
+  },
+  tier5: {
+    title: "🎉 최고 사령부 승인 진급!",
+    msg: "최고 사령부가 당신의 작전 기록을 전체 회의에서 검토했습니다.\n이 시간부로 [{nextLevelTitle}({nextLevelRank})] 진급을 명합니다!\n전 부대에 특별 포상이 함께 하달됩니다.\n\n충성!"
+  },
+  tier6: {
+    title: "🎉 전군 통합 진급 명령!",
+    msg: "전군 사령부가 만장일치로 당신을 인정했습니다.\n이 시간부로 [{nextLevelTitle}({nextLevelRank})] 진급을 명합니다!\n당신의 이름은 작전 기록에 영구 등재됩니다.\n\n충성!"
+  }
+};
 
 const SHOP_ITEMS = {
   daily: [ // 즉시소비형 — 자주, 소액으로 구매
-    {id:'s1', icon:'🎮', name:'게임 추가 1시간', cost:1000, desc:'오늘 하루 게임 1시간 추가'},
-    {id:'s2', icon:'📺', name:'TV 추가 1시간', cost:800, desc:'오늘 하루 TV 시청 1시간 추가'},
+    {id:'s1', icon:'🎮', name:'게임 추가 1시간', cost:1500, desc:'오늘 하루 게임 1시간 추가'},
+    {id:'s2', icon:'📺', name:'TV 추가 1시간', cost:1000, desc:'오늘 하루 TV 시청 1시간 추가'},
     {id:'s5', icon:'🤸', name:'엄마와 놀기 1시간', cost:1000, desc:'엄마와 함께 1시간 놀기 찬스'},
   ],
   mid: [ // 중기목표형 — 모아서 구매
     {id:'s3', icon:'💸', name:'게임 현질 5,000원', cost:10000, desc:'한 달 최대 30,000원'},
   ],
   final: [ // 최종목표형 — 장기 목표
-    {id:'s4', icon:'🐹', name:'햄스터', cost:50000, desc:'🏆 최종 목표 보상! 함께 키우자!'},
+    {id:'s4', icon:'🐹', name:'전설의 햄스터 장군님 영접', cost:50000, desc:'🏆 최종 목표 보상! 함께 키우자!'},
   ],
 };
 
@@ -237,13 +264,15 @@ function getXpProgress(pts) {
 }
 
 // 레벨업 발생 시 어떤 이벤트를 띄울지 판별
-// - 타이틀이 바뀌면 'levelUp' (즉각 팝업, {nextLevelTitle})
+// - 타이틀이 바뀌는 5단계 경계(티어 전환)면 'tierUp' (풀스크린 팝업, {nextLevelTitle},{nextLevelRank},tier)
 // - 같은 타이틀 안에서 레벨만 오르면 'subLevelUp' (경량 알림, {nextLv})
 function getLevelUpEventType(prevPts, newPts) {
   const prevLv = getLevelByPts(prevPts);
   const newLv = getLevelByPts(newPts);
   if (newLv.lv === prevLv.lv) return null; // 레벨업 없음
-  if (newLv.title !== prevLv.title) return { type: 'levelUp', nextLevelTitle: newLv.title };
+  if (newLv.title !== prevLv.title) {
+    return { type: 'tierUp', nextLevelTitle: newLv.title, nextLevelRank: `Lv.${newLv.lv}`, tier: Math.ceil(newLv.lv / 5) };
+  }
   return { type: 'subLevelUp', nextLv: newLv.lv };
 }
 

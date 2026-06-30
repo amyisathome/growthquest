@@ -101,9 +101,8 @@
 
       <!-- 스토리 카드 -->
       <div class="story-card" id="storyCard">
-        <div class="story-icon" id="storyIcon">⚔️</div>
         <div class="story-body">
-          <div class="story-title" id="storyTitle">오늘의 미션</div>
+          <div class="story-title"><span class="story-icon" id="storyIcon">⚔️</span><span id="storyTitle">오늘의 미션</span></div>
           <div class="story-msg" id="storyMsg">퀘스트를 완료하면 전설이 만들어진다!</div>
         </div>
       </div>
@@ -143,7 +142,7 @@
         <div id="gachaResult" class="gacha-result hidden"></div>
         <button class="gacha-cta" id="gachaBtn" onclick="openGacha()">보급품 수령!</button>
       </div>
-      <div class="gacha-empty-msg hidden" id="gachaEmptyMsg">보상함이 비어있습니다</div>
+      <div class="gacha-empty-msg hidden" id="gachaEmptyMsg">아직 보상이 없습니다.<br>임무를 모두 완수해서 보급품을 획득하십시오!</div>
       </div>
       <div class="section-label">🛒 PX 상점</div>
       <div style="font-size:13px;color:var(--text3);margin:-6px 0 10px 2px;text-align:right;">잔여 포인트: <span id="shopPointsDisplay" style="color:var(--gold);font-weight:700;"></span></div>
@@ -286,8 +285,20 @@
     </div>
   </div>
 
+  <!-- 티어 전환(진급) 풀스크린 모달 -->
+  <div class="modal-overlay center hidden tierup-overlay" id="tierUpModal">
+    <div class="tierup-burst"></div>
+    <div class="tierup-confetti" id="tierUpConfetti"></div>
+    <div class="modal-box center-box tierup-box" style="text-align:center;">
+      <div style="font-size:60px;margin-bottom:8px;" id="tierUpIcon">🎉</div>
+      <div class="tierup-title" id="tierUpTitle"></div>
+      <div style="font-size:14px;color:var(--text2);white-space:pre-line;line-height:1.8;margin:14px 0 22px;" id="tierUpMsg"></div>
+      <button class="modal-btn primary" onclick="closeTierUpModal()">확인!</button>
+    </div>
+  </div>
+
   <!-- 편지함 모달 -->
-  <div class="modal-overlay hidden" id="mailboxModal" onclick="closeMailboxModal()">
+  <div class="modal-overlay center hidden" id="mailboxModal" onclick="closeMailboxModal()">
     <div class="modal-box" onclick="event.stopPropagation()" style="width:92%;max-width:380px;max-height:80vh;display:flex;flex-direction:column;">
       <!-- 목록 뷰 -->
       <div id="mailboxListView">

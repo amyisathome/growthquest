@@ -562,8 +562,10 @@ function renderGachaScreen() {
     .sort((a, b) => b.cost - a.cost);
   allShopItems.forEach(item => {
       const can = (STATE.profile.points || 0) >= item.cost;
+      const isFinal = SHOP_ITEMS.final.some(f => f.id === item.id);
+      const isMid = SHOP_ITEMS.mid.some(f => f.id === item.id);
       const div = document.createElement('div');
-      div.className = 'shop-card';
+      div.className = isFinal ? 'shop-card final' : isMid ? 'shop-card mid' : 'shop-card';
       div.innerHTML = `
         <div class="shop-icon">${item.icon}</div>
         <div class="shop-body">
@@ -803,11 +805,12 @@ function renderParentScreen() {
     </div>
   `;
 
-  // ② 승인 대기 — QUEST_POOL에 있는 유효한 항목만 카운트
+  // ② 승인 대기 — 퀘스트 승인 + 신체 기록 보상 승인을 한 목록으로 통합
   const validPending = pending.filter(p => QUEST_POOL.find(q => q.id === p.questId));
-  html += `<div class="section-label" style="margin-top:18px;">✅ 승인 대기 (${validPending.length}건)</div>`;
-  if (validPending.length === 0) {
-    html += `<div style="text-align:center;color:var(--text4);font-size:15px;padding:14px;">승인 대기 중인 퀘스트가 없습니다.</div>`;
+  const recordPending = pending.filter(p => p.type === 'record');
+  html += `<div class="section-label" style="margin-top:18px;">✅ 승인 대기 (${validPending.length + recordPending.length}건)</div>`;
+  if (validPending.length === 0 && recordPending.length === 0) {
+    html += `<div style="text-align:center;color:var(--text4);font-size:15px;padding:14px;">승인 대기 중인 항목이 없습니다.</div>`;
   } else {
     validPending.forEach(p => {
       const q = QUEST_POOL.find(q=>q.id===p.questId);
@@ -824,14 +827,6 @@ function renderParentScreen() {
         </div>
       `;
     });
-  }
-
-  // ②-2 신체 기록 보상 승인 대기
-  const recordPending = pending.filter(p => p.type === 'record');
-  html += `<div class="section-label" style="margin-top:18px;">📏 신체 기록 보상 승인 대기 (${recordPending.length}건)</div>`;
-  if (recordPending.length === 0) {
-    html += `<div style="text-align:center;color:var(--text4);font-size:15px;padding:14px;">승인 대기 중인 신체 기록이 없습니다.</div>`;
-  } else {
     recordPending.forEach(p => {
       const parts = [];
       if (p.height != null) parts.push(`키 ${p.height}cm`);
@@ -1162,8 +1157,8 @@ function approveQuest(approvalId) {
   const lvEvent = getLevelUpEventType(prevPts, STATE.profile.totalEarnedPoints);
   if (lvEvent) {
     STATE.pendingEvents = STATE.pendingEvents || [];
-    if (lvEvent.type === 'levelUp') {
-      STATE.pendingEvents.push({ type: 'levelUp', vars: { nextLevelTitle: lvEvent.nextLevelTitle } });
+    if (lvEvent.type === 'tierUp') {
+      STATE.pendingEvents.push({ type: 'tierUp', vars: { nextLevelTitle: lvEvent.nextLevelTitle, nextLevelRank: lvEvent.nextLevelRank, tier: lvEvent.tier } });
     } else {
       STATE.pendingEvents.push({ type: 'subLevelUp', vars: { nextLv: lvEvent.nextLv } });
     }
@@ -1319,7 +1314,7 @@ function openGacha() {
   STATE.profile.points = (STATE.profile.points||0) + pts;
   STATE.profile.totalEarnedPoints = (STATE.profile.totalEarnedPoints||0) + pts;
   STATE.rewardHistory = STATE.rewardHistory || [];
-  const rewardName = physicalReward ? physicalReward.name : `가챠 보상 — ${title}`;
+  const rewardName = physicalReward ? physicalReward.name : `보급품 도착 — ${title}`;
   const rewardIcon = physicalReward ? physicalReward.icon : icon;
   const gachaReward = {icon: rewardIcon, name: rewardName, pts, date: todayLabel(), timestamp: Date.now()};
   STATE.rewardHistory.push(gachaReward);
@@ -1474,19 +1469,7 @@ function fillEventVars(template, vars) {
   return template.replace(/\{(\w+)\}/g, (_, k) => vars[k] !== undefined ? vars[k] : `{${k}}`);
 }
 
-function pushEvent(type, vars = {}) {
-  const def = EVENT_MESSAGES[type];
-  if (!def) return;
-  if (type === 'subLevelUp') {
-    showToast(`⬆️ Lv.${vars.nextLv} 달성! 계속 정진하십시오.`);
-    return;
-  }
-  const title = fillEventVars(def.title, vars);
-  const msg   = fillEventVars(def.msg, vars);
-  eventQueue.push({ title, msg });
-  if (!eventShowing) showNextEvent();
-
-  // 편지함 저장 (subLevelUp 제외, 7일 초과 항목 자동 정리, 당일 동일 제목 중복 방지)
+function saveEventToMailbox(title, msg) {
   if (!STATE.mailbox) STATE.mailbox = [];
   const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 7);
   STATE.mailbox = STATE.mailbox.filter(m => new Date(m.date) >= cutoff);
@@ -1503,10 +1486,36 @@ function pushEvent(type, vars = {}) {
   renderMailboxBadge();
 }
 
+function pushEvent(type, vars = {}) {
+  if (type === 'subLevelUp') {
+    showToast(`⬆️ Lv.${vars.nextLv} 달성! 계속 정진하십시오.`);
+    return;
+  }
+  if (type === 'tierUp') {
+    const def = TIER_LEVELUP_MESSAGES[`tier${vars.tier}`];
+    if (!def) return;
+    const title = fillEventVars(def.title, vars);
+    const msg   = fillEventVars(def.msg, vars);
+    // 일반 레벨업보다 우선순위 높게: 큐 맨 앞에 삽입
+    eventQueue.unshift({ title, msg, tierUp: true });
+    if (!eventShowing) showNextEvent();
+    saveEventToMailbox(title, msg);
+    return;
+  }
+  const def = EVENT_MESSAGES[type];
+  if (!def) return;
+  const title = fillEventVars(def.title, vars);
+  const msg   = fillEventVars(def.msg, vars);
+  eventQueue.push({ title, msg });
+  if (!eventShowing) showNextEvent();
+  saveEventToMailbox(title, msg);
+}
+
 function showNextEvent() {
   if (eventQueue.length === 0) { eventShowing = false; return; }
   eventShowing = true;
   const ev = eventQueue.shift();
+  if (ev.tierUp) { showTierUpModal(ev); return; }
   const iconMatch = ev.title.match(/^(\p{Emoji}[️]?)\s*/u);
   document.getElementById('eventModalIcon').textContent = iconMatch ? iconMatch[1] : '🎯';
   document.getElementById('eventModalTitle').textContent = ev.title.replace(/^(\p{Emoji}[️]?)\s*/u, '');
@@ -1517,6 +1526,41 @@ function showNextEvent() {
 function closeEventModal() {
   document.getElementById('eventModal').classList.add('hidden');
   showNextEvent();
+}
+
+function showTierUpModal(ev) {
+  const iconMatch = ev.title.match(/^(\p{Emoji}[️]?)\s*/u);
+  document.getElementById('tierUpIcon').textContent = iconMatch ? iconMatch[1] : '🎉';
+  document.getElementById('tierUpTitle').textContent = ev.title.replace(/^(\p{Emoji}[️]?)\s*/u, '');
+  document.getElementById('tierUpMsg').textContent = ev.msg;
+  spawnTierConfetti();
+  const modal = document.getElementById('tierUpModal');
+  modal.classList.remove('hidden');
+  modal.classList.add('shake');
+  setTimeout(() => modal.classList.remove('shake'), 250);
+}
+
+function closeTierUpModal() {
+  document.getElementById('tierUpModal').classList.add('hidden');
+  document.getElementById('tierUpConfetti').innerHTML = '';
+  showNextEvent();
+}
+
+function spawnTierConfetti() {
+  const wrap = document.getElementById('tierUpConfetti');
+  wrap.innerHTML = '';
+  const colors = ['#f6c945', '#fff7d6', '#ffe79a', '#ffffff'];
+  const N = 60;
+  for (let i = 0; i < N; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.animationDelay = (Math.random() * 0.4) + 's';
+    p.style.animationDuration = (1.6 + Math.random() * 1.2) + 's';
+    p.style.setProperty('--drift', (Math.random() * 80 - 40) + 'px');
+    wrap.appendChild(p);
+  }
 }
 
 // ═══════════════════════════════════════
