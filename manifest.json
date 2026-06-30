@@ -1,6 +1,6 @@
 {
   "name": "Jake's Epic Journey",
-  "short_name": "Jake's Journey",
+  "short_name": "Jake",
   "description": "성장 기록 게이미피케이션 앱",
   "start_url": "./index.html",
   "scope": "./",
